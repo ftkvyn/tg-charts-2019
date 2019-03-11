@@ -19,14 +19,16 @@ const duration = 300; // ms
 
 const mx = Symbol('Max X'),
 	my = Symbol('Max Y'),
+	zx = Symbol('Shift X'),
+	zy = Symbol('Shift Y'),
 	chart_A_opacity = Symbol('Chart A opacity'),
 	chart_B_opacity = Symbol('Chart B opacity');
 
 let state = {
 	[mx]: width,
 	[my]: height  * 2,
-	zx: 0,
-	zy: 0,
+	[zx]: 0,
+	[zy]: 0,
 	animateFrameId: null,
 	[chart_A_opacity]: 255,
 	[chart_B_opacity]: 255
@@ -38,11 +40,11 @@ function setChartWidths() {
 }
 
 function translateX (orig_x) {
-	return Math.floor((orig_x - state.zx) * state.scale_x);
+	return Math.floor((orig_x - state[zx]) * state.scale_x);
 }
 
 function translateY (orig_y) {
-	return  Math.floor((- orig_y + state.zy) * state.scale_y);
+	return  Math.floor((- orig_y + state[zy]) * state.scale_y);
 }
 
 function clearChart() {
@@ -50,8 +52,8 @@ function clearChart() {
 }
 
 function calcScale () {
-	state.scale_x = width / (state[mx] - state.zx);
-	state.scale_y = height / (state[my] - state.zy);
+	state.scale_x = width / (state[mx] - state[zx]);
+	state.scale_y = height / (state[my] - state[zy]);
 }
 
 function drawAxis(){
@@ -65,9 +67,9 @@ function drawAxis(){
 	ctx.stroke();
 
 	ctx.font = "14px Arial";
-	ctx.fillText(`${ Math.round(state.zx)},${ Math.round(state.zy)}`, 10, - 10);
-	ctx.fillText(`${ Math.round(state[mx]) +  Math.round(state.zx)}`, width - 30, - 10);
-	ctx.fillText(`${ Math.round(state[my]) +  Math.round(state.zy)}`, 10, - height + 10);
+	ctx.fillText(`${ Math.round(state[zx])},${ Math.round(state[zy])}`, 10, - 10);
+	ctx.fillText(`${ Math.round(state[mx]) +  Math.round(state[zx])}`, width - 30, - 10);
+	ctx.fillText(`${ Math.round(state[my]) +  Math.round(state[zy])}`, 10, - height + 10);
 }
 
 let last_X, last_Y;
@@ -136,7 +138,7 @@ function initChangesObject(key) {
 		originalValue: -1
 	}
 }
-const changingFields = [mx, my, chart_A_opacity, chart_B_opacity];
+const changingFields = [mx, my, zx, zy, chart_A_opacity, chart_B_opacity];
 
 function init(){
 	setChartWidths();
@@ -203,10 +205,14 @@ document.getElementById('action_btn_2').onclick = function(){
 document.getElementById('action_randomize').onclick = function(){
 	const new_width = Math.round(Math.random() * 1000 + 100);
 	const new_height = Math.round(Math.random() * 1000 + 100);
+	const new_x_shift = Math.round(Math.random() * 100 - 50);
+	const new_y_shift = Math.round(Math.random() * 100 - 50);
 	document.getElementById('width_val').value = new_width;
 	document.getElementById('height_val').value = new_height;
 	startChangeKey(mx, new_width);
 	startChangeKey(my, new_height);
+	startChangeKey(zx, new_x_shift);
+	startChangeKey(zy, new_y_shift);
 };
 
 document.getElementById('toggle_A').onclick = function(){	
