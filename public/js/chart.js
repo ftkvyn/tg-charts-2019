@@ -6,12 +6,14 @@
     window.requestAnimationFrame = requestAnimationFrame;
 })();
 
-const width = 700, height = 500, map_height = 100;
 
 const main_chart = document.getElementById("main_chart");
 const chart_map = document.getElementById("chart_map");
 const ctx = main_chart.getContext("2d");
 const axis_color = "#f2f4f5";
+let width = main_chart.clientWidth;
+const height = 500, map_height = 100;
+
 const radius = 1.5, thickness = 3.2;
 const duration = 300; // ms
 
@@ -21,13 +23,18 @@ const mx = Symbol('Max X'),
 	chart_B_opacity = Symbol('Chart B opacity');
 
 let state = {
-	[mx]: width * 0.7,
+	[mx]: width,
 	[my]: height  * 2,
 	zx: 0,
 	zy: 0,
 	animateFrameId: null,
 	[chart_A_opacity]: 255,
 	[chart_B_opacity]: 255
+}
+
+function setChartWidths() {
+	width = main_chart.clientWidth;
+	main_chart.width = width * 2;
 }
 
 function translateX (orig_x) {
@@ -118,9 +125,7 @@ function drawAll() {
 	drawChart();
 }
 
-ctx.scale(2,2);
-ctx.translate(0, height);
-drawAll();
+
 
 const changes = {}
 
@@ -132,7 +137,15 @@ function initChangesObject(key) {
 	}
 }
 const changingFields = [mx, my, chart_A_opacity, chart_B_opacity];
-changingFields.forEach(initChangesObject);
+
+function init(){
+	setChartWidths();
+	ctx.scale(2,2);
+	ctx.translate(0, height);
+	drawAll();
+	changingFields.forEach(initChangesObject);
+}
+init();
 
 function startChangeKey(key, targetVal) {
 	const val = changes[key];
@@ -204,4 +217,9 @@ document.getElementById('toggle_A').onclick = function(){
 document.getElementById('toggle_B').onclick = function(){	
 	startChangeKey(chart_B_opacity, 255);
 	startChangeKey(my, 950);
+};
+
+window.onresize = () => {
+	//ToDo: handle animations that are in progress
+	init();
 };
