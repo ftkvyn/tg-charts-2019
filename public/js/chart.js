@@ -118,6 +118,7 @@ function drawAll() {
 	drawChart();
 }
 
+ctx.scale(2,2);
 ctx.translate(0, height);
 drawAll();
 
