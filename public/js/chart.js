@@ -245,11 +245,17 @@ document.getElementById('action_randomize').onclick = function () {
 document.getElementById('toggle_A').onclick = function () {
 	mainChart.startChangeKey(chart_B_opacity, 0);
 	mainChart.startChangeKey(my, 500);
+
+	mapChart.startChangeKey(chart_B_opacity, 0);
+	mapChart.startChangeKey(my, 500);
 };
 
 document.getElementById('toggle_B').onclick = function () {
 	mainChart.startChangeKey(chart_B_opacity, 255);
 	mainChart.startChangeKey(my, 950);
+
+	mapChart.startChangeKey(chart_B_opacity, 255);
+	mapChart.startChangeKey(my, 950);
 };
 
 let prevTouch = null;
