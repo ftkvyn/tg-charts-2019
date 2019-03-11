@@ -15,7 +15,10 @@
     "no-underscore-dangle": "off",
     "no-tabs": "off",
     "indent": ["error", "tab", { "SwitchCase": 1 }],
-    "linebreak-style": 0
+    "linebreak-style": 0,
+    "func-names": "off",
+    "camelcase": "off",
+    "one-var": "off"
   },
   "env": {
     "browser": true,
