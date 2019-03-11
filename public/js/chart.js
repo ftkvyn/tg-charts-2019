@@ -15,6 +15,7 @@ const chart_map = document.getElementById("chart_map");
 const ctx = main_chart.getContext("2d");
 const axis_color = "#f2f4f5";
 const radius = 2, thickness = radius * 2;
+const duration = 500; // ms
 
 let state = {
 	mx: width * 0.7,
@@ -23,11 +24,14 @@ let state = {
 	zy: 0
 }
 
+function clearChart() {
+	ctx.clearRect(0, 0, main_chart.width, -main_chart.height);
+}
+
 function calcScale () {
 	state.scale_x = width / (state.mx - state.zx);
 	state.scale_y = height / (state.my - state.zy);
 }
-calcScale();
 
 function drawAxis(){
 	ctx.beginPath();	
@@ -73,34 +77,55 @@ function endDraw() {
 	ctx.stroke();
 }
 
-function drawLine(orig_x0, orig_y0, orig_x1, orig_y1) {
-	let x0 = orig_x0 - state.zx, x1 = orig_x1 - state.zx,
-		y0 = - orig_y0 + state.zy, y1 = - orig_y1 + state.zy;
-	
-	ctx.lineTo(x1, y1);
-	ctx.stroke();
+function drawChart() {
+	startDraw(0, 0);
+	drawNextPoint(100, 100);
+	drawNextPoint(200, 480);
+	drawNextPoint(300, 000);
+	drawNextPoint(400, 400);
+	drawNextPoint(500, 30);
+	endDraw();
 }
 
-ctx.translate(0, height + 0);
+ctx.translate(0, height);
+calcScale();
 drawAxis();
+drawChart();
 
-// ctx.beginPath();
-// ctx.lineWidth = 4;
-// ctx.strokeStyle = '#3DC23F';
-// ctx.beginPath();       // Start a new path
-// ctx.moveTo(30, 50);    // Move the pen to (30, 50)
-// ctx.lineTo(350, 300);  // Draw a line to (150, 100)
-// ctx.lineTo(450, 110);
-// ctx.lineTo(500, 500);
-// ctx.stroke();          // Render the path
+let changeStart = -1;
+let changeHeight = -1;
+let originalMy = -1;
 
-startDraw(0, 0);
-drawNextPoint(100, 100);
-drawNextPoint(200, 480);
-drawNextPoint(300, 000);
-drawNextPoint(400, 400);
-drawNextPoint(500, 30);
-endDraw();
+function startChangeHeight(targetVal) {
+	changeStart = Date.now();
+	changeHeight = targetVal - state.my;
+	originalMy = state.my;
+	requestAnimationFrame(changeHeightStep);
+}
+
+function changeHeightStep() {
+	let delta = Date.now() - changeStart;
+	let deltaScale = delta / duration;
+	if (deltaScale > 1) {
+		deltaScale = 1;
+	}
+	let additionalHeight = changeHeight * deltaScale;
+	state.my = originalMy + additionalHeight;
+
+	clearChart();
+	calcScale();
+	drawAxis();
+	drawChart();
+	if(deltaScale < 1) {
+		requestAnimationFrame(changeHeightStep);
+	}
+}
+
+document.getElementById('action_btn').onclick = function(){
+	const new_height = +document.getElementById('height_val').value;
+	console.log(new_height);
+	startChangeHeight(new_height);
+};
 // let prev = 0;
 // let vel = 100; // vel px per second;
 // let left = 0;
