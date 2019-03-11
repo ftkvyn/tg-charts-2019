@@ -33,11 +33,20 @@ function initChangesObject(key) {
 }
 
 class Chart {
-	constructor(canv, height) {
+	constructor(canv, height, max_x = 0, max_y = 0) {
 		this.width = canv.clientWidth;
 		this.height = height;
 		this[mx] = this.width;
-		this[my] = this.height * 2;
+		if (max_x) {
+			this[mx] = max_x;
+		} else {
+			this[mx] = this.width;
+		}
+		if (max_y) {
+			this[my] = max_y;
+		} else {
+			this[my] = this.height * 2;
+		}
 		this[zx] = 0;
 		this[zy] = 0;
 		this[chart_A_opacity] = 255;
@@ -46,6 +55,8 @@ class Chart {
 		this.canv = canv;
 		this.ctx = canv.getContext('2d');
 		this.changes = {};
+
+		this.isDrawAxis = true;
 	}
 
 	setChartWidths() {
@@ -76,6 +87,9 @@ class Chart {
 	}
 
 	drawAxis() {
+		if (!this.isDrawAxis) {
+			return;
+		}
 		this.ctx.beginPath();
 		this.ctx.lineWidth = thickness;
 		this.ctx.strokeStyle = axis_color;
@@ -198,9 +212,10 @@ const height = 500,
 	map_height = 100;
 
 const mainChart = new Chart(main_chart, height);
-// const mapChart = new Chart(chart_map, map_height);
+const mapChart = new Chart(chart_map, map_height, 500, 900);
+mapChart.isDrawAxis = false;
 mainChart.init();
-// mapChart.init();
+mapChart.init();
 
 // ====== UI buttons ====== //
 
@@ -239,11 +254,11 @@ document.getElementById('toggle_B').onclick = function () {
 
 let prevTouch = null;
 
-main_chart.addEventListener('touchstart', (event) => {
+chart_map.addEventListener('touchstart', (event) => {
 	[prevTouch] = event.changedTouches;
 });
 
-main_chart.addEventListener('touchmove', (event) => {
+chart_map.addEventListener('touchmove', (event) => {
 	let touch = event.changedTouches[0];
 	if (event.changedTouches.length > 1 && prevTouch) {
 		const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
@@ -259,14 +274,15 @@ main_chart.addEventListener('touchmove', (event) => {
 	prevTouch = touch;
 });
 
-main_chart.addEventListener('touchend', () => {
+chart_map.addEventListener('touchend', () => {
 	prevTouch = null;
 });
-main_chart.addEventListener('touchcancel', () => {
+chart_map.addEventListener('touchcancel', () => {
 	prevTouch = null;
 });
 
 window.onresize = () => {
 	// ToDo: handle animations that are in progress
 	mainChart.init();
+	mapChart.init();
 };
