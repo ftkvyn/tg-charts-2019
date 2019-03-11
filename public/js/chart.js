@@ -1,4 +1,3 @@
-/* eslint-disable  */
 /* jshint esversion: 6 */
 // console.log(data);
 
@@ -12,18 +11,8 @@ document.getElementById('app').onselect = function () {
 	return false;
 };
 
-
-const main_chart = document.getElementById('main_chart');
-const chart_map = document.getElementById('chart_map');
-const ctx = main_chart.getContext('2d');
-const ctx_map = main_chart.getContext('2d');
-const axis_color = '#f2f4f5';
-let width = main_chart.clientWidth;
-let map_width = chart_map.clientWidth;
-const height = 500,
-	map_height = 100;
-
 const thickness = 2.5;
+const axis_color = '#f2f4f5';
 const duration = 300; // ms
 
 const mx = Symbol('Max X'),
@@ -33,207 +22,196 @@ const mx = Symbol('Max X'),
 	chart_A_opacity = Symbol('Chart A opacity'),
 	chart_B_opacity = Symbol('Chart B opacity');
 
-const state = {
-	[mx]: width,
-	[my]: height * 2,
-	[zx]: 0,
-	[zy]: 0,
-	width: width,
-	height: height,
-	animateFrameId: null,
-	[chart_A_opacity]: 255,
-	[chart_B_opacity]: 255,
-	canv: main_chart,
-	ctx: ctx
-};
-
-const map_state = {
-	[mx]: map_width,
-	[my]: map_height * 2,
-	[zx]: 0,
-	[zy]: 0,
-	width: map_width,
-	height: map_width,
-	animateFrameId: null,
-	[chart_A_opacity]: 255,
-	[chart_B_opacity]: 255,
-	canv: chart_map,
-	ctx: ctx_map
-};
-
-function setChartWidths() {
-	state.width = state.canv.clientWidth;
-	state.canv.width = state.width * 2;
-
-	// map_width = chart_map.clientWidth;
-	// chart_map.width = map_width * 2;
-}
-
-function translateX(orig_x) {
-	return Math.floor((orig_x - state[zx]) * state.scale_x);
-}
-
-function translateY(orig_y) {
-	return Math.floor((-orig_y + state[zy]) * state.scale_y);
-}
-
-function clearChart() {
-	state.ctx.clearRect(0, 0, state.canv.width, -state.canv.height);
-}
-
-// function clearMap() {
-// 	ctx_map.clearRect(0, 0, chart_map.width, -chart_map.height);
-// }
-
-function calcScale() {
-	state.scale_x = state.width / (state[mx] - state[zx]);
-	state.scale_y = state.height / (state[my] - state[zy]);
-}
-
-// function calcScaleMap() {
-// 	map_state.scale_x = map_width / (map_state[mx] - map_state[zx]);
-// 	smap_statetate.scale_y = map_height / (map_state[my] - map_state[zy]);
-// }
-
-function drawAxis() {
-	ctx.beginPath();
-	ctx.lineWidth = thickness;
-	ctx.strokeStyle = axis_color;
-	ctx.beginPath();
-	ctx.moveTo(thickness, -state.height);
-	ctx.lineTo(thickness, 0 - thickness);
-	ctx.lineTo(state.width, 0 - thickness);
-	ctx.stroke();
-
-	ctx.font = '14px Arial';
-	ctx.fillText(`${Math.round(state[zx])},${Math.round(state[zy])}`, 10, -10);
-	ctx.fillText(`${Math.round(state[mx]) + Math.round(state[zx])}`, state.width - 40, -10);
-	ctx.fillText(`${Math.round(state[my]) + Math.round(state[zy])}`, 10, -state.height + 20);
-}
-
-function startDraw(orig_x0, orig_y0, color) {
-	ctx.lineWidth = thickness;
-	ctx.strokeStyle = color;
-	ctx.lineJoin = 'round';
-	ctx.beginPath();
-
-	let x0 = translateX(orig_x0),
-		y0 = translateY(orig_y0);
-	ctx.moveTo(x0, y0);
-}
-
-function drawNextPoint(orig_x, orig_y) {
-	let x = translateX(orig_x),
-		y = translateY(orig_y);
-	ctx.lineTo(x, y);
-}
-
-function endDraw() {
-	ctx.stroke();
-}
-
-function drawChart() {
-	if (state[chart_A_opacity]) {
-		const opacity = (`00${Math.round(state[chart_A_opacity]).toString(16)}`).substr(-2);
-		startDraw(0, 0, `#3cc23f${opacity}`);
-		drawNextPoint(100, 100);
-		drawNextPoint(200, 480);
-		drawNextPoint(300, 0);
-		drawNextPoint(400, 400);
-		drawNextPoint(500, 30);
-		endDraw();
-	}
-	if (state[chart_B_opacity]) {
-		const opacity = (`00${Math.round(state[chart_B_opacity]).toString(16)}`).substr(-2);
-		startDraw(0, 0, `#f34c44${opacity}`);
-		drawNextPoint(100, 900);
-		drawNextPoint(200, 80);
-		drawNextPoint(300, 100);
-		drawNextPoint(400, 130);
-		drawNextPoint(500, 500);
-		endDraw();
-	}
-}
-
-function drawAll() {
-	clearChart();
-	calcScale();
-	drawChart();
-	drawAxis();
-}
-
-
-const changes = {};
+const changingFields = [mx, my, zx, zy, chart_A_opacity, chart_B_opacity];
 
 function initChangesObject(key) {
-	changes[key] = {
+	this[key] = {
 		startTimestamp: -1,
 		deltaValue: -1,
 		originalValue: -1,
 	};
 }
-const changingFields = [mx, my, zx, zy, chart_A_opacity, chart_B_opacity];
 
-function init() {
-	setChartWidths();
-	ctx.scale(2, 2);
-	ctx.translate(0, height);
-	drawAll();
-	changingFields.forEach(initChangesObject);
-}
-init();
-
-function startChangeKey(key, targetVal) {
-	const val = changes[key];
-	val.startTimestamp = Date.now();
-	val.deltaValue = targetVal - state[key];
-	val.originalValue = state[key];
-	if (!state.animateFrameId) {
-		state.animateFrameId = requestAnimationFrame(changeAllStep);
+class Chart {
+	constructor(canv, height) {
+		this.width = canv.clientWidth;
+		this.height = height;
+		this[mx] = this.width;
+		this[my] = this.height * 2;
+		this[zx] = 0;
+		this[zy] = 0;
+		this[chart_A_opacity] = 255;
+		this[chart_B_opacity] = 255;
+		this.animateFrameId = null;
+		this.canv = canv;
+		this.ctx = canv.getContext('2d');
+		this.changes = {};
 	}
-}
 
-function changeKeyStep(key) {
-	const val = changes[key];
-	if (val.startTimestamp == -1) {
-		return false;
+	setChartWidths() {
+		this.width = this.canv.clientWidth;
+		this.canv.width = this.width * 2;
 	}
-	const delta = Date.now() - val.startTimestamp;
-	let deltaScale = delta / duration;
-	if (deltaScale > 1) {
-		deltaScale = 1;
+
+	translateX(orig_x) {
+		return Math.floor((orig_x - this[zx]) * this.scale_x);
 	}
-	const additionalVal = val.deltaValue * deltaScale;
-	state[key] = val.originalValue + additionalVal;
 
-	if (deltaScale >= 1) {
-		initChangesObject(key);
+	translateY(orig_y) {
+		return Math.floor((-orig_y + this[zy]) * this.scale_y);
 	}
-	return true;
-}
 
-function changeAllStep() {
-	const somethingChanged = changingFields.reduce((keyChanged, key) => { return changeKeyStep(key) || keyChanged ;}, false);
+	clearChart() {
+		this.ctx.clearRect(0, 0, this.canv.width, -this.canv.height);
+	}
 
-	state.animateFrameId = null;
-	if (somethingChanged) {
-		drawAll();
-		if (!state.animateFrameId) {
-			state.animateFrameId = requestAnimationFrame(changeAllStep);
+	calcScale() {
+		this.scale_x = this.width / (this[mx] - this[zx]);
+		this.scale_y = this.height / (this[my] - this[zy]);
+	}
+
+	moveX(dx) {
+		this[zx] -= dx;
+		this[mx] -= dx;
+	}
+
+	drawAxis() {
+		this.ctx.beginPath();
+		this.ctx.lineWidth = thickness;
+		this.ctx.strokeStyle = axis_color;
+		this.ctx.beginPath();
+		this.ctx.moveTo(thickness, -this.height);
+		this.ctx.lineTo(thickness, 0 - thickness);
+		this.ctx.lineTo(this.width, 0 - thickness);
+		this.ctx.stroke();
+
+		this.ctx.font = '14px Arial';
+		this.ctx.fillText(`${Math.round(this[zx])},${Math.round(this[zy])}`, 10, -10);
+		this.ctx.fillText(`${Math.round(this[mx]) + Math.round(this[zx])}`, this.width - 40, -10);
+		this.ctx.fillText(`${Math.round(this[my]) + Math.round(this[zy])}`, 10, -this.height + 20);
+	}
+
+	startDraw(orig_x0, orig_y0, color) {
+		this.ctx.lineWidth = thickness;
+		this.ctx.strokeStyle = color;
+		this.ctx.lineJoin = 'round';
+		this.ctx.beginPath();
+
+		const x0 = this.translateX(orig_x0),
+			y0 = this.translateY(orig_y0);
+		this.ctx.moveTo(x0, y0);
+	}
+
+	drawNextPoint(orig_x, orig_y) {
+		const x = this.translateX(orig_x),
+			y = this.translateY(orig_y);
+		this.ctx.lineTo(x, y);
+	}
+
+	endDraw() {
+		this.ctx.stroke();
+	}
+
+	drawAll() {
+		this.clearChart();
+		this.calcScale();
+		this.drawChart();
+		this.drawAxis();
+	}
+
+	drawChart() {
+		if (this[chart_A_opacity]) {
+			const opacity = (`00${Math.round(this[chart_A_opacity]).toString(16)}`).substr(-2);
+			this.startDraw(0, 0, `#3cc23f${opacity}`);
+			this.drawNextPoint(100, 100);
+			this.drawNextPoint(200, 480);
+			this.drawNextPoint(300, 0);
+			this.drawNextPoint(400, 400);
+			this.drawNextPoint(500, 30);
+			this.endDraw();
+		}
+		if (this[chart_B_opacity]) {
+			const opacity = (`00${Math.round(this[chart_B_opacity]).toString(16)}`).substr(-2);
+			this.startDraw(0, 0, `#f34c44${opacity}`);
+			this.drawNextPoint(100, 900);
+			this.drawNextPoint(200, 80);
+			this.drawNextPoint(300, 100);
+			this.drawNextPoint(400, 130);
+			this.drawNextPoint(500, 500);
+			this.endDraw();
+		}
+	}
+
+	init() {
+		this.setChartWidths();
+		this.ctx.scale(2, 2);
+		this.ctx.translate(0, this.height);
+		this.drawAll();
+		changingFields.forEach(initChangesObject.bind(this.changes));
+	}
+
+	startChangeKey(key, targetVal) {
+		const val = this.changes[key];
+		val.startTimestamp = Date.now();
+		val.deltaValue = targetVal - this[key];
+		val.originalValue = this[key];
+		if (!this.animateFrameId) {
+			this.animateFrameId = requestAnimationFrame(this.changeAllStep.bind(this));
+		}
+	}
+
+	changeKeyStep(key) {
+		const val = this.changes[key];
+		if (val.startTimestamp === -1) {
+			return false;
+		}
+		const delta = Date.now() - val.startTimestamp;
+		let deltaScale = delta / duration;
+		if (deltaScale > 1) {
+			deltaScale = 1;
+		}
+		const additionalVal = val.deltaValue * deltaScale;
+		this[key] = val.originalValue + additionalVal;
+
+		if (deltaScale >= 1) {
+			initChangesObject.call(this.changes, key);
+		}
+		return true;
+	}
+
+	changeAllStep() {
+		const somethingChanged = changingFields.reduce((keyChanged, key) => { return this.changeKeyStep(key) || keyChanged; }, false);
+
+		this.animateFrameId = null;
+		if (somethingChanged) {
+			this.drawAll();
+			if (!this.animateFrameId) {
+				this.animateFrameId = requestAnimationFrame(this.changeAllStep.bind(this));
+			}
 		}
 	}
 }
+
+const main_chart = document.getElementById('main_chart');
+const chart_map = document.getElementById('chart_map');
+const height = 500,
+	map_height = 100;
+
+const mainChart = new Chart(main_chart, height);
+// const mapChart = new Chart(chart_map, map_height);
+mainChart.init();
+// mapChart.init();
 
 // ====== UI buttons ====== //
 
 document.getElementById('action_btn').onclick = function () {
 	const new_height = +document.getElementById('height_val').value;
-	startChangeKey(my, new_height);
+	mainChart.startChangeKey(my, new_height);
 };
 
 document.getElementById('action_btn_2').onclick = function () {
 	const new_width = +document.getElementById('width_val').value;
-	startChangeKey(mx, new_width);
+	mainChart.startChangeKey(mx, new_width);
 };
 
 document.getElementById('action_randomize').onclick = function () {
@@ -243,57 +221,52 @@ document.getElementById('action_randomize').onclick = function () {
 	const new_y_shift = Math.round(Math.random() * 100 - 50);
 	document.getElementById('width_val').value = new_width;
 	document.getElementById('height_val').value = new_height;
-	startChangeKey(mx, new_width);
-	startChangeKey(my, new_height);
-	startChangeKey(zx, new_x_shift);
-	startChangeKey(zy, new_y_shift);
+	mainChart.startChangeKey(mx, new_width);
+	mainChart.startChangeKey(my, new_height);
+	mainChart.startChangeKey(zx, new_x_shift);
+	mainChart.startChangeKey(zy, new_y_shift);
 };
 
 document.getElementById('toggle_A').onclick = function () {
-	startChangeKey(chart_B_opacity, 0);
-	startChangeKey(my, 500);
+	mainChart.startChangeKey(chart_B_opacity, 0);
+	mainChart.startChangeKey(my, 500);
 };
 
 document.getElementById('toggle_B').onclick = function () {
-	startChangeKey(chart_B_opacity, 255);
-	startChangeKey(my, 950);
+	mainChart.startChangeKey(chart_B_opacity, 255);
+	mainChart.startChangeKey(my, 950);
 };
 
 let prevTouch = null;
 
 main_chart.addEventListener('touchstart', (event) => {
-	prevTouch = event.changedTouches[0];
+	[prevTouch] = event.changedTouches;
 });
 
 main_chart.addEventListener('touchmove', (event) => {
 	let touch = event.changedTouches[0];
 	if (event.changedTouches.length > 1 && prevTouch) {
-		let touches = event.changedTouches.filter( e => e.identifier === prevTouch.identifier);
+		const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
 		if (touches.length) {
-			touch = touches[0];
+			[touch] = touches;
 		}
 	}
 	if (prevTouch && touch) {
 		const dx = touch.pageX - prevTouch.pageX;
-		// const dy = -(touch.pageY - prevTouch.pageY);
-		state[zx] -= dx;
-		state[mx] -= dx;
-		// state[zy] -= dy;
-		// state[my] -= dy;
-		drawAll();
+		mainChart.moveX(dx);
+		mainChart.drawAll();
 	}
 	prevTouch = touch;
-	console.log(touch);
 });
 
-main_chart.addEventListener('touchend', (event) => {
+main_chart.addEventListener('touchend', () => {
 	prevTouch = null;
 });
-main_chart.addEventListener('touchcancel', (event) => {
+main_chart.addEventListener('touchcancel', () => {
 	prevTouch = null;
 });
 
 window.onresize = () => {
 	// ToDo: handle animations that are in progress
-	init();
+	mainChart.init();
 };
