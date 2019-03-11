@@ -21,8 +21,7 @@ let width = main_chart.clientWidth;
 const height = 500,
 	map_height = 100;
 
-const radius = 1.5,
-	thickness = 3.2;
+const thickness = 2.5;
 const duration = 300; // ms
 
 const mx = Symbol('Max X'),
