@@ -242,8 +242,13 @@ main_chart.addEventListener('touchstart', (event) => {
 });
 
 main_chart.addEventListener('touchmove', (event) => {
-	// ToDo: find the same touch by id of the previous.
-	const touch = event.changedTouches[0];
+	let touch = event.changedTouches[0];
+	if (event.changedTouches.length > 1 && prevTouch) {
+		let touches = event.changedTouches.filter( e => e.identifier === prevTouch.identifier);
+		if (touches.length) {
+			touch = touches[0];
+		}
+	}
 	if (prevTouch && touch) {
 		const dx = touch.pageX - prevTouch.pageX;
 		// const dy = -(touch.pageY - prevTouch.pageY);
