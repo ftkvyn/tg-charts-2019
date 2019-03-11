@@ -215,15 +215,43 @@ document.getElementById('action_randomize').onclick = function(){
 	startChangeKey(zy, new_y_shift);
 };
 
-document.getElementById('toggle_A').onclick = function(){	
+document.getElementById('toggle_A').onclick = function(){
 	startChangeKey(chart_B_opacity, 0);
 	startChangeKey(my, 500);
 };
 
-document.getElementById('toggle_B').onclick = function(){	
+document.getElementById('toggle_B').onclick = function(){
 	startChangeKey(chart_B_opacity, 255);
 	startChangeKey(my, 950);
 };
+
+let prevTouch = null;
+
+main_chart.addEventListener('touchstart', function(event){
+	prevTouch = event.changedTouches[0];
+});
+
+main_chart.addEventListener('touchmove', function(event){
+	const touch = event.changedTouches[0];
+	if(prevTouch && touch) {
+		const dx = touch.pageX - prevTouch.pageX,
+			dy = -(touch.pageY - prevTouch.pageY);
+		state[zx] -= dx;
+		state[mx] -= dx;
+		// state[zy] -= dy;
+		// state[my] -= dy;
+		drawAll();
+	}
+	prevTouch = touch;
+	console.log(touch);
+});
+
+main_chart.addEventListener('touchend', function(event){
+	prevTouch = null;
+});
+main_chart.addEventListener('touchcancel', function(event){
+	prevTouch = null;
+});
 
 window.onresize = () => {
 	//ToDo: handle animations that are in progress
