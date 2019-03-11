@@ -9,19 +9,18 @@
 const width = 700, height = 500, map_height = 100;
 
 const main_chart = document.getElementById("main_chart");
-// main_chart.width = width; main_chart.height = height;
 const chart_map = document.getElementById("chart_map");
-// main_chart.width = width; main_chart.height = map_height;
 const ctx = main_chart.getContext("2d");
 const axis_color = "#f2f4f5";
 const radius = 2, thickness = radius * 2;
-const duration = 500; // ms
+const duration = 300; // ms
 
 let state = {
 	mx: width * 0.7,
 	my: height  * 2,
 	zx: 0,
-	zy: 0
+	zy: 0,
+	animateFrameId: null
 }
 
 function clearChart() {
@@ -87,24 +86,38 @@ function drawChart() {
 	endDraw();
 }
 
-ctx.translate(0, height);
-calcScale();
-drawAxis();
-drawChart();
+function drawAll() {
+	clearChart();
+	calcScale();
+	drawAxis();
+	drawChart();
+}
 
-let changeStart = -1;
+ctx.translate(0, height);
+drawAll();
+
+let changeHeightStart = -1;
 let changeHeight = -1;
 let originalMy = -1;
 
+let changeWidthStart = -1;
+let changeWidth = -1;
+let originalMx = -1;
+
 function startChangeHeight(targetVal) {
-	changeStart = Date.now();
+	changeHeightStart = Date.now();
 	changeHeight = targetVal - state.my;
 	originalMy = state.my;
-	requestAnimationFrame(changeHeightStep);
+	if(!state.animateFrameId) {
+		state.animateFrameId = requestAnimationFrame(changeAllStep);
+	}
 }
 
 function changeHeightStep() {
-	let delta = Date.now() - changeStart;
+	if(changeHeightStart == -1) {
+		return false;
+	}
+	let delta = Date.now() - changeHeightStart;
 	let deltaScale = delta / duration;
 	if (deltaScale > 1) {
 		deltaScale = 1;
@@ -112,42 +125,72 @@ function changeHeightStep() {
 	let additionalHeight = changeHeight * deltaScale;
 	state.my = originalMy + additionalHeight;
 
-	clearChart();
-	calcScale();
-	drawAxis();
-	drawChart();
-	if(deltaScale < 1) {
-		requestAnimationFrame(changeHeightStep);
+	if(deltaScale >= 1) {
+		changeHeightStart = -1;
+		changeHeight = -1;
+		originalMy = -1;
+	}
+	return true;
+}
+
+function startChangeWidth(targetVal) {
+	changeWidthStart = Date.now();
+	changeWidth = targetVal - state.mx;
+	originalMx = state.mx;
+	if(!state.animateFrameId) {
+		state.animateFrameId = requestAnimationFrame(changeAllStep);
+	}
+}
+
+function changeWidthStep() {
+	if(changeWidthStart == -1) {
+		return false;
+	}
+	let delta = Date.now() - changeWidthStart;
+	let deltaScale = delta / duration;
+	if (deltaScale > 1) {
+		deltaScale = 1;
+	}
+	let additionalWidth = changeWidth * deltaScale;
+	state.mx = originalMx + additionalWidth;
+
+	if(deltaScale >= 1) {
+		changeWidthStart = -1;
+		changeWidth = -1;
+		originalMx = -1;
+	}
+	return true;
+}
+
+function changeAllStep() {
+	let somethingChanged = false;
+	state.animateFrameId = null;
+	somethingChanged = changeHeightStep() || somethingChanged;
+	somethingChanged = changeWidthStep() || somethingChanged;
+	if(somethingChanged) {
+		drawAll();
+		if(!state.animateFrameId) {
+			state.animateFrameId = requestAnimationFrame(changeAllStep);
+		}
 	}
 }
 
 document.getElementById('action_btn').onclick = function(){
 	const new_height = +document.getElementById('height_val').value;
-	console.log(new_height);
 	startChangeHeight(new_height);
 };
-// let prev = 0;
-// let vel = 100; // vel px per second;
-// let left = 0;
-// let counter = 0;
 
-// function step(timestamp) {
-//     let progress = timestamp - prev; //ms
-//     prev = timestamp;
-//     // console.log(progress);
-//     // console.log(timestamp);
-//     // console.log('---------------');
-//     left += progress * vel / 1000;
-//     move.style.left = left  + "px";
-//     if(left > 120 || left < 0){
-//         vel = -vel;
-//     }
-//     if (counter++ < 2000) 
-//     {
-//         requestAnimationFrame(step);
-//     }
-// }
+document.getElementById('action_btn_2').onclick = function(){
+	const new_width = +document.getElementById('width_val').value;
+	console.log(new_width);
+	startChangeWidth(new_width);
+};
 
-// requestAnimationFrame(step);
-
-
+document.getElementById('action_randomize').onclick = function(){
+	const new_width = Math.round(Math.random() * 1000 + 100);
+	const new_height = Math.round(Math.random() * 1000 + 100);
+	document.getElementById('width_val').value = new_width;
+	document.getElementById('height_val').value = new_height;
+	startChangeWidth(new_width);
+	startChangeHeight(new_height);	
+};
