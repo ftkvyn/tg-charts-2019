@@ -20,7 +20,17 @@ let state = {
 	my: height  * 2,
 	zx: 0,
 	zy: 0,
-	animateFrameId: null
+	animateFrameId: null,
+	chart_A_opacity: 255,
+	chart_B_opacity: 255
+}
+
+function translateX (orig_x) {
+	return Math.floor((orig_x - state.zx) * state.scale_x);
+}
+
+function translateY (orig_y) {
+	return  Math.floor((- orig_y + state.zy) * state.scale_y);
 }
 
 function clearChart() {
@@ -48,17 +58,9 @@ function drawAxis(){
 	ctx.fillText(`${state.my + state.zy}`, 10, - height + 10);
 }
 
-function translateX (orig_x) {
-	return Math.floor((orig_x - state.zx) * state.scale_x);
-}
-
-function translateY (orig_y) {
-	return  Math.floor((- orig_y + state.zy) * state.scale_y);
-}
-
-function startDraw(orig_x0, orig_y0) {
+function startDraw(orig_x0, orig_y0, color) {
 	ctx.lineWidth = thickness;
-	ctx.strokeStyle = '#3DC23F';
+	ctx.strokeStyle = color;
 	ctx.lineJoin = 'round';
 	// ctx.miterLimit = 1;
 	ctx.beginPath();
@@ -77,13 +79,26 @@ function endDraw() {
 }
 
 function drawChart() {
-	startDraw(0, 0);
-	drawNextPoint(100, 100);
-	drawNextPoint(200, 480);
-	drawNextPoint(300, 000);
-	drawNextPoint(400, 400);
-	drawNextPoint(500, 30);
-	endDraw();
+	if(state.chart_A_opacity) {
+		const opacity = ('00' + state.chart_A_opacity.toString(16)).substr(-2);
+		startDraw(0, 0, '#3cc23f' + opacity);
+		drawNextPoint(100, 100);
+		drawNextPoint(200, 480);
+		drawNextPoint(300, 0);
+		drawNextPoint(400, 400);
+		drawNextPoint(500, 30);
+		endDraw();
+	}
+	if(state.chart_B_opacity) {
+		const opacity = ('00' + state.chart_B_opacity.toString(16)).substr(-2);
+		startDraw(0, 0, '#f34c44' + opacity);
+		drawNextPoint(100, 900);
+		drawNextPoint(200, 80);
+		drawNextPoint(300, 100);
+		drawNextPoint(400, 130);
+		drawNextPoint(500, 500);
+		endDraw();
+	}
 }
 
 function drawAll() {
@@ -103,6 +118,10 @@ let originalMy = -1;
 let changeWidthStart = -1;
 let changeWidth = -1;
 let originalMx = -1;
+
+let changeOpacityStart = -1;
+let changeOpacity = -1;
+let originalOpacity = -1;
 
 function startChangeHeight(targetVal) {
 	changeHeightStart = Date.now();
@@ -162,11 +181,42 @@ function changeWidthStep() {
 	return true;
 }
 
+function startChangeOpacity(targetOpactity){
+	changeOpacityStart = Date.now();
+	changeOpacity = targetOpactity - state.chart_B_opacity;
+	originalOpacity = state.chart_B_opacity;
+	if(!state.animateFrameId) {
+		state.animateFrameId = requestAnimationFrame(changeAllStep);
+	}
+}
+
+
+function changeOpacityStep() {
+	if(changeOpacityStart == -1) {
+		return false;
+	}
+	let delta = Date.now() - changeOpacityStart;
+	let deltaScale = delta / duration;
+	if (deltaScale > 1) {
+		deltaScale = 1;
+	}
+	let additionalVal = Math.round(changeOpacity * deltaScale);
+	state.chart_B_opacity = additionalVal + originalOpacity;
+
+	if(deltaScale >= 1) {
+		changeOpacityStart = -1;
+		changeOpacity = -1;
+		originalOpacity = -1;
+	}
+	return true;
+}
+
 function changeAllStep() {
 	let somethingChanged = false;
 	state.animateFrameId = null;
 	somethingChanged = changeHeightStep() || somethingChanged;
 	somethingChanged = changeWidthStep() || somethingChanged;
+	somethingChanged = changeOpacityStep() || somethingChanged;	
 	if(somethingChanged) {
 		drawAll();
 		if(!state.animateFrameId) {
@@ -175,6 +225,8 @@ function changeAllStep() {
 	}
 }
 
+// ====== UI buttons ====== //
+
 document.getElementById('action_btn').onclick = function(){
 	const new_height = +document.getElementById('height_val').value;
 	startChangeHeight(new_height);
@@ -182,7 +234,6 @@ document.getElementById('action_btn').onclick = function(){
 
 document.getElementById('action_btn_2').onclick = function(){
 	const new_width = +document.getElementById('width_val').value;
-	console.log(new_width);
 	startChangeWidth(new_width);
 };
 
@@ -192,5 +243,15 @@ document.getElementById('action_randomize').onclick = function(){
 	document.getElementById('width_val').value = new_width;
 	document.getElementById('height_val').value = new_height;
 	startChangeWidth(new_width);
-	startChangeHeight(new_height);	
+	startChangeHeight(new_height);
+};
+
+document.getElementById('toggle_A').onclick = function(){	
+	startChangeOpacity(0);
+	startChangeHeight(500);
+};
+
+document.getElementById('toggle_B').onclick = function(){	
+	startChangeOpacity(255);
+	startChangeHeight(950);
 };
