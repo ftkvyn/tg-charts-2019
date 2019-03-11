@@ -232,10 +232,11 @@ main_chart.addEventListener('touchstart', function(event){
 });
 
 main_chart.addEventListener('touchmove', function(event){
+	//ToDo: find the same touch by id of the previous.
 	const touch = event.changedTouches[0];
 	if(prevTouch && touch) {
-		const dx = touch.pageX - prevTouch.pageX,
-			dy = -(touch.pageY - prevTouch.pageY);
+		const dx = touch.pageX - prevTouch.pageX;
+		// const dy = -(touch.pageY - prevTouch.pageY);
 		state[zx] -= dx;
 		state[mx] -= dx;
 		// state[zy] -= dy;
