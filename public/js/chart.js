@@ -258,13 +258,31 @@ document.getElementById('toggle_B').onclick = function () {
 	mapChart.startChangeKey(my, 950);
 };
 
+const map_container = document.getElementById('map_container');
+let container_width = map_container.clientWidth;
+const thumb = document.getElementById('thumb');
+const overlay_left = document.getElementById('overlay_left');
+const overlay_right = document.getElementById('overlay_right');
+
+function moveChart(dx) {
+	// ToDo: set limits
+	mainChart.moveX(dx);
+	mainChart.drawAll();
+	const right = +thumb.style.right.slice(0, -2);
+	thumb.style.right = `${right - dx}px`;
+	const thumb_width = thumb.clientWidth;
+
+	overlay_right.style.width = `${right}px`;
+	overlay_left.style.width = `${container_width - right - thumb_width}px`;
+}
+
 let prevTouch = null;
 
-chart_map.addEventListener('touchstart', (event) => {
+thumb.addEventListener('touchstart', (event) => {
 	[prevTouch] = event.changedTouches;
 });
 
-chart_map.addEventListener('touchmove', (event) => {
+thumb.addEventListener('touchmove', (event) => {
 	let touch = event.changedTouches[0];
 	if (event.changedTouches.length > 1 && prevTouch) {
 		const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
@@ -274,21 +292,39 @@ chart_map.addEventListener('touchmove', (event) => {
 	}
 	if (prevTouch && touch) {
 		const dx = touch.pageX - prevTouch.pageX;
-		mainChart.moveX(dx);
-		mainChart.drawAll();
+		moveChart(dx);
 	}
 	prevTouch = touch;
 });
 
-chart_map.addEventListener('touchend', () => {
+thumb.addEventListener('touchend', () => {
 	prevTouch = null;
 });
-chart_map.addEventListener('touchcancel', () => {
+thumb.addEventListener('touchcancel', () => {
 	prevTouch = null;
+});
+
+let dragStart = false;
+
+thumb.addEventListener('mousedown', () => {
+	dragStart = true;
+});
+
+thumb.addEventListener('mousemove', (event) => {
+	if (!dragStart) {
+		return;
+	}
+	const dx = event.movementX;
+	moveChart(dx);
+});
+
+document.addEventListener('mouseup', () => {
+	dragStart = false;
 });
 
 window.onresize = () => {
 	// ToDo: handle animations that are in progress
 	mainChart.init();
 	mapChart.init();
+	container_width = map_container.clientWidth;
 };

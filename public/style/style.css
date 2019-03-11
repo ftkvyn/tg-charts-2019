@@ -11,3 +11,43 @@ body {
 a {
   color: #00B7FF;
 }
+
+.map_container{
+  position: relative;
+}
+
+.overlay{
+  position: absolute;
+  height: 100%;
+  background: blue;
+  opacity: 0.5;
+  width: 100px;
+}
+.overlay.overlay_left{
+  left: 0;
+}
+.overlay.overlay_right{
+  right: 0;
+  width: 0;
+}
+.selected{
+  position: absolute;
+  border: 1px solid #000;
+  cursor: pointer;
+  height: 100%;
+}
+
+.selected .thumb{
+  position: absolute;
+  width: 5px;
+  background: gray;
+  height: 100%;
+}
+
+.selected .thumb.thumb_left{
+  left: 0;
+}
+
+.selected .thumb.thumb_right{
+  right: 0;
+}
