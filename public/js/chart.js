@@ -14,10 +14,12 @@ document.getElementById('app').onselect = function () {
 
 
 const main_chart = document.getElementById('main_chart');
-// const chart_map = document.getElementById('chart_map');
+const chart_map = document.getElementById('chart_map');
 const ctx = main_chart.getContext('2d');
+const ctx_map = main_chart.getContext('2d');
 const axis_color = '#f2f4f5';
 let width = main_chart.clientWidth;
+let map_width = chart_map.clientWidth;
 const height = 500,
 	map_height = 100;
 
@@ -36,14 +38,35 @@ const state = {
 	[my]: height * 2,
 	[zx]: 0,
 	[zy]: 0,
+	width: width,
+	height: height,
 	animateFrameId: null,
 	[chart_A_opacity]: 255,
 	[chart_B_opacity]: 255,
+	canv: main_chart,
+	ctx: ctx
+};
+
+const map_state = {
+	[mx]: map_width,
+	[my]: map_height * 2,
+	[zx]: 0,
+	[zy]: 0,
+	width: map_width,
+	height: map_width,
+	animateFrameId: null,
+	[chart_A_opacity]: 255,
+	[chart_B_opacity]: 255,
+	canv: chart_map,
+	ctx: ctx_map
 };
 
 function setChartWidths() {
-	width = main_chart.clientWidth;
-	main_chart.width = width * 2;
+	state.width = state.canv.clientWidth;
+	state.canv.width = state.width * 2;
+
+	// map_width = chart_map.clientWidth;
+	// chart_map.width = map_width * 2;
 }
 
 function translateX(orig_x) {
@@ -55,52 +78,54 @@ function translateY(orig_y) {
 }
 
 function clearChart() {
-	ctx.clearRect(0, 0, main_chart.width, -main_chart.height);
+	state.ctx.clearRect(0, 0, state.canv.width, -state.canv.height);
 }
 
+// function clearMap() {
+// 	ctx_map.clearRect(0, 0, chart_map.width, -chart_map.height);
+// }
+
 function calcScale() {
-	state.scale_x = width / (state[mx] - state[zx]);
-	state.scale_y = height / (state[my] - state[zy]);
+	state.scale_x = state.width / (state[mx] - state[zx]);
+	state.scale_y = state.height / (state[my] - state[zy]);
 }
+
+// function calcScaleMap() {
+// 	map_state.scale_x = map_width / (map_state[mx] - map_state[zx]);
+// 	smap_statetate.scale_y = map_height / (map_state[my] - map_state[zy]);
+// }
 
 function drawAxis() {
 	ctx.beginPath();
 	ctx.lineWidth = thickness;
 	ctx.strokeStyle = axis_color;
 	ctx.beginPath();
-	ctx.moveTo(thickness, -height);
+	ctx.moveTo(thickness, -state.height);
 	ctx.lineTo(thickness, 0 - thickness);
-	ctx.lineTo(width, 0 - thickness);
+	ctx.lineTo(state.width, 0 - thickness);
 	ctx.stroke();
 
 	ctx.font = '14px Arial';
 	ctx.fillText(`${Math.round(state[zx])},${Math.round(state[zy])}`, 10, -10);
-	ctx.fillText(`${Math.round(state[mx]) + Math.round(state[zx])}`, width - 40, -10);
-	ctx.fillText(`${Math.round(state[my]) + Math.round(state[zy])}`, 10, -height + 20);
+	ctx.fillText(`${Math.round(state[mx]) + Math.round(state[zx])}`, state.width - 40, -10);
+	ctx.fillText(`${Math.round(state[my]) + Math.round(state[zy])}`, 10, -state.height + 20);
 }
-
-let last_X,
-	last_Y;
 
 function startDraw(orig_x0, orig_y0, color) {
 	ctx.lineWidth = thickness;
 	ctx.strokeStyle = color;
 	ctx.lineJoin = 'round';
-	// ctx.miterLimit = 1;
 	ctx.beginPath();
 
 	let x0 = translateX(orig_x0),
 		y0 = translateY(orig_y0);
 	ctx.moveTo(x0, y0);
-	last_X = x0, last_Y = y0;
 }
 
 function drawNextPoint(orig_x, orig_y) {
 	let x = translateX(orig_x),
 		y = translateY(orig_y);
 	ctx.lineTo(x, y);
-	// ctx.quadraticCurveTo(last_X, last_Y, x, y);
-	last_X = x, last_Y = y;
 }
 
 function endDraw() {
