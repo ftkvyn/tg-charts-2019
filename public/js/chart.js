@@ -12,7 +12,7 @@ const main_chart = document.getElementById("main_chart");
 const chart_map = document.getElementById("chart_map");
 const ctx = main_chart.getContext("2d");
 const axis_color = "#f2f4f5";
-const radius = 2, thickness = radius * 2;
+const radius = 1.5, thickness = 3.2;
 const duration = 300; // ms
 
 const mx = Symbol('Max X'),
@@ -63,6 +63,8 @@ function drawAxis(){
 	ctx.fillText(`${ Math.round(state[my]) +  Math.round(state.zy)}`, 10, - height + 10);
 }
 
+let last_X, last_Y;
+
 function startDraw(orig_x0, orig_y0, color) {
 	ctx.lineWidth = thickness;
 	ctx.strokeStyle = color;
@@ -72,11 +74,14 @@ function startDraw(orig_x0, orig_y0, color) {
 
 	let x0 = translateX(orig_x0), y0 = translateY(orig_y0);
 	ctx.moveTo(x0, y0);
+	last_X = x0, last_Y = y0;
 }
 
 function drawNextPoint(orig_x, orig_y) {
 	let x = translateX(orig_x), y = translateY(orig_y);
-	ctx.lineTo(x, y);
+	ctx.lineTo(x,y);
+	// ctx.quadraticCurveTo(last_X, last_Y, x, y);
+	last_X = x, last_Y = y;
 }
 
 function endDraw() {
