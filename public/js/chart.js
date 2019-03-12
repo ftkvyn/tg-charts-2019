@@ -190,13 +190,13 @@ class Chart {
 		this.calculateMaxY(start_i, end_i);
 	}
 
-	calculateMaxY(start_i, end_i) {
-		if (this.prev_start_i !== start_i || this.prev_end_i !== end_i) {
+	calculateMaxY(start_i, end_i, force) {
+		if (this.prev_start_i !== start_i || this.prev_end_i !== end_i || force) {
 			this.prev_start_i = start_i;
 			this.prev_end_i = end_i;
 			let newMax = Math.max(...this.graphs
 				.filter((ch) => { return ch.display; })
-				.map((gr) => { return Math.max(...gr.y_vals.slice(start_i, end_i)); }));
+				.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
 			newMax += Math.round((newMax - this[zy]) * padding_y);
 			if (newMax !== 0 && newMax !== this[my]) {
 				this.startChangeKey(my, newMax);
@@ -256,7 +256,7 @@ class Chart {
 	toggleChart(key) {
 		const chart = this.graphs.find((ch) => { return ch.opacityKey === key; });
 		chart.display = !chart.display;
-		// this.calculateMaxY();
+		this.calculateMaxY(null, null, true);
 		// let newMax = Math.max(...this.graphs
 		// 	.filter((ch) => { return ch.display; })
 		// 	.map((gr) => { return gr.max_Y; }));
