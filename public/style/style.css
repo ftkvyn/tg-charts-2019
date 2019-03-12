@@ -55,3 +55,58 @@ a {
 .selected .thumb.thumb_right{
   right: 0;
 }
+
+.btn{
+	display: inline-block;
+	margin: 10px;
+	border-radius: 30px;
+	border: 1px solid #e6ecf0;
+	padding: 7px;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	height: 22px;
+	position: relative;
+}
+
+.btn .btn-mark{
+	height: 22px;
+	width: 22px;
+	border-radius: 20px;
+	display: inline-block;
+	text-align: center;
+	border-width: 11px;
+	border-style: solid;
+	box-sizing: border-box;
+	transition: border-width .2s;
+}
+
+.btn .btn-mark::before{
+	content: '\2714';
+	color: white;
+	font-weight: bold;
+	position: absolute;
+	left: 12px;
+	top: 8px;
+}
+
+.btn .btn-text{
+	display: block;
+	float: right;
+	padding-top: 3px;
+	padding-left: 7px;
+	padding-right: 7px;
+}
+
+.btn.btn-off .btn-mark{
+	border-width: 2px;
+}
+
+.btn.btn-green .btn-mark{
+	border-color: #3cc23f;
+}
+
+.btn.btn-red .btn-mark{
+	border-color: #f34c44;
+}

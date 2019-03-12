@@ -109,6 +109,8 @@ class Chart {
 		this.ctx.lineWidth = thickness;
 		this.ctx.strokeStyle = color;
 		this.ctx.lineJoin = 'round';
+		this.ctx.lineCap = 'round';
+		this.ctx.miterLimit = 0;
 		this.ctx.beginPath();
 
 		const x0 = this.translateX(orig_x0),
@@ -220,44 +222,29 @@ mapChart.init();
 
 // ====== UI buttons ====== //
 
-document.getElementById('action_btn').onclick = function () {
-	const new_height = +document.getElementById('height_val').value;
-	mainChart.startChangeKey(my, new_height);
-};
+const btns = document.getElementsByClassName('btn');
+for (let i = 0; i < btns.length; i += 1) {
+	const el = btns[i];
+	el.onclick = () => {
+		const isOff = el.classList.contains('btn-off');
+		const isGreen = el.classList.contains('btn-green');
+		const targetOpacity = isOff ? 255 : 0;
+		const key = isGreen ? chart_A_opacity : chart_B_opacity;
+		const maxY = isOff ? 950 : 500;
 
-document.getElementById('action_btn_2').onclick = function () {
-	const new_width = +document.getElementById('width_val').value;
-	mainChart.startChangeKey(mx, new_width);
-};
+		mainChart.startChangeKey(key, targetOpacity);
+		mainChart.startChangeKey(my, maxY);
 
-document.getElementById('action_randomize').onclick = function () {
-	const new_width = Math.round((Math.random() * 1000) + 100);
-	const new_height = Math.round((Math.random() * 1000) + 100);
-	const new_x_shift = Math.round((Math.random() * 100) - 50);
-	const new_y_shift = Math.round((Math.random() * 100) - 50);
-	document.getElementById('width_val').value = new_width;
-	document.getElementById('height_val').value = new_height;
-	mainChart.startChangeKey(mx, new_width);
-	mainChart.startChangeKey(my, new_height);
-	mainChart.startChangeKey(zx, new_x_shift);
-	mainChart.startChangeKey(zy, new_y_shift);
-};
+		mapChart.startChangeKey(key, targetOpacity);
+		mapChart.startChangeKey(my, maxY);
 
-document.getElementById('toggle_A').onclick = function () {
-	mainChart.startChangeKey(chart_B_opacity, 0);
-	mainChart.startChangeKey(my, 500);
-
-	mapChart.startChangeKey(chart_B_opacity, 0);
-	mapChart.startChangeKey(my, 500);
-};
-
-document.getElementById('toggle_B').onclick = function () {
-	mainChart.startChangeKey(chart_B_opacity, 255);
-	mainChart.startChangeKey(my, 950);
-
-	mapChart.startChangeKey(chart_B_opacity, 255);
-	mapChart.startChangeKey(my, 950);
-};
+		if (isOff) {
+			el.classList.remove('btn-off');
+		} else {
+			el.classList.add('btn-off');
+		}
+	};
+}
 
 const map_container = document.getElementById('map_container');
 let container_width = map_container.clientWidth;
