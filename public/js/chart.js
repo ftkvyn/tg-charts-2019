@@ -18,11 +18,9 @@ const duration = 300; // ms
 const mx = Symbol('Max X'),
 	my = Symbol('Max Y'),
 	zx = Symbol('Shift X'),
-	zy = Symbol('Shift Y'),
-	chart_A_opacity = 'chart A',
-	chart_B_opacity = 'chart B';
+	zy = Symbol('Shift Y');
 
-const changingFields = [mx, my, zx, zy, chart_A_opacity, chart_B_opacity];
+const changingFields = [mx, my, zx, zy];
 
 function initChangesObject(key) {
 	this[key] = {
@@ -33,24 +31,22 @@ function initChangesObject(key) {
 }
 
 class Chart {
-	constructor(canv, height, max_x = 0, max_y = 0) {
+	constructor(canv, height) {
 		this.width = canv.clientWidth;
 		this.height = height;
-		this[mx] = this.width;
-		if (max_x) {
-			this[mx] = max_x;
-		} else {
-			this[mx] = this.width;
-		}
-		if (max_y) {
-			this[my] = max_y;
-		} else {
-			this[my] = this.height * 2;
-		}
-		this[zx] = 0;
-		this[zy] = 0;
-		this[chart_A_opacity] = 255;
-		this[chart_B_opacity] = 255;
+		// this[mx] = this.width;
+		// if (max_x) {
+		// 	this[mx] = max_x;
+		// } else {
+		// 	this[mx] = this.width;
+		// }
+		// if (max_y) {
+		// 	this[my] = max_y;
+		// } else {
+		// 	this[my] = this.height * 2;
+		// }
+		// this[zx] = 0;
+		// this[zy] = 0;
 		this.animateFrameId = null;
 		this.canv = canv;
 		this.ctx = canv.getContext('2d');
@@ -59,29 +55,42 @@ class Chart {
 		this.entangledChart = null;
 		this.isDrawAxis = true;
 		this.data = null;
-		this.x_vals = [0, 100, 200, 300, 400, 500];
-		this.graphs = [
-			{
-				name: 'Green line',
-				color: '#3cc23f',
-				opacityKey: chart_A_opacity,
-				max_Y: 500,
-				display: true,
-				y_vals: [0, 100, 480, 0, 400, 30],
-			},
-			{
-				name: 'Red line',
-				color: '#f34c44',
-				opacityKey: chart_B_opacity,
-				max_Y: 950,
-				display: true,
-				y_vals: [0, 900, 80, 100, 130, 500],
-			},
-		];
+		this.x_vals = [];
+		this.graphs = [];
 	}
 
 	setData(data) {
+		this.x_vals = [];
+		this.graphs = [];
 		this.data = data;
+
+		for (let i = 0; i < this.data.columns.length; i += 1) {
+			const col = [...this.data.columns[i]];
+			const key = col.shift();
+			if (key === 'x') {
+				this.x_vals = col;
+			} else {
+				const graph = {
+					name: this.data.names[key],
+					color: this.data.colors[key],
+					opacityKey: key,
+					display: true,
+					y_vals: col,
+					max_Y: Math.max(...col),
+				};
+				this[graph.opacityKey] = 255;
+				this.graphs.push(graph);
+				if (changingFields.findIndex((val) => { return val === graph.opacityKey; }) === -1) {
+					changingFields.push(graph.opacityKey);
+				}
+			}
+		}
+
+		this[zx] = Math.min(...this.x_vals);
+		this[mx] = Math.max(...this.x_vals);
+
+		this[zy] = 0;
+		this[my] = Math.max(...this.graphs.map((gr) => { return gr.max_Y; }));
 	}
 
 	setChartWidths() {
@@ -107,8 +116,9 @@ class Chart {
 	}
 
 	moveX(dx) {
-		this[zx] -= dx;
-		this[mx] -= dx;
+		const value = dx / this.scale_x;
+		this[zx] -= value;
+		this[mx] -= value;
 	}
 
 	drawAxis() {
@@ -126,8 +136,8 @@ class Chart {
 
 		this.ctx.font = '14px Arial';
 		this.ctx.fillText(`${Math.round(this[zx])},${Math.round(this[zy])}`, 10, -10);
-		this.ctx.fillText(`${Math.round(this[mx]) + Math.round(this[zx])}`, this.width - 40, -10);
-		this.ctx.fillText(`${Math.round(this[my]) + Math.round(this[zy])}`, 10, -this.height + 20);
+		this.ctx.fillText(`${Math.round(this[mx])}`, this.width - 80, -10);
+		this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
 	}
 
 	startDraw(orig_x0, orig_y0, color) {
@@ -225,15 +235,10 @@ class Chart {
 	toggleChart(key) {
 		const chart = this.graphs.find((ch) => { return ch.opacityKey === key; });
 		chart.display = !chart.display;
-		const newMax = this.graphs
+		const newMax = Math.max(...this.graphs
 			.filter((ch) => { return ch.display; })
-			.reduce((prev, ch) => {
-				if (prev < ch.max_Y) {
-					return ch.max_Y;
-				}
-				return prev;
-			}, -1);
-		if (newMax !== -1 && newMax !== this[my]) {
+			.map((gr) => { return gr.max_Y; }));
+		if (newMax !== 0 && newMax !== this[my]) {
 			this.startChangeKey(my, newMax);
 		}
 	}
@@ -277,13 +282,13 @@ const chart_map = document.getElementById('chart_map');
 const height = 450,
 	map_height = 45;
 
-const mainChart = new Chart(main_chart, height, 100, 950);
-const mapChart = new Chart(chart_map, map_height, 500, 900);
+const mainChart = new Chart(main_chart, height);
+const mapChart = new Chart(chart_map, map_height);
 mapChart.isDrawAxis = false;
 mainChart.setData(data[0]);
 mapChart.entangledChart = mainChart;
 mapChart.setData(data[0]);
-mainChart.moveX(-400);
+mainChart[zx] = mapChart[zx] + (mapChart[mx] - mapChart[zx]) * 0.8;
 mainChart.init();
 mapChart.init();
 
