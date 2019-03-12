@@ -12,7 +12,7 @@ document.getElementById('app').onselectstart = function () {
 };
 
 const axis_color = '#f2f4f5';
-const duration = 300; // ms
+const duration = 200; // ms
 const padding_y = 0.04;
 const padding_x = 0.003;
 
