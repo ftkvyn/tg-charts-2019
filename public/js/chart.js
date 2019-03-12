@@ -1,5 +1,6 @@
 /* jshint esversion: 6 */
-console.log(data[0]);
+// console.log(data[0]);
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 (function () {
 	const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
@@ -126,8 +127,10 @@ class Chart {
 		this.ctx.stroke();
 
 		this.ctx.font = '14px Arial';
-		this.ctx.fillText(`${Math.round(this[zx])},${Math.round(this[zy])}`, 10, -10);
-		this.ctx.fillText(`${Math.round(this[mx])}`, this.width - 80, -10);
+		const startDay = new Date(this[zx]);
+		const endDay = new Date(this[mx]);
+		this.ctx.fillText(`${months[startDay.getMonth()]} ${startDay.getDate()}`, 10, -10);
+		this.ctx.fillText(`${months[endDay.getMonth()]} ${endDay.getDate()}`, this.width - 50, -10);
 		this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
 	}
 
