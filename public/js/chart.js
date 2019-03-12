@@ -208,12 +208,13 @@ class Chart {
 
 const main_chart = document.getElementById('main_chart');
 const chart_map = document.getElementById('chart_map');
-const height = 500,
-	map_height = 100;
+const height = 450,
+	map_height = 45;
 
-const mainChart = new Chart(main_chart, height);
+const mainChart = new Chart(main_chart, height, 100, 950);
 const mapChart = new Chart(chart_map, map_height, 500, 900);
 mapChart.isDrawAxis = false;
+mainChart.moveX(-400);
 mainChart.init();
 mapChart.init();
 
@@ -268,19 +269,25 @@ thumb.onselect = function () {
 	return false;
 };
 
-const thumb_width = thumb.clientWidth;
+const thumb_width = thumb.offsetWidth;
 overlay_left.style.width = `${container_width - thumb_width}px`;
 
 function moveChart(dx) {
 	// ToDo: set limits
-	const dx_int = Math.round(dx);
+	let dx_int = Math.round(dx);
 	const right = +thumb.style.right.slice(0, -2);
+	if (right - dx_int < 0) {
+		dx_int = right;
+	}
+	if (container_width - right - thumb_width + dx_int < 0) {
+		dx_int = right + thumb_width - container_width;
+	}
 	thumb.style.right = `${right - dx_int}px`;
 
 	overlay_right.style.width = `${right - dx_int}px`;
 	overlay_left.style.width = `${container_width - right - thumb_width + dx_int}px`;
 
-	mainChart.moveX(dx_int);
+	mainChart.moveX(-dx_int);
 	mainChart.drawAll();
 }
 

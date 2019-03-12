@@ -14,13 +14,14 @@ a {
 
 .map_container{
   position: relative;
+  /* padding: 16px; */
 }
 
 .overlay{
   position: absolute;
   height: 100%;
-  background: blue;
-  opacity: 0.5;
+  background: #f4fafd;;
+  opacity: 0.8;
   width: 100px;
 }
 .overlay.overlay_left{
@@ -32,15 +33,16 @@ a {
 }
 .selected{
   position: absolute;
-  border: 1px solid #000;
+  border: 2px solid #cbe3f470;
   cursor: pointer;
   height: 100%;
+  box-sizing: border-box;
 }
 
 .selected .thumb{
   position: absolute;
   width: 5px;
-  background: gray;
+  background: #cbe3f470;
   height: 100%;
 }
 

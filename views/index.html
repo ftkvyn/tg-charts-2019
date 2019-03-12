@@ -10,15 +10,17 @@
 </head>
 <body> 
 	<div id="app">
-		<canvas height="1000" style="width:100%;height:500px;" id="main_chart"></canvas>
-		<div class="map_container" id='map_container'>
-			<div class="overlay overlay_left" id="overlay_left"></div>
-			<div class="selected" id="thumb" style="right:0;width:200px;">
-				<div id="thumb_left" class="thumb thumb_left"></div>
-				<div id="thumb_right" class="thumb thumb_right"></div>
+		<canvas height="900" style="width:100%;height:450px;" id="main_chart"></canvas>
+		<div style="padding-left:16px;padding-right:16px;padding-top:50px;">
+			<div class="map_container" id='map_container'>
+				<div class="overlay overlay_left" id="overlay_left"></div>
+				<div class="selected" id="thumb" style="right:0;width:135px;">
+					<div id="thumb_left" class="thumb thumb_left"></div>
+					<div id="thumb_right" class="thumb thumb_right"></div>
+				</div>
+				<div class="overlay overlay_right" id="overlay_right"></div>
+				<canvas height="90" style="width:100%;height:45px;margin-top:10px;" id="chart_map"></canvas>
 			</div>
-			<div class="overlay overlay_right" id="overlay_right"></div>
-			<canvas height="200" style="width:100%;height:100px;margin-top:10px;" id="chart_map"></canvas>
 		</div>
 	</div>
 	<input type="text" value="500" id="height_val"/>
