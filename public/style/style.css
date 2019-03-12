@@ -86,9 +86,15 @@ a {
 .btn .btn-mark img{
 	position: absolute;
 	left: 10px;
-	top: 8px;
+	top: 9px;
 	width: 16px;
 	height: 16px;
+	opacity: 1;
+	transition: opacity .15s;
+}
+
+.btn.btn-off .btn-mark img{
+	opacity: 0;
 }
 
 .btn .btn-text{
