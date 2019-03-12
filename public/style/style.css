@@ -82,8 +82,7 @@ a {
 	transition: border-width .2s;
 }
 
-.btn .btn-mark::before{
-	content: '\2714';
+.btn .btn-mark span{
 	color: white;
 	font-weight: bold;
 	position: absolute;
