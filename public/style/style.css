@@ -5,7 +5,10 @@ body {
 
 #app {
   -moz-user-select: none;
-  -webkit-user-select: none;
+	-webkit-user-select: none;
+	max-width: 1000px;
+	margin: auto;
+	display: block;
 }
 
 a {

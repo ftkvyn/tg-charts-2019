@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-// console.log(data);
+console.log(data[0]);
 
 (function () {
 	const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
@@ -19,8 +19,8 @@ const mx = Symbol('Max X'),
 	my = Symbol('Max Y'),
 	zx = Symbol('Shift X'),
 	zy = Symbol('Shift Y'),
-	chart_A_opacity = Symbol('Chart A opacity'),
-	chart_B_opacity = Symbol('Chart B opacity');
+	chart_A_opacity = 'chart A',
+	chart_B_opacity = 'chart B';
 
 const changingFields = [mx, my, zx, zy, chart_A_opacity, chart_B_opacity];
 
@@ -56,7 +56,29 @@ class Chart {
 		this.ctx = canv.getContext('2d');
 		this.changes = {};
 
+		this.entangledChart = null;
 		this.isDrawAxis = true;
+		this.data = null;
+		this.graphs = [
+			{
+				name: 'Green line',
+				color: '#3cc23f',
+				opacityKey: chart_A_opacity,
+				max_Y: 500,
+				display: true,
+			},
+			{
+				name: 'Red line',
+				color: '#f34c44',
+				opacityKey: chart_B_opacity,
+				max_Y: 950,
+				display: true,
+			},
+		];
+	}
+
+	setData(data) {
+		this.data = data;
 	}
 
 	setChartWidths() {
@@ -206,8 +228,57 @@ class Chart {
 			}
 		}
 	}
+
+	toggleChart(key) {
+		const chart = this.graphs.find((ch) => { return ch.opacityKey === key; });
+		chart.display = !chart.display;
+		const newMax = this.graphs
+			.filter((ch) => { return ch.display; })
+			.reduce((prev, ch) => {
+				if (prev < ch.max_Y) {
+					return ch.max_Y;
+				}
+				return prev;
+			}, -1);
+		if (newMax !== -1 && newMax !== this[my]) {
+			this.startChangeKey(my, newMax);
+		}
+	}
+
+	generateControlButtons() {
+		const btns = this.graphs.map((gr) => {
+			const template = document.createElement('template');
+			const html = `<div class="btn">
+			<div class="btn-mark" style="border-color: ${gr.color}"><img src="/img/ch2.png" /></div>
+			<div class="btn-text">${gr.name}</div>
+		</div>`;
+			template.innerHTML = html;
+			const el = template.content.firstChild;
+			el.onclick = () => {
+				const isOff = el.classList.contains('btn-off');
+				const targetOpacity = isOff ? 255 : 0;
+
+				this.startChangeKey(gr.opacityKey, targetOpacity);
+				this.toggleChart(gr.opacityKey);
+
+				if (this.entangledChart) {
+					this.entangledChart.startChangeKey(gr.opacityKey, targetOpacity);
+					this.entangledChart.toggleChart(gr.opacityKey);
+				}
+
+				if (isOff) {
+					el.classList.remove('btn-off');
+				} else {
+					el.classList.add('btn-off');
+				}
+			};
+			return el;
+		});
+		return btns;
+	}
 }
 
+const appEl = document.getElementById('app');
 const main_chart = document.getElementById('main_chart');
 const chart_map = document.getElementById('chart_map');
 const height = 450,
@@ -216,35 +287,19 @@ const height = 450,
 const mainChart = new Chart(main_chart, height, 100, 950);
 const mapChart = new Chart(chart_map, map_height, 500, 900);
 mapChart.isDrawAxis = false;
+mainChart.setData(data[0]);
+mapChart.entangledChart = mainChart;
+mapChart.setData(data[0]);
 mainChart.moveX(-400);
 mainChart.init();
 mapChart.init();
 
 // ====== UI buttons ====== //
 
-const btns = document.getElementsByClassName('btn');
-for (let i = 0; i < btns.length; i += 1) {
-	const el = btns[i];
-	el.onclick = () => {
-		const isOff = el.classList.contains('btn-off');
-		const isGreen = el.classList.contains('btn-green');
-		const targetOpacity = isOff ? 255 : 0;
-		const key = isGreen ? chart_A_opacity : chart_B_opacity;
-		const maxY = isOff ? 950 : 500;
-
-		mainChart.startChangeKey(key, targetOpacity);
-		mainChart.startChangeKey(my, maxY);
-
-		mapChart.startChangeKey(key, targetOpacity);
-		mapChart.startChangeKey(my, maxY);
-
-		if (isOff) {
-			el.classList.remove('btn-off');
-		} else {
-			el.classList.add('btn-off');
-		}
-	};
-}
+const btns = mapChart.generateControlButtons();
+btns.forEach((btn) => {
+	appEl.appendChild(btn);
+});
 
 const map_container = document.getElementById('map_container');
 let container_width = map_container.clientWidth;
@@ -260,7 +315,6 @@ const thumb_width = thumb.offsetWidth;
 overlay_left.style.width = `${container_width - thumb_width}px`;
 
 function moveChart(dx) {
-	// ToDo: set limits
 	let dx_int = Math.round(dx);
 	const right = +thumb.style.right.slice(0, -2);
 	if (right - dx_int < 0) {
