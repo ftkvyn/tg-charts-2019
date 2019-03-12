@@ -59,6 +59,7 @@ class Chart {
 		this.entangledChart = null;
 		this.isDrawAxis = true;
 		this.data = null;
+		this.x_vals = [0, 100, 200, 300, 400, 500];
 		this.graphs = [
 			{
 				name: 'Green line',
@@ -66,6 +67,7 @@ class Chart {
 				opacityKey: chart_A_opacity,
 				max_Y: 500,
 				display: true,
+				y_vals: [0, 100, 480, 0, 400, 30],
 			},
 			{
 				name: 'Red line',
@@ -73,6 +75,7 @@ class Chart {
 				opacityKey: chart_B_opacity,
 				max_Y: 950,
 				display: true,
+				y_vals: [0, 900, 80, 100, 130, 500],
 			},
 		];
 	}
@@ -158,26 +161,16 @@ class Chart {
 	}
 
 	drawChart() {
-		if (this[chart_A_opacity]) {
-			const opacity = (`00${Math.round(this[chart_A_opacity]).toString(16)}`).substr(-2);
-			this.startDraw(0, 0, `#3cc23f${opacity}`);
-			this.drawNextPoint(100, 100);
-			this.drawNextPoint(200, 480);
-			this.drawNextPoint(300, 0);
-			this.drawNextPoint(400, 400);
-			this.drawNextPoint(500, 30);
-			this.endDraw();
-		}
-		if (this[chart_B_opacity]) {
-			const opacity = (`00${Math.round(this[chart_B_opacity]).toString(16)}`).substr(-2);
-			this.startDraw(0, 0, `#f34c44${opacity}`);
-			this.drawNextPoint(100, 900);
-			this.drawNextPoint(200, 80);
-			this.drawNextPoint(300, 100);
-			this.drawNextPoint(400, 130);
-			this.drawNextPoint(500, 500);
-			this.endDraw();
-		}
+		this.graphs.forEach((gr) => {
+			if (this[gr.opacityKey]) {
+				const opacity = (`00${Math.round(this[gr.opacityKey]).toString(16)}`).substr(-2);
+				this.startDraw(this.x_vals[0], gr.y_vals[0], `${gr.color}${opacity}`);
+				for (let i = 1; i < this.x_vals.length; i += 1) {
+					this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
+				}
+				this.endDraw();
+			}
+		});
 	}
 
 	init() {
