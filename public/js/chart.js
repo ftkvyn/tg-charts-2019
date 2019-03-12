@@ -34,19 +34,6 @@ class Chart {
 	constructor(canv, height) {
 		this.width = canv.clientWidth;
 		this.height = height;
-		// this[mx] = this.width;
-		// if (max_x) {
-		// 	this[mx] = max_x;
-		// } else {
-		// 	this[mx] = this.width;
-		// }
-		// if (max_y) {
-		// 	this[my] = max_y;
-		// } else {
-		// 	this[my] = this.height * 2;
-		// }
-		// this[zx] = 0;
-		// this[zy] = 0;
 		this.animateFrameId = null;
 		this.canv = canv;
 		this.ctx = canv.getContext('2d');
@@ -116,9 +103,8 @@ class Chart {
 	}
 
 	moveX(dx) {
-		const value = dx / this.scale_x;
-		this[zx] -= value;
-		this[mx] -= value;
+		this[zx] -= dx;
+		this[mx] -= dx;
 	}
 
 	drawAxis() {
@@ -288,7 +274,8 @@ mapChart.isDrawAxis = false;
 mainChart.setData(data[0]);
 mapChart.entangledChart = mainChart;
 mapChart.setData(data[0]);
-mainChart[zx] = mapChart[zx] + (mapChart[mx] - mapChart[zx]) * 0.8;
+// ToDo: calculate the real scale
+mainChart[zx] = mapChart[zx] + (mapChart[mx] - mapChart[zx]) * 0.87;
 mainChart.init();
 mapChart.init();
 
@@ -326,7 +313,7 @@ function moveChart(dx) {
 	overlay_right.style.width = `${right - dx_int}px`;
 	overlay_left.style.width = `${container_width - right - thumb_width + dx_int}px`;
 
-	mainChart.moveX(-dx_int);
+	mainChart.moveX(-dx_int / mapChart.scale_x);
 	mainChart.drawAll();
 }
 
