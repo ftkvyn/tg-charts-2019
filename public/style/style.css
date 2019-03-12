@@ -82,12 +82,13 @@ a {
 	transition: border-width .2s;
 }
 
-.btn .btn-mark span{
-	color: white;
-	font-weight: bold;
+
+.btn .btn-mark img{
 	position: absolute;
-	left: 12px;
+	left: 10px;
 	top: 8px;
+	width: 16px;
+	height: 16px;
 }
 
 .btn .btn-text{
