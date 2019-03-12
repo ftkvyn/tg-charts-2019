@@ -333,4 +333,5 @@ window.onresize = () => {
 	mainChart.init();
 	mapChart.init();
 	container_width = map_container.clientWidth;
+	moveChart(0);
 };
