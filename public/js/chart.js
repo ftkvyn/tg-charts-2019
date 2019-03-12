@@ -78,11 +78,11 @@ class Chart {
 
 		this[zx] = Math.min(...this.x_vals);
 		this[mx] = Math.max(...this.x_vals);
-		this[mx] += (this[mx] - this[zx]) * padding_x;
+		this[mx] += Math.round((this[mx] - this[zx]) * padding_x);
 
 		this[zy] = 0;
 		this[my] = Math.max(...this.graphs.map((gr) => { return gr.max_Y; }));
-		this[my] += (this[my] - this[zy]) * padding_y;
+		this[my] += Math.round((this[my] - this[zy]) * padding_y);
 	}
 
 	setChartWidths() {
@@ -162,25 +162,54 @@ class Chart {
 	}
 
 	drawChart() {
+		let start_i = this.x_vals.findIndex((val) => { return val >= this[zx]; });
+		if (start_i > 0) {
+			start_i -= 1; // Starting from the first point beyond the chart to the left;
+		}
+		let end_i = start_i;
+		for (; end_i < this.x_vals.length; end_i += 1) {
+			if (this.x_vals[end_i] >= this[mx]) {
+				break;
+			}
+		}
+		if (end_i < this.x_vals.length) {
+			end_i += 1; // Going till the first one beyond the chart to the right;
+		}
+
 		this.graphs.forEach((gr) => {
 			if (this[gr.opacityKey]) {
 				const opacity = (`00${Math.round(this[gr.opacityKey]).toString(16)}`).substr(-2);
-				this.startDraw(this.x_vals[0], gr.y_vals[0], `${gr.color}${opacity}`);
-				for (let i = 1; i < this.x_vals.length; i += 1) {
+				this.startDraw(this.x_vals[start_i], gr.y_vals[start_i], `${gr.color}${opacity}`);
+				for (let i = start_i + 1; i < end_i; i += 1) {
 					// ToDo: draw only visible points
 					this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
 				}
 				this.endDraw();
 			}
 		});
+		this.calculateMaxY(start_i, end_i);
+	}
+
+	calculateMaxY(start_i, end_i) {
+		if (this.prev_start_i !== start_i || this.prev_end_i !== end_i) {
+			this.prev_start_i = start_i;
+			this.prev_end_i = end_i;
+			let newMax = Math.max(...this.graphs
+				.filter((ch) => { return ch.display; })
+				.map((gr) => { return Math.max(...gr.y_vals.slice(start_i, end_i)); }));
+			newMax += Math.round((newMax - this[zy]) * padding_y);
+			if (newMax !== 0 && newMax !== this[my]) {
+				this.startChangeKey(my, newMax);
+			}
+		}
 	}
 
 	init() {
+		changingFields.forEach(initChangesObject.bind(this.changes));
 		this.setChartWidths();
 		this.ctx.scale(2, 2);
 		this.ctx.translate(0, this.height);
 		this.drawAll();
-		changingFields.forEach(initChangesObject.bind(this.changes));
 	}
 
 	startChangeKey(key, targetVal) {
@@ -227,13 +256,14 @@ class Chart {
 	toggleChart(key) {
 		const chart = this.graphs.find((ch) => { return ch.opacityKey === key; });
 		chart.display = !chart.display;
-		let newMax = Math.max(...this.graphs
-			.filter((ch) => { return ch.display; })
-			.map((gr) => { return gr.max_Y; }));
-		newMax += (newMax - this[zy]) * padding_y;
-		if (newMax !== 0 && newMax !== this[my]) {
-			this.startChangeKey(my, newMax);
-		}
+		// this.calculateMaxY();
+		// let newMax = Math.max(...this.graphs
+		// 	.filter((ch) => { return ch.display; })
+		// 	.map((gr) => { return gr.max_Y; }));
+		// newMax += (newMax - this[zy]) * padding_y;
+		// if (newMax !== 0 && newMax !== this[my]) {
+		// 	this.startChangeKey(my, newMax);
+		// }
 	}
 
 	generateControlButtons() {
