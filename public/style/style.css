@@ -14,7 +14,6 @@ a {
 
 .map_container{
   position: relative;
-  /* padding: 16px; */
 }
 
 .overlay{
@@ -37,6 +36,9 @@ a {
   cursor: pointer;
   height: 100%;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
 
 .selected .thumb{
