@@ -7,7 +7,7 @@
 	window.requestAnimationFrame = requestAnimationFrame;
 }());
 
-document.getElementById('app').onselect = function () {
+document.getElementById('app').onselectstart = function () {
 	return false;
 };
 
@@ -265,7 +265,7 @@ const thumb = document.getElementById('thumb');
 const overlay_left = document.getElementById('overlay_left');
 const overlay_right = document.getElementById('overlay_right');
 
-thumb.onselect = function () {
+thumb.onselectstart = function () {
 	return false;
 };
 
