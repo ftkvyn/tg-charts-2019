@@ -162,6 +162,7 @@ class Chart {
 				const opacity = (`00${Math.round(this[gr.opacityKey]).toString(16)}`).substr(-2);
 				this.startDraw(this.x_vals[0], gr.y_vals[0], `${gr.color}${opacity}`);
 				for (let i = 1; i < this.x_vals.length; i += 1) {
+					// ToDo: draw only visible points
 					this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
 				}
 				this.endDraw();
