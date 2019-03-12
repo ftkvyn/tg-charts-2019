@@ -264,38 +264,6 @@ const thumb = document.getElementById('thumb');
 const overlay_left = document.getElementById('overlay_left');
 const overlay_right = document.getElementById('overlay_right');
 
-const move_duration = 100;
-let moveStartTime = -1;
-let originalRight = -1;
-let moveValue = -1;
-let moveFrame = -1;
-
-function moveThumbStep() {
-	moveFrame = -1;
-	if (moveStartTime === -1) {
-		return;
-	}
-	const delta = Date.now() - moveStartTime;
-	let deltaScale = delta / move_duration;
-	if (deltaScale > 1) {
-		deltaScale = 1;
-	}
-	const additionalVal = moveValue * deltaScale;
-	console.log('step ' + additionalVal);
-	thumb.style.right = `${originalRight - additionalVal}px`;
-
-	mainChart.moveX(additionalVal);
-	mainChart.drawAll();
-
-	if (deltaScale >= 1) {
-		moveStartTime = -1;
-		originalRight = -1;
-		moveValue = -1;
-	} else if (moveFrame === -1) {
-		moveFrame = requestAnimationFrame(moveThumbStep);
-	}
-}
-
 thumb.onselect = function () {
 	return false;
 };
