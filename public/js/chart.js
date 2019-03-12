@@ -11,9 +11,10 @@ document.getElementById('app').onselectstart = function () {
 	return false;
 };
 
-const thickness = 2.5;
 const axis_color = '#f2f4f5';
 const duration = 300; // ms
+const padding_y = 0.04;
+const padding_x = 0.003;
 
 const mx = Symbol('Max X'),
 	my = Symbol('Max Y'),
@@ -38,6 +39,8 @@ class Chart {
 		this.canv = canv;
 		this.ctx = canv.getContext('2d');
 		this.changes = {};
+
+		this.thickness = 2.5;
 
 		this.entangledChart = null;
 		this.isDrawAxis = true;
@@ -75,9 +78,11 @@ class Chart {
 
 		this[zx] = Math.min(...this.x_vals);
 		this[mx] = Math.max(...this.x_vals);
+		this[mx] += (this[mx] - this[zx]) * padding_x;
 
 		this[zy] = 0;
 		this[my] = Math.max(...this.graphs.map((gr) => { return gr.max_Y; }));
+		this[my] += (this[my] - this[zy]) * padding_y;
 	}
 
 	setChartWidths() {
@@ -112,12 +117,12 @@ class Chart {
 			return;
 		}
 		this.ctx.beginPath();
-		this.ctx.lineWidth = thickness;
+		this.ctx.lineWidth = this.thickness;
 		this.ctx.strokeStyle = axis_color;
 		this.ctx.beginPath();
-		this.ctx.moveTo(thickness, -this.height);
-		this.ctx.lineTo(thickness, 0 - thickness);
-		this.ctx.lineTo(this.width, 0 - thickness);
+		this.ctx.moveTo(this.thickness, -this.height);
+		this.ctx.lineTo(this.thickness, 0 - this.thickness);
+		this.ctx.lineTo(this.width, 0 - this.thickness);
 		this.ctx.stroke();
 
 		this.ctx.font = '14px Arial';
@@ -127,7 +132,7 @@ class Chart {
 	}
 
 	startDraw(orig_x0, orig_y0, color) {
-		this.ctx.lineWidth = thickness;
+		this.ctx.lineWidth = this.thickness;
 		this.ctx.strokeStyle = color;
 		this.ctx.lineJoin = 'round';
 		this.ctx.lineCap = 'round';
@@ -222,9 +227,10 @@ class Chart {
 	toggleChart(key) {
 		const chart = this.graphs.find((ch) => { return ch.opacityKey === key; });
 		chart.display = !chart.display;
-		const newMax = Math.max(...this.graphs
+		let newMax = Math.max(...this.graphs
 			.filter((ch) => { return ch.display; })
 			.map((gr) => { return gr.max_Y; }));
+		newMax += (newMax - this[zy]) * padding_y;
 		if (newMax !== 0 && newMax !== this[my]) {
 			this.startChangeKey(my, newMax);
 		}
@@ -272,11 +278,12 @@ const height = 450,
 const mainChart = new Chart(main_chart, height);
 const mapChart = new Chart(chart_map, map_height);
 mapChart.isDrawAxis = false;
+mapChart.thickness = 1.5;
 mainChart.setData(data[0]);
 mapChart.entangledChart = mainChart;
 mapChart.setData(data[0]);
 // ToDo: calculate the real scale
-mainChart[zx] = mapChart[zx] + (mapChart[mx] - mapChart[zx]) * 0.87;
+mainChart[zx] += (mapChart[mx] - mapChart[zx]) * 0.87;
 mainChart.init();
 mapChart.init();
 
