@@ -230,10 +230,10 @@ document.getElementById('action_btn_2').onclick = function () {
 };
 
 document.getElementById('action_randomize').onclick = function () {
-	const new_width = Math.round(Math.random() * 1000 + 100);
-	const new_height = Math.round(Math.random() * 1000 + 100);
-	const new_x_shift = Math.round(Math.random() * 100 - 50);
-	const new_y_shift = Math.round(Math.random() * 100 - 50);
+	const new_width = Math.round((Math.random() * 1000) + 100);
+	const new_height = Math.round((Math.random() * 1000) + 100);
+	const new_x_shift = Math.round((Math.random() * 100) - 50);
+	const new_y_shift = Math.round((Math.random() * 100) - 50);
 	document.getElementById('width_val').value = new_width;
 	document.getElementById('height_val').value = new_height;
 	mainChart.startChangeKey(mx, new_width);
@@ -264,16 +264,21 @@ const thumb = document.getElementById('thumb');
 const overlay_left = document.getElementById('overlay_left');
 const overlay_right = document.getElementById('overlay_right');
 
+thumb.onselect = function () {
+	return false;
+};
+
 function moveChart(dx) {
 	// ToDo: set limits
-	mainChart.moveX(dx);
-	mainChart.drawAll();
 	const right = +thumb.style.right.slice(0, -2);
 	thumb.style.right = `${right - dx}px`;
 	const thumb_width = thumb.clientWidth;
 
-	overlay_right.style.width = `${right}px`;
+	overlay_right.style.width = `${right + dx}px`;
 	overlay_left.style.width = `${container_width - right - thumb_width}px`;
+
+	mainChart.moveX(dx);
+	mainChart.drawAll();
 }
 
 let prevTouch = null;
@@ -315,7 +320,11 @@ thumb.addEventListener('mousemove', (event) => {
 		return;
 	}
 	const dx = event.movementX;
-	moveChart(dx);
+	let ratio = window.devicePixelRatio;
+	if (!ratio) {
+		ratio = 1;
+	}
+	moveChart(dx / ratio);
 });
 
 document.addEventListener('mouseup', () => {
