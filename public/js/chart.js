@@ -192,8 +192,8 @@ class Chart {
 
 	calculateMaxY(start_i, end_i, force) {
 		if (this.prev_start_i !== start_i || this.prev_end_i !== end_i || force) {
-			this.prev_start_i = start_i;
-			this.prev_end_i = end_i;
+			this.prev_start_i = start_i || this.prev_start_i;
+			this.prev_end_i = end_i || this.prev_end_i;
 			let newMax = Math.max(...this.graphs
 				.filter((ch) => { return ch.display; })
 				.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
@@ -214,7 +214,9 @@ class Chart {
 
 	startChangeKey(key, targetVal) {
 		const val = this.changes[key];
-		val.startTimestamp = Date.now();
+		if (val.startTimestamp === -1) {
+			val.startTimestamp = Date.now();
+		}
 		val.deltaValue = targetVal - this[key];
 		val.originalValue = this[key];
 		if (!this.animateFrameId) {
