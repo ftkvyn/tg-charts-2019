@@ -14,7 +14,7 @@
 
 	const axis_color = '#f2f4f5';
 	const duration = 200; // ms
-	const padding_y = 0.04;
+	const padding_y = 0.0;
 	const padding_x = 0.003;
 
 	const mx = Symbol('Max X'),
