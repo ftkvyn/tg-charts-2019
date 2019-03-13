@@ -344,6 +344,9 @@
 		mainChart[mx] = to;
 	}
 
+	const thumb_width = thumb.offsetWidth;
+	overlay_left.style.width = `${container_width - thumb_width}px`;
+
 	function moveChart(dx) {
 		let dx_int = Math.round(dx);
 		const right = +thumb.style.right.slice(0, -2);
@@ -436,9 +439,6 @@
 	}
 	setupAllEvents();
 
-	const thumb_width = thumb.offsetWidth;
-	overlay_left.style.width = `${container_width - thumb_width}px`;
-
 	function run(chartNum) {
 		mainChart.setData(data[chartNum]);
 		mapChart.entangledChart = mainChart;
@@ -466,10 +466,7 @@
 		link.onclick = () => {
 			const num = +link.innerText - 1;
 			run(num);
-			setTimeout(() => {
-				moveChart(-1);
-				setTimeout(() => { moveChart(1); }, 100);
-			}, 100);
+			moveChart(0);
 		};
 	}
 
