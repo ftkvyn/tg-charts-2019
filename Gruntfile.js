@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = function (grunt) {
 	// Project configuration.
 	grunt.initConfig({
@@ -17,12 +19,34 @@ module.exports = function (grunt) {
 				},
 			},
 		},
+		watch: {
+			scripts: {
+				files: ['**/*.js'],
+				tasks: ['build'],
+				options: {
+					spawn: false,
+				},
+			},
+		},
+		express: {
+			myServer: {
+				options: {
+					port: 3000,
+					server: './app.js',
+				},
+				// server: './fwefwe.js', // path.resolve(__dirname, 'app.js'),
+				// if you do not define a port it will start your server at port 3000
+			},
+		},
 	});
 
 	// Load the plugin that provides the "uglify" task.
 	grunt.loadNpmTasks('grunt-contrib-uglify-es');
 	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-express');
 
 	// Default task(s).
 	grunt.registerTask('build', ['clean', 'uglify']);
+	grunt.registerTask('dev', ['clean', 'uglify', 'express', 'watch']);
 };
