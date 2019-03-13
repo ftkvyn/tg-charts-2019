@@ -15,7 +15,7 @@
 	const dark_color = '#242f3e';
 	const white_color = '#ffffff';
 	const black_color = '#000000';
-	let isLight = true;
+	let isLight = false;
 	const axis_color = '#f2f4f5';
 	const axis_color_dark = '#344658';
 	const duration = 200; // ms
@@ -426,12 +426,11 @@
 
 	function setupTouchEvents() {
 		let prevTouch = null;
+		let dragThumbStart = false;
+		let dragLeftStart = false;
+		let dragRightStart = false;
 
-		thumb.addEventListener('touchstart', (event) => {
-			[prevTouch] = event.changedTouches;
-		});
-
-		thumb.addEventListener('touchmove', (event) => {
+		function touchMove(event) {
 			let touch = event.changedTouches[0];
 			if (event.changedTouches.length > 1 && prevTouch) {
 				const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
@@ -441,18 +440,58 @@
 			}
 			if (prevTouch && touch) {
 				const dx = touch.pageX - prevTouch.pageX;
-				moveChart(dx);
+				if (dragThumbStart) {
+					moveChart(dx);
+				} else if (dragLeftStart) {
+					moveLeftBorder(dx);
+				} if (dragRightStart) {
+					moveRightBorder(dx);
+				}
 			}
 			prevTouch = touch;
+		}
+
+		thumb.addEventListener('touchstart', (event) => {
+			if (!prevTouch) {
+				// Handling only the first touch
+				[prevTouch] = event.changedTouches;
+				dragThumbStart = true;
+			}
 		});
 
-		thumb.addEventListener('touchend', () => {
-			prevTouch = null;
+		thumb_left.addEventListener('touchstart', (event) => {
+			if (!prevTouch) {
+				// Handling only the first touch
+				[prevTouch] = event.changedTouches;
+				dragLeftStart = true;
+			}
 		});
 
-		thumb.addEventListener('touchcancel', () => {
-			prevTouch = null;
+		thumb_right.addEventListener('touchstart', (event) => {
+			if (!prevTouch) {
+				// Handling only the first touch
+				[prevTouch] = event.changedTouches;
+				dragRightStart = true;
+			}
 		});
+
+		thumb.addEventListener('touchmove', touchMove);
+		thumb_left.addEventListener('touchmove', touchMove);
+		thumb_right.addEventListener('touchmove', touchMove);
+		overlay_left.addEventListener('touchmove', touchMove);
+		overlay_left.addEventListener('touchmove', touchMove);
+
+		function touchEnd() {
+			// ToDo: handle the end of some different touch
+			prevTouch = null;
+			dragThumbStart = false;
+			dragLeftStart = false;
+			dragRightStart = false;
+		}
+
+		thumb.addEventListener('touchend', touchEnd);
+
+		thumb.addEventListener('touchcancel', touchEnd);
 	}
 
 	function setupMouseEvents() {
@@ -498,6 +537,8 @@
 		};
 
 		thumb.onmousemove = handleMouseMove;
+		thumb_left.onmousemove = handleMouseMove;
+		thumb_right.onmousemove = handleMouseMove;
 		overlay_left.onmousemove = handleMouseMove;
 		overlay_right.onmousemove = handleMouseMove;
 
