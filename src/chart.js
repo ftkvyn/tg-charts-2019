@@ -198,8 +198,12 @@
 			if (this.prev_start_i !== start_i || this.prev_end_i !== end_i || force) {
 				this.prev_start_i = start_i || this.prev_start_i;
 				this.prev_end_i = end_i || this.prev_end_i;
-				let newMax = Math.max(...this.graphs
-					.filter((ch) => { return ch.display; })
+				const visibleCharts = this.graphs
+					.filter((ch) => { return ch.display; });
+				if (!visibleCharts.length) {
+					return;
+				}
+				let newMax = Math.max(...visibleCharts
 					.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
 				newMax += Math.round((newMax - this[zy]) * padding_y);
 				if (newMax !== 0 && newMax !== this[my]) {
