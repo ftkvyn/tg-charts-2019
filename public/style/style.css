@@ -56,14 +56,6 @@ a {
   height: 100%;
 }
 
-/* .dark-theme .selected .selected {
-	border-color: #242f3e;
-}
-
-.dark-theme .selected .thumb {
-	background: #242f3e;
-} */
-
 .selected .thumb.thumb_left{
   left: 0;
 }
@@ -76,7 +68,9 @@ a {
 	display: inline-block;
 	margin: 10px;
 	border-radius: 30px;
-	border: 1px solid #e6ecf0;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #e6ecf0;
 	padding: 7px;
 	cursor: pointer;
 	-webkit-tap-highlight-color: transparent;
@@ -84,6 +78,10 @@ a {
 	-webkit-user-select: none;
 	height: 22px;
 	position: relative;
+}
+
+.dark-theme .btn {
+	border-color: #344658;
 }
 
 .btn .btn-mark{
@@ -111,7 +109,7 @@ a {
 }
 
 .btn.btn-off .btn-mark img{
-	transform: scale(0.2);
+	transform: scale(0);
 }
 
 .btn .btn-text{

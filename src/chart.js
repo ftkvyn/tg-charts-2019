@@ -17,6 +17,7 @@
 	const black_color = '#000000';
 	let isLight = false;
 	const axis_color = '#f2f4f5';
+	const axis_color_dark = '#344658';
 	const duration = 200; // ms
 	const padding_y = 0.01;
 	const padding_x = 0.003;
@@ -131,7 +132,11 @@
 			}
 			this.ctx.beginPath();
 			this.ctx.lineWidth = this.thickness;
-			this.ctx.strokeStyle = axis_color;
+			if (isLight) {
+				this.ctx.strokeStyle = axis_color;
+			} else {
+				this.ctx.strokeStyle = axis_color_dark;
+			}
 			this.ctx.beginPath();
 			this.ctx.moveTo(this.thickness, -this.height);
 			this.ctx.lineTo(this.thickness, 0 - this.thickness);
@@ -141,7 +146,7 @@
 			this.ctx.font = '14px Arial';
 			const startDay = new Date(this[zx]);
 			const endDay = new Date(this[mx]);
-			this.ctx.fillStyle = isLight ? dark_color : white_color;
+			this.ctx.fillStyle = isLight ? dark_color : axis_color;
 			this.ctx.fillText(`${months[startDay.getMonth()]} ${startDay.getDate()}`, 10, -10);
 			this.ctx.fillText(`${months[endDay.getMonth()]} ${endDay.getDate()}`, this.width - 50, -10);
 			this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
