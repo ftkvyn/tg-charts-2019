@@ -67,7 +67,6 @@
 						opacityKey: key,
 						display: true,
 						y_vals: col,
-						max_Y: Math.max(...col),
 					};
 					this[graph.opacityKey] = 255;
 					this.graphs.push(graph);
@@ -82,8 +81,6 @@
 			this[mx] += Math.round((this[mx] - this[zx]) * padding_x);
 
 			this[zy] = 0;
-			// this[my] = Math.max(...this.graphs.map((gr) => { return gr.max_Y; }));
-			// this[my] += Math.round((this[my] - this[zy]) * padding_y);
 		}
 
 		setChartWidths() {
