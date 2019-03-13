@@ -51,6 +51,10 @@
 		}
 
 		setData(data) {
+			this[mx] = undefined;
+			this[zx] = undefined;
+			this[my] = undefined;
+			this[zy] = undefined;
 			this.x_vals = [];
 			this.graphs = [];
 			this.data = data;
@@ -316,16 +320,9 @@
 	const mapChart = new Chart(chart_map, map_height);
 	mapChart.isDrawAxis = false;
 	mapChart.thickness = 1.5;
-	mainChart.setData(data[0]);
 	mapChart.entangledChart = mainChart;
-	mapChart.setData(data[0]);
 
 	// ====== UI setup ====== //
-
-	const btns = mapChart.generateControlButtons();
-	btns.forEach((btn) => {
-		appEl.appendChild(btn);
-	});
 
 	const map_container = document.getElementById('map_container');
 	let container_width = map_container.clientWidth;
@@ -336,9 +333,6 @@
 	thumb.onselectstart = function () {
 		return false;
 	};
-
-	const thumb_width = thumb.offsetWidth;
-	overlay_left.style.width = `${container_width - thumb_width}px`;
 
 	function setMapBox() {
 		const right = +thumb.style.right.slice(0, -2);
@@ -442,9 +436,39 @@
 	}
 	setupAllEvents();
 
-	mainChart.init();
-	mapChart.init();
-	mapChart.drawAll();
-	setMapBox();
-	mainChart.drawAll();
+	const thumb_width = thumb.offsetWidth;
+	overlay_left.style.width = `${container_width - thumb_width}px`;
+
+	function run(chartNum) {
+		mainChart.setData(data[chartNum]);
+		mapChart.entangledChart = mainChart;
+		mapChart.setData(data[chartNum]);
+
+		const btns = mapChart.generateControlButtons();
+		const oldBtns = appEl.getElementsByClassName('btn');
+		while (oldBtns.length > 0) {
+			appEl.removeChild(oldBtns[0]);
+		}
+		btns.forEach((btn) => {
+			appEl.appendChild(btn);
+		});
+
+		mainChart.init();
+		mapChart.init();
+		mapChart.drawAll();
+		setMapBox();
+		mainChart.drawAll();
+	}
+
+	const links = appEl.getElementsByClassName('chart-link');
+	for (let i = 0; i < links.length; i += 1) {
+		const link = links[i];
+		link.onclick = () => {
+			const num = +link.innerText - 1;
+			run(num);
+			setTimeout(() => { moveChart(-1); }, 100);
+		};
+	}
+
+	run(1);
 }(window));
