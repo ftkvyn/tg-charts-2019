@@ -313,7 +313,7 @@
 	const appEl = document.getElementById('app');
 	const main_chart = document.getElementById('main_chart');
 	const chart_map = document.getElementById('chart_map');
-	const height = 350,
+	const height = 300,
 		map_height = 45;
 
 	const mainChart = new Chart(main_chart, height);
