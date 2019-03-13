@@ -466,7 +466,10 @@
 		link.onclick = () => {
 			const num = +link.innerText - 1;
 			run(num);
-			setTimeout(() => { moveChart(-1); moveChart(1); }, 200);
+			setTimeout(() => {
+				moveChart(-1);
+				setTimeout(() => { moveChart(1); }, 100);
+			}, 100);
 		};
 	}
 
