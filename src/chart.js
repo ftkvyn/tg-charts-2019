@@ -457,14 +457,14 @@
 			isLight = false;
 			run(dataNum);
 			dark_link.style.display = 'none';
-			light_link.style.display = 'block';
+			light_link.style.display = 'initial';
 		};
 
 		light_link.onclick = () => {
 			isLight = true;
 			run(dataNum);
 			light_link.style.display = 'none';
-			dark_link.style.display = 'block';
+			dark_link.style.display = 'initial';
 		};
 	}
 	setupAllEvents();
