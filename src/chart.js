@@ -1,5 +1,4 @@
 /* jshint esversion: 6 */
-// console.log(data[0]);
 (function (global) {
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	// eslint-disable-next-line prefer-destructuring
@@ -518,21 +517,18 @@
 		}
 
 		thumb_left.onmousedown = (event) => {
-			console.log('start left');
 			dragLeftStart = true;
 			event.cancelBubble = true;
 			return false;
 		};
 
 		thumb_right.onmousedown = (event) => {
-			console.log('start right');
 			dragRightStart = true;
 			event.cancelBubble = true;
 			return false;
 		};
 
 		thumb.onmousedown = () => {
-			console.log('start center');
 			dragThumbStart = true;
 		};
 
