@@ -14,7 +14,7 @@
 
 	const axis_color = '#f2f4f5';
 	const duration = 200; // ms
-	const padding_y = 0.0;
+	const padding_y = 0.01;
 	const padding_x = 0.003;
 
 	const mx = Symbol('Max X'),
@@ -94,6 +94,10 @@
 
 		translateY(orig_y) {
 			return Math.floor((-orig_y + this[zy]) * this.scale_y);
+		}
+
+		translateBackX(real_x) {
+			return (real_x / this.scale_x) + this[zx];
 		}
 
 		clearChart() {
@@ -214,7 +218,6 @@
 			this.setChartWidths();
 			this.ctx.scale(2, 2);
 			this.ctx.translate(0, this.height);
-			this.drawAll();
 		}
 
 		startChangeKey(key, targetVal) {
@@ -312,12 +315,8 @@
 	mainChart.setData(data[0]);
 	mapChart.entangledChart = mainChart;
 	mapChart.setData(data[0]);
-	// ToDo: calculate the real scale
-	mainChart[zx] += (mapChart[mx] - mapChart[zx]) * 0.87;
-	mainChart.init();
-	mapChart.init();
 
-	// ====== UI buttons ====== //
+	// ====== UI setup ====== //
 
 	const btns = mapChart.generateControlButtons();
 	btns.forEach((btn) => {
@@ -336,6 +335,16 @@
 
 	const thumb_width = thumb.offsetWidth;
 	overlay_left.style.width = `${container_width - thumb_width}px`;
+
+	function setMapBox() {
+		const right = +thumb.style.right.slice(0, -2);
+		const real_from = container_width - thumb_width - right;
+		const real_to = real_from + thumb_width;
+		const from = mapChart.translateBackX(real_from);
+		const to = mapChart.translateBackX(real_to);
+		mainChart[zx] = from;
+		mainChart[mx] = to;
+	}
 
 	function moveChart(dx) {
 		let dx_int = Math.round(dx);
@@ -357,61 +366,81 @@
 		mainChart.drawAll();
 	}
 
-	let prevTouch = null;
+	function setupTouchEvents() {
+		let prevTouch = null;
 
-	thumb.addEventListener('touchstart', (event) => {
-		[prevTouch] = event.changedTouches;
-	});
+		thumb.addEventListener('touchstart', (event) => {
+			[prevTouch] = event.changedTouches;
+		});
 
-	thumb.addEventListener('touchmove', (event) => {
-		let touch = event.changedTouches[0];
-		if (event.changedTouches.length > 1 && prevTouch) {
-			const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
-			if (touches.length) {
-				[touch] = touches;
+		thumb.addEventListener('touchmove', (event) => {
+			let touch = event.changedTouches[0];
+			if (event.changedTouches.length > 1 && prevTouch) {
+				const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
+				if (touches.length) {
+					[touch] = touches;
+				}
 			}
-		}
-		if (prevTouch && touch) {
-			const dx = touch.pageX - prevTouch.pageX;
-			moveChart(dx);
-		}
-		prevTouch = touch;
-	});
+			if (prevTouch && touch) {
+				const dx = touch.pageX - prevTouch.pageX;
+				moveChart(dx);
+			}
+			prevTouch = touch;
+		});
 
-	thumb.addEventListener('touchend', () => {
-		prevTouch = null;
-	});
-	thumb.addEventListener('touchcancel', () => {
-		prevTouch = null;
-	});
+		thumb.addEventListener('touchend', () => {
+			prevTouch = null;
+		});
 
-	let dragStart = false;
+		thumb.addEventListener('touchcancel', () => {
+			prevTouch = null;
+		});
+	}
 
-	thumb.addEventListener('mousedown', () => {
-		dragStart = true;
-	});
+	function setupMouseEvents() {
+		let dragStart = false;
 
-	thumb.addEventListener('mousemove', (event) => {
-		if (!dragStart) {
-			return;
-		}
-		const dx = event.movementX;
-		let ratio = global.devicePixelRatio;
-		if (!ratio) {
-			ratio = 1;
-		}
-		moveChart(dx / ratio);
-	});
+		thumb.addEventListener('mousedown', () => {
+			dragStart = true;
+		});
 
-	document.addEventListener('mouseup', () => {
-		dragStart = false;
-	});
+		thumb.addEventListener('mousemove', (event) => {
+			if (!dragStart) {
+				return;
+			}
+			const dx = event.movementX;
+			let ratio = global.devicePixelRatio;
+			if (!ratio) {
+				ratio = 1;
+			}
+			moveChart(dx / ratio);
+		});
 
-	global.onresize = () => {
-		// ToDo: handle animations that are in progress
-		mainChart.init();
-		mapChart.init();
-		container_width = map_container.clientWidth;
-		moveChart(0);
-	};
+		document.addEventListener('mouseup', () => {
+			dragStart = false;
+		});
+	}
+
+	function setupAllEvents() {
+		setupTouchEvents();
+		setupMouseEvents();
+
+		global.onresize = () => {
+			// ToDo: handle animations that are in progress
+			mainChart.init();
+			mapChart.init();
+			mapChart.drawAll();
+			container_width = map_container.clientWidth;
+			moveChart(0);
+			setMapBox();
+			mainChart.drawAll();
+		};
+	}
+	setupAllEvents();
+
+	mainChart.init();
+	mapChart.init();
+	mapChart.drawAll();
+	setMapBox();
+	mainChart.drawAll();
 }(window));

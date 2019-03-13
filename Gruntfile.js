@@ -11,10 +11,18 @@ module.exports = function (grunt) {
 					mangle: true,
 				},
 				files: {
-					'public/js/chart.min.js': 'src/chart.js',
-					'public/js/data.min.js': 'src/data.js',
+					'public/js/chart.js': 'src/chart.js',
+					'public/js/data.js': 'src/data.js',
 					// 'public/js/test.min.js': 'src/test.js',
 				},
+			},
+		},
+		copy: {
+			main: {
+				src: 'src/*',
+				dest: 'public/js/',
+				expand: true,
+				flatten: true,
 			},
 		},
 		watch: {
@@ -43,8 +51,9 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-express');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 
 	// Default task(s).
 	grunt.registerTask('build', ['clean', 'uglify']);
-	grunt.registerTask('dev', ['clean', 'uglify', 'express', 'watch']);
+	grunt.registerTask('dev', ['clean', 'copy', 'express', 'watch']);
 };

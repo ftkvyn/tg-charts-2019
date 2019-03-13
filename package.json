@@ -24,6 +24,7 @@
     "eslint-plugin-react": "^7.12.4",
     "grunt": "^1.0.3",
     "grunt-contrib-clean": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify-es": "github:gruntjs/grunt-contrib-uglify#harmony",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-express": "^1.4.1",
