@@ -55,6 +55,8 @@
 			this[zx] = undefined;
 			this[my] = undefined;
 			this[zy] = undefined;
+			this.prev_end_i = undefined;
+			this.prev_start_i = undefined;
 			this.x_vals = [];
 			this.graphs = [];
 			this.data = data;
@@ -334,6 +336,9 @@
 		return false;
 	};
 
+	const thumb_width = thumb.offsetWidth;
+	overlay_left.style.width = `${container_width - thumb_width}px`;
+
 	function setMapBox() {
 		const right = +thumb.style.right.slice(0, -2);
 		const real_from = container_width - thumb_width - right;
@@ -343,9 +348,6 @@
 		mainChart[zx] = from;
 		mainChart[mx] = to;
 	}
-
-	const thumb_width = thumb.offsetWidth;
-	overlay_left.style.width = `${container_width - thumb_width}px`;
 
 	function moveChart(dx) {
 		let dx_int = Math.round(dx);
@@ -457,6 +459,7 @@
 		mapChart.init();
 		mapChart.drawAll();
 		setMapBox();
+		mainChart.calculateMaxY();
 		mainChart.drawAll();
 	}
 
