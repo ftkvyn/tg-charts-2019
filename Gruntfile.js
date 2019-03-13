@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = function (grunt) {
 	// Project configuration.
 	grunt.initConfig({
@@ -21,7 +19,7 @@ module.exports = function (grunt) {
 		},
 		watch: {
 			scripts: {
-				files: ['**/*.js'],
+				files: ['src/*.js'],
 				tasks: ['build'],
 				options: {
 					spawn: false,
