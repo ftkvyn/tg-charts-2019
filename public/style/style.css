@@ -38,7 +38,10 @@ a {
 }
 .selected{
   position: absolute;
-  border-width: 2px;
+  border-top-width: 2px;
+  border-bottom-width: 2px;
+  border-left-width: 0;
+  border-right-width: 0;
   border-style: solid;
   border-color: #79a8c970;
   cursor: pointer;
@@ -51,7 +54,8 @@ a {
 
 .selected .thumb{
   position: absolute;
-  width: 5px;
+  width: 7px;
+  /* background: red; */
   background: #79a8c970;
   height: 100%;
 }

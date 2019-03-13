@@ -15,13 +15,14 @@
 	const dark_color = '#242f3e';
 	const white_color = '#ffffff';
 	const black_color = '#000000';
-	let isLight = false;
+	let isLight = true;
 	const axis_color = '#f2f4f5';
 	const axis_color_dark = '#344658';
 	const duration = 200; // ms
 	const padding_y = 0.01;
 	const padding_x = 0.003;
 	let dataNum = 0;
+	const min_thumb_width = 50;
 
 	const mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
@@ -341,6 +342,8 @@
 	const map_container = document.getElementById('map_container');
 	let container_width = map_container.clientWidth;
 	const thumb = document.getElementById('thumb');
+	const thumb_left = document.getElementById('thumb_left');
+	const thumb_right = document.getElementById('thumb_right');
 	const overlay_left = document.getElementById('overlay_left');
 	const overlay_right = document.getElementById('overlay_right');
 	const dark_link = document.getElementById('set-theme-dark');
@@ -350,7 +353,7 @@
 		return false;
 	};
 
-	const thumb_width = thumb.offsetWidth;
+	let thumb_width = thumb.offsetWidth;
 	overlay_left.style.width = `${container_width - thumb_width}px`;
 
 	function setMapBox() {
@@ -380,6 +383,44 @@
 		overlay_left.style.width = `${container_width - right - thumb_width + dx_int}px`;
 
 		mainChart.moveX(-dx_int / mapChart.scale_x);
+		mainChart.drawAll();
+	}
+
+	function moveLeftBorder(dx) {
+		let dx_int = Math.round(dx);
+		const left_width = overlay_left.offsetWidth;
+		if (left_width + dx_int < 0) {
+			dx_int = -left_width;
+		}
+		if (thumb_width - dx_int < min_thumb_width) {
+			dx_int = thumb_width - min_thumb_width;
+		}
+		thumb_width -= dx_int;
+		thumb.style.width = `${thumb_width}px`;
+
+		overlay_left.style.width = `${left_width + dx_int}px`;
+
+		setMapBox();
+		mainChart.drawAll();
+	}
+
+	function moveRightBorder(dx) {
+		let dx_int = Math.round(dx);
+		const right_width = overlay_right.offsetWidth;
+		const right = +thumb.style.right.slice(0, -2);
+		if (right_width - dx_int < 0) {
+			dx_int = right_width;
+		}
+		if (thumb_width + dx_int < min_thumb_width) {
+			dx_int = min_thumb_width - thumb_width;
+		}
+		thumb_width += dx_int;
+		thumb.style.width = `${thumb_width}px`;
+		thumb.style.right = `${right - dx_int}px`;
+
+		overlay_right.style.width = `${right_width - dx_int}px`;
+
+		setMapBox();
 		mainChart.drawAll();
 	}
 
@@ -415,14 +456,12 @@
 	}
 
 	function setupMouseEvents() {
-		let dragStart = false;
+		let dragThumbStart = false;
+		let dragLeftStart = false;
+		let dragRightStart = false;
 
-		thumb.addEventListener('mousedown', () => {
-			dragStart = true;
-		});
-
-		thumb.addEventListener('mousemove', (event) => {
-			if (!dragStart) {
+		function handleMouseMove(event) {
+			if (!dragThumbStart && !dragLeftStart && !dragRightStart) {
 				return;
 			}
 			const dx = event.movementX;
@@ -430,44 +469,44 @@
 			if (!ratio) {
 				ratio = 1;
 			}
-			moveChart(dx / ratio);
-		});
+			if (dragThumbStart) {
+				moveChart(dx / ratio);
+			} else if (dragLeftStart) {
+				moveLeftBorder(dx / ratio);
+			} if (dragRightStart) {
+				moveRightBorder(dx / ratio);
+			}
+		}
 
-		document.addEventListener('mouseup', () => {
-			dragStart = false;
-		});
+		thumb_left.onmousedown = (event) => {
+			console.log('start left');
+			dragLeftStart = true;
+			event.cancelBubble = true;
+			return false;
+		};
+
+		thumb_right.onmousedown = (event) => {
+			console.log('start right');
+			dragRightStart = true;
+			event.cancelBubble = true;
+			return false;
+		};
+
+		thumb.onmousedown = () => {
+			console.log('start center');
+			dragThumbStart = true;
+		};
+
+		thumb.onmousemove = handleMouseMove;
+		overlay_left.onmousemove = handleMouseMove;
+		overlay_right.onmousemove = handleMouseMove;
+
+		document.onmouseup = () => {
+			dragThumbStart = false;
+			dragLeftStart = false;
+			dragRightStart = false;
+		};
 	}
-
-	function setupAllEvents() {
-		setupTouchEvents();
-		setupMouseEvents();
-
-		global.onresize = () => {
-			// ToDo: handle animations that are in progress
-			mainChart.init();
-			mapChart.init();
-			mapChart.drawAll();
-			container_width = map_container.clientWidth;
-			moveChart(0);
-			setMapBox();
-			mainChart.drawAll();
-		};
-
-		dark_link.onclick = () => {
-			isLight = false;
-			run(dataNum);
-			dark_link.style.display = 'none';
-			light_link.style.display = 'initial';
-		};
-
-		light_link.onclick = () => {
-			isLight = true;
-			run(dataNum);
-			light_link.style.display = 'none';
-			dark_link.style.display = 'initial';
-		};
-	}
-	setupAllEvents();
 
 	function setColors() {
 		if (isLight) {
@@ -504,6 +543,37 @@
 		mainChart.calculateMaxY();
 		mainChart.drawAll();
 	}
+
+	function setupAllEvents() {
+		setupTouchEvents();
+		setupMouseEvents();
+
+		global.onresize = () => {
+			// ToDo: handle animations that are in progress
+			mainChart.init();
+			mapChart.init();
+			mapChart.drawAll();
+			container_width = map_container.clientWidth;
+			moveChart(0);
+			setMapBox();
+			mainChart.drawAll();
+		};
+
+		dark_link.onclick = () => {
+			isLight = false;
+			run(dataNum);
+			dark_link.style.display = 'none';
+			light_link.style.display = 'initial';
+		};
+
+		light_link.onclick = () => {
+			isLight = true;
+			run(dataNum);
+			light_link.style.display = 'none';
+			dark_link.style.display = 'initial';
+		};
+	}
+	setupAllEvents();
 
 	const links = appEl.getElementsByClassName('chart-link');
 	for (let i = 0; i < links.length; i += 1) {
