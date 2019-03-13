@@ -25,6 +25,9 @@ a {
   background: #f4fafd;
   opacity: 0.8;
   width: 100px;
+  -webkit-tap-highlight-color: transparent;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
 .dark-theme .overlay{
 	background: #1d2837;
@@ -50,6 +53,7 @@ a {
   -webkit-tap-highlight-color: transparent;
   -moz-user-select: none;
   -webkit-user-select: none;
+  z-index: 1;
 }
 
 .selected .thumb{
