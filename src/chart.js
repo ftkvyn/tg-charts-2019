@@ -82,8 +82,8 @@
 			this[mx] += Math.round((this[mx] - this[zx]) * padding_x);
 
 			this[zy] = 0;
-			this[my] = Math.max(...this.graphs.map((gr) => { return gr.max_Y; }));
-			this[my] += Math.round((this[my] - this[zy]) * padding_y);
+			// this[my] = Math.max(...this.graphs.map((gr) => { return gr.max_Y; }));
+			// this[my] += Math.round((this[my] - this[zy]) * padding_y);
 		}
 
 		setChartWidths() {
@@ -202,7 +202,12 @@
 					.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
 				newMax += Math.round((newMax - this[zy]) * padding_y);
 				if (newMax !== 0 && newMax !== this[my]) {
-					this.startChangeKey(my, newMax);
+					if (this[my]) {
+						this.startChangeKey(my, newMax);
+					} else {
+						this[my] = newMax;
+						this.drawAll();
+					}
 				}
 			}
 		}
@@ -262,13 +267,6 @@
 			const chart = this.graphs.find((ch) => { return ch.opacityKey === key; });
 			chart.display = !chart.display;
 			this.calculateMaxY(null, null, true);
-			// let newMax = Math.max(...this.graphs
-			// 	.filter((ch) => { return ch.display; })
-			// 	.map((gr) => { return gr.max_Y; }));
-			// newMax += (newMax - this[zy]) * padding_y;
-			// if (newMax !== 0 && newMax !== this[my]) {
-			// 	this.startChangeKey(my, newMax);
-			// }
 		}
 
 		generateControlButtons() {
