@@ -12,10 +12,15 @@
 		return false;
 	};
 
+	const dark_color = '#242f3e';
+	const white_color = '#ffffff';
+	const black_color = '#000000';
+	let isLight = false;
 	const axis_color = '#f2f4f5';
 	const duration = 200; // ms
 	const padding_y = 0.01;
 	const padding_x = 0.003;
+	let dataNum = 0;
 
 	const mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
@@ -136,6 +141,7 @@
 			this.ctx.font = '14px Arial';
 			const startDay = new Date(this[zx]);
 			const endDay = new Date(this[mx]);
+			this.ctx.fillStyle = isLight ? dark_color : white_color;
 			this.ctx.fillText(`${months[startDay.getMonth()]} ${startDay.getDate()}`, 10, -10);
 			this.ctx.fillText(`${months[endDay.getMonth()]} ${endDay.getDate()}`, this.width - 50, -10);
 			this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
@@ -312,6 +318,7 @@
 		}
 	}
 
+	const bodyEl = document.getElementsByTagName('body')[0];
 	const appEl = document.getElementById('app');
 	const main_chart = document.getElementById('main_chart');
 	const chart_map = document.getElementById('chart_map');
@@ -331,6 +338,8 @@
 	const thumb = document.getElementById('thumb');
 	const overlay_left = document.getElementById('overlay_left');
 	const overlay_right = document.getElementById('overlay_right');
+	const dark_link = document.getElementById('set-theme-dark');
+	const light_link = document.getElementById('set-theme-light');
 
 	thumb.onselectstart = function () {
 		return false;
@@ -438,10 +447,38 @@
 			setMapBox();
 			mainChart.drawAll();
 		};
+
+		dark_link.onclick = () => {
+			isLight = false;
+			run(dataNum);
+			dark_link.style.display = 'none';
+			light_link.style.display = 'block';
+		};
+
+		light_link.onclick = () => {
+			isLight = true;
+			run(dataNum);
+			light_link.style.display = 'none';
+			dark_link.style.display = 'block';
+		};
 	}
 	setupAllEvents();
 
+	function setColors() {
+		if (isLight) {
+			bodyEl.style.background = white_color;
+			bodyEl.style.color = black_color;
+			bodyEl.classList.remove('dark-theme');
+		} else {
+			bodyEl.style.background = dark_color;
+			bodyEl.style.color = white_color;
+			bodyEl.classList.add('dark-theme');
+		}
+	}
+
 	function run(chartNum) {
+		dataNum = chartNum;
+		setColors();
 		mainChart.setData(data[chartNum]);
 		mapChart.entangledChart = mainChart;
 		mapChart.setData(data[chartNum]);

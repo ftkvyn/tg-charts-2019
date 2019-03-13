@@ -22,9 +22,12 @@ a {
 .overlay{
   position: absolute;
   height: 100%;
-  background: #f4fafd;;
+  background: #f4fafd;
   opacity: 0.8;
   width: 100px;
+}
+.dark-theme .overlay{
+	background: #1d2837;
 }
 .overlay.overlay_left{
   left: 0;
@@ -35,7 +38,9 @@ a {
 }
 .selected{
   position: absolute;
-  border: 2px solid #cbe3f470;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #79a8c970;
   cursor: pointer;
   height: 100%;
   box-sizing: border-box;
@@ -47,9 +52,17 @@ a {
 .selected .thumb{
   position: absolute;
   width: 5px;
-  background: #cbe3f470;
+  background: #79a8c970;
   height: 100%;
 }
+
+/* .dark-theme .selected .selected {
+	border-color: #242f3e;
+}
+
+.dark-theme .selected .thumb {
+	background: #242f3e;
+} */
 
 .selected .thumb.thumb_left{
   left: 0;
