@@ -17,6 +17,7 @@
 	let isLight = false;
 	const axis_color = '#f2f4f5';
 	const axis_color_dark = '#344658';
+	const text_color_dark = '#788490';
 	const duration = 200; // ms
 	const padding_y = 0.01;
 	const padding_x = 0.003;
@@ -47,7 +48,7 @@
 			this.ctx = canv.getContext('2d');
 			this.changes = {};
 
-			this.thickness = 2.5;
+			this.thickness = 2;
 
 			this.entangledChart = null;
 			this.isDrawAxis = true;
@@ -146,7 +147,7 @@
 			this.ctx.font = '14px Arial';
 			const startDay = new Date(this[zx]);
 			const endDay = new Date(this[mx]);
-			this.ctx.fillStyle = isLight ? dark_color : axis_color;
+			this.ctx.fillStyle = isLight ? text_color_dark : text_color_dark;
 			this.ctx.fillText(`${months[startDay.getMonth()]} ${startDay.getDate()}`, 10, -10);
 			this.ctx.fillText(`${months[endDay.getMonth()]} ${endDay.getDate()}`, this.width - 50, -10);
 			this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
@@ -328,12 +329,12 @@
 	const main_chart = document.getElementById('main_chart');
 	const chart_map = document.getElementById('chart_map');
 	const height = 300,
-		map_height = 45;
+		map_height = 40;
 
 	const mainChart = new Chart(main_chart, height);
 	const mapChart = new Chart(chart_map, map_height);
 	mapChart.isDrawAxis = false;
-	mapChart.thickness = 1.5;
+	mapChart.thickness = 1.2;
 	mapChart.entangledChart = mainChart;
 
 	// ====== UI setup ====== //

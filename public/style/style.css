@@ -46,7 +46,7 @@ a {
   border-left-width: 0;
   border-right-width: 0;
   border-style: solid;
-  border-color: #548db570;
+  border-color: #bdd5e670;
   cursor: pointer;
   height: 100%;
   box-sizing: border-box;
@@ -56,12 +56,21 @@ a {
   z-index: 1;
 }
 
+.dark-theme .selected{
+	border-color: #548db570;
+}
+
 .selected .thumb{
   position: absolute;
-  width: 7px;
-  background: #548db570;
+  width: 5px;
+  background: #bdd5e670;
   height: 100%;
 }
+
+.dark-theme .selected .thumb{
+ background: #548db570;
+}
+
 
 .selected .thumb.thumb_left{
   left: 0;
@@ -149,7 +158,7 @@ a {
 
 .chart-links {
 	position: absolute;
-	bottom: 40px;
+	bottom: 20px;
 	width: 100%;
 }
 
