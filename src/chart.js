@@ -497,16 +497,20 @@
 		let dragThumbStart = false;
 		let dragLeftStart = false;
 		let dragRightStart = false;
+		let prevMouseX = 0;
 
 		function handleMouseMove(event) {
 			if (!dragThumbStart && !dragLeftStart && !dragRightStart) {
 				return;
 			}
-			const dx = event.movementX;
+			const dx = event.clientX - prevMouseX;
+			prevMouseX = event.clientX;
 			let ratio = global.devicePixelRatio;
 			if (!ratio) {
 				ratio = 1;
 			}
+			// ToDo: check on surface.
+			ratio = 1;
 			if (dragThumbStart) {
 				moveChart(dx / ratio);
 			} else if (dragLeftStart) {
@@ -519,17 +523,20 @@
 		thumb_left.onmousedown = (event) => {
 			dragLeftStart = true;
 			event.cancelBubble = true;
+			prevMouseX = event.clientX;
 			return false;
 		};
 
 		thumb_right.onmousedown = (event) => {
 			dragRightStart = true;
 			event.cancelBubble = true;
+			prevMouseX = event.clientX;
 			return false;
 		};
 
-		thumb.onmousedown = () => {
+		thumb.onmousedown = (event) => {
 			dragThumbStart = true;
+			prevMouseX = event.clientX;
 		};
 
 		thumb.onmousemove = handleMouseMove;
@@ -542,6 +549,7 @@
 			dragThumbStart = false;
 			dragLeftStart = false;
 			dragRightStart = false;
+			prevMouseX = 0;
 		};
 	}
 
