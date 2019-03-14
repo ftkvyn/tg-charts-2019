@@ -41,12 +41,12 @@ a {
 }
 .selected{
   position: absolute;
-  border-top-width: 2px;
-  border-bottom-width: 2px;
+  border-top-width: 1px;
+  border-bottom-width: 1px;
   border-left-width: 0;
   border-right-width: 0;
   border-style: solid;
-  border-color: #79a8c970;
+  border-color: #548db570;
   cursor: pointer;
   height: 100%;
   box-sizing: border-box;
@@ -59,8 +59,7 @@ a {
 .selected .thumb{
   position: absolute;
   width: 7px;
-  /* background: red; */
-  background: #79a8c970;
+  background: #548db570;
   height: 100%;
 }
 
@@ -70,6 +69,14 @@ a {
 
 .selected .thumb.thumb_right{
   right: 0;
+}
+
+.selected .thumb .invisible-addition {
+	position: absolute;
+	width: 20px;
+	height: 100%;
+	background: transparent;
+	left: -7px;
 }
 
 .btn{
