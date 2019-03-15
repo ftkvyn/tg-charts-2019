@@ -228,6 +228,7 @@
 			const textColor = isLight ? text_color_dark : text_color_dark;
 
 			// y-legend
+			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
 			for (let i = 0; i < this.y_legend.length; i += 1) {
 				const item = this.y_legend[i];
 				this.ctx.strokeStyle = strokeStyle;
@@ -238,14 +239,6 @@
 				this.ctx.fillStyle = textColor;
 				this.ctx.fillText(`${item.y}`, 0, this.translateY(item.y) - y_legend_text_height);
 			}
-
-			// this.ctx.beginPath();
-			// // ToDo: draw lines
-			// this.ctx.moveTo(this.thickness, -x_legend_padding - this.thickness);
-			// this.ctx.lineTo(this.width, -x_legend_padding - this.thickness);
-			// this.ctx.stroke();
-			// // y-legend
-			// this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
 
 			// x-legend
 			for (let i = this.prev_start_i - 1; i < this.prev_end_i; i += 1) {
@@ -338,16 +331,22 @@
 				newMax += Math.round((newMax - this[zy]) * padding_y);
 				if (newMax !== 0 && newMax !== this[my]) {
 					if (this.isDrawAxis) {
-						// ToDo: start hiding old y-s;
-						this.y_legend = [];
+						for (let i = 0; i < this.y_legend.length; i += 1) {
+							this.y_legend[i].display = false;
+							this.y_legend[i].startTimestamp = Date.now();
+						}
 						let val = 0;
 						const step = Math.floor(newMax / this.yLegendItemsCount);
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
 							const item = {
 								y: val,
-								opacity: 255,
+								opacity: 0,
 								display: true,
 							};
+							if (!this[my]) {
+								// Initial creation
+								item.opacity = 255;
+							}
 							val += step;
 							this.y_legend.push(item);
 						}
