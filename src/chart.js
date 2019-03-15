@@ -68,6 +68,8 @@
 			this.graphs = [];
 			this.data = data;
 
+			// this.x_legend = [];
+
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
 				const key = col.shift();
@@ -356,14 +358,20 @@
 	let thumb_width = thumb.offsetWidth;
 	overlay_left.style.width = `${container_width - thumb_width}px`;
 
-	function setMapBox() {
+	function setMapBox(isInitial) {
 		const right = +thumb.style.right.slice(0, -2);
 		const real_from = container_width - thumb_width - right;
 		const real_to = real_from + thumb_width;
 		const from = mapChart.translateBackX(real_from);
 		const to = mapChart.translateBackX(real_to);
-		mainChart[zx] = from;
-		mainChart[mx] = to;
+
+		if (!isInitial) {
+			mainChart.startChangeKey(zx, from);
+			mainChart.startChangeKey(mx, to);
+		} else {
+			mainChart[zx] = from;
+			mainChart[mx] = to;
+		}
 	}
 
 	function moveChart(dx) {
@@ -380,10 +388,10 @@
 		thumb.style.right = `${right - dx_int}px`;
 
 		overlay_right.style.width = `${right - dx_int}px`;
+		// eslint-disable-next-line no-mixed-operators
 		overlay_left.style.width = `${container_width - right - thumb_width + dx_int}px`;
 
-		mainChart.moveX(-dx_int / mapChart.scale_x);
-		mainChart.drawAll();
+		setMapBox();
 	}
 
 	function moveLeftBorder(dx) {
@@ -401,7 +409,6 @@
 		overlay_left.style.width = `${left_width + dx_int}px`;
 
 		setMapBox();
-		mainChart.drawAll();
 	}
 
 	function moveRightBorder(dx) {
@@ -421,7 +428,6 @@
 		overlay_right.style.width = `${right_width - dx_int}px`;
 
 		setMapBox();
-		mainChart.drawAll();
 	}
 
 	function setupTouchEvents() {
@@ -506,18 +512,12 @@
 			}
 			const dx = event.clientX - prevMouseX;
 			prevMouseX = event.clientX;
-			let ratio = global.devicePixelRatio;
-			if (!ratio) {
-				ratio = 1;
-			}
-			// ToDo: check on surface.
-			ratio = 1;
 			if (dragThumbStart) {
-				moveChart(dx / ratio);
+				moveChart(dx);
 			} else if (dragLeftStart) {
-				moveLeftBorder(dx / ratio);
+				moveLeftBorder(dx);
 			} if (dragRightStart) {
-				moveRightBorder(dx / ratio);
+				moveRightBorder(dx);
 			}
 		}
 
@@ -585,7 +585,7 @@
 		mainChart.init();
 		mapChart.init();
 		mapChart.drawAll();
-		setMapBox();
+		setMapBox(true);
 		mainChart.calculateMaxY();
 		mainChart.drawAll();
 	}
@@ -602,7 +602,6 @@
 			container_width = map_container.clientWidth;
 			moveChart(0);
 			setMapBox();
-			mainChart.drawAll();
 		};
 
 		dark_link.onclick = () => {
