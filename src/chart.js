@@ -380,6 +380,18 @@
 			}
 		}
 
+		static changeLegendEntry(val) {
+			const delta = Date.now() - val.startTimestamp;
+			let deltaScale = delta / duration;
+			if (deltaScale > 1) {
+				deltaScale = 1;
+			}
+			if (deltaScale === 1) {
+				val.startTimestamp = -1;
+			}
+			val.opacity = Math.round(255 * deltaScale);
+		}
+
 		changeAxisStep() {
 			let changed = false;
 			for (let i = 0; i < this.x_legend.length; i += 1) {
@@ -387,29 +399,13 @@
 				if (val.display) {
 					if (val.opacity !== 255) {
 						changed = true;
-						const delta = Date.now() - val.startTimestamp;
-						let deltaScale = delta / duration;
-						if (deltaScale > 1) {
-							deltaScale = 1;
-						}
-						if (deltaScale === 1) {
-							val.startTimestamp = -1;
-						}
-						val.opacity = Math.round(255 * deltaScale);
+						val.opacity = Chart.changeLegendEntry(val);
 					}
 				}
 				if (!val.display) {
 					if (val.opacity !== 0) {
 						changed = true;
-						const delta = Date.now() - val.startTimestamp;
-						let deltaScale = delta / duration;
-						if (deltaScale > 1) {
-							deltaScale = 1;
-						}
-						if (deltaScale === 1) {
-							val.startTimestamp = -1;
-						}
-						val.opacity = 255 - Math.round(255 * deltaScale);
+						val.opacity = 255 - Chart.changeLegendEntry(val);
 					}
 				}
 			}
