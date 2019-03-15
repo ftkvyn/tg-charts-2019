@@ -241,12 +241,14 @@
 			}
 
 			// x-legend
-			for (let i = this.prev_start_i - 1; i < this.prev_end_i; i += 1) {
-				const val = this.x_legend[i];
-				if (val.opacity) {
-					this.ctx.fillStyle = textColor + getOpacity(val.opacity);
-					const x = this.translateX(val.x);
-					this.ctx.fillText(val.name, x, 0);
+			for (let i = this.prev_start_i - 2; i < this.prev_end_i; i += 1) {
+				if (this.x_legend[i]) {
+					const val = this.x_legend[i];
+					if (val.opacity) {
+						this.ctx.fillStyle = textColor + getOpacity(val.opacity);
+						const x = this.translateX(val.x);
+						this.ctx.fillText(val.name, x, -3);
+					}
 				}
 			}
 		}
