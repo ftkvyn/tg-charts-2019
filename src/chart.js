@@ -170,12 +170,13 @@
 			if (!this.isDrawAxis) {
 				return;
 			}
-			let itemsOnScreen = Math.floor(this.width / (x_legend_val_width));
-			// Needed to prevent changing on scroll the map box.
-			if (itemsOnScreen % 2) {
-				itemsOnScreen -= 1;
-			}
+			const itemsOnScreen = Math.floor(this.width / (x_legend_val_width));
 			const dxOnScreen = this.prev_end_i - this.prev_start_i + 1;
+			const length = this[mx] - this[zx];
+			if (this.prevLength === length) {
+				return;
+			}
+			this.prevLength = this[mx] - this[zx];
 			let skipItemsEachStep = Math.floor(dxOnScreen / itemsOnScreen);
 			if (skipItemsEachStep < 0) {
 				skipItemsEachStep = 0;
@@ -183,7 +184,6 @@
 			if (this.prevSkipItemsEachStep === skipItemsEachStep) {
 				return;
 			}
-			this.itemsOnScreen = itemsOnScreen;
 			this.prevSkipItemsEachStep = skipItemsEachStep;
 			let toSkip = 0;
 			for (let i = this.x_legend.length - 1; i >= 0; i -= 1) {
