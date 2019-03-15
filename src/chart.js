@@ -17,7 +17,7 @@
 	const black_color = '#000000';
 	let isLight = false;
 	const axis_color = '#f2f4f5';
-	const axis_color_dark = '#344658';
+	const axis_color_dark = '#303d4a';
 	const text_color_dark = '#788490';
 	const duration = 200; // ms
 	const padding_y = 0.08;
@@ -66,6 +66,7 @@
 			this.changes = {};
 
 			this.thickness = 2;
+			this.axisThickness = 1;
 
 			this.entangledChart = null;
 			this.isDrawAxis = true;
@@ -218,7 +219,6 @@
 				return;
 			}
 			// Configuration
-			this.ctx.lineWidth = this.thickness;
 			let strokeColor = null;
 			if (isLight) {
 				strokeColor = axis_color;
@@ -229,16 +229,23 @@
 			const textColor = isLight ? text_color_dark : text_color_dark;
 
 			// y-legend
+			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
 			for (let i = 0; i < this.y_legend.length; i += 1) {
+				this.ctx.lineWidth = this.axisThickness;
 				const item = this.y_legend[i];
-				this.ctx.strokeStyle = strokeColor;
+				if (item.y === 0) {
+					this.ctx.lineWidth = this.axisThickness * 2;
+				}
+				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity);
 				this.ctx.beginPath();
 				this.ctx.moveTo(0, this.translateY(item.y));
 				this.ctx.lineTo(this.width, this.translateY(item.y));
 				this.ctx.stroke();
-				this.ctx.fillStyle = textColor;
+				this.ctx.fillStyle = textColor + getOpacity(item.opacity);
 				this.ctx.fillText(`${item.y}`, 0, this.translateY(item.y) - y_legend_text_height);
 			}
+
+			this.ctx.lineWidth = this.axisThickness;
 
 			// x-legend
 			for (let i = this.prev_start_i - 2; i < this.prev_end_i; i += 1) {
@@ -333,15 +340,23 @@
 				newMax += Math.round((newMax - this[zy]) * padding_y);
 				if (newMax !== 0 && newMax !== this[my]) {
 					if (this.isDrawAxis) {
-						this.y_legend = [];
+						for (let i = 0; i < this.y_legend.length; i += 1) {
+							this.y_legend[i].display = false;
+							this.y_legend[i].startTimestamp = Date.now();
+						}
 						let val = 0;
 						const step = Math.floor(newMax / this.yLegendItemsCount);
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
 							const item = {
 								y: val,
-								opacity: 255,
+								opacity: 0,
 								display: true,
+								startTimestamp: Date.now(),
 							};
+							if (!this[my]) {
+								// Initial creation
+								item.opacity = 255;
+							}
 							val += step;
 							this.y_legend.push(item);
 						}
@@ -405,6 +420,13 @@
 			let changed = false;
 			for (let i = 0; i < this.x_legend.length; i += 1) {
 				const val = this.x_legend[i];
+				changed = Chart.processLegendEntry(val) || changed;
+			}
+
+			// ToDo: change animation here - first disappear in durantion / 2,
+			//		then appear new in dur/2 with delay of dur/2.
+			for (let i = 0; i < this.y_legend.length; i += 1) {
+				const val = this.y_legend[i];
 				changed = Chart.processLegendEntry(val) || changed;
 			}
 			return changed;
