@@ -25,8 +25,7 @@
 	const min_thumb_width = 50;
 
 	const x_legend_padding = 20;
-	const x_legend_vals_padding = 20;
-	const x_legend_val_width = 44;
+	const x_legend_val_width = 55;
 
 	const mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
@@ -71,6 +70,7 @@
 			this.prev_end_i = undefined;
 			this.prev_start_i = undefined;
 			this.x_vals = [];
+			this.x_legend = [];
 			this.graphs = [];
 			this.data = data;
 
@@ -79,6 +79,14 @@
 				const key = col.shift();
 				if (key === 'x') {
 					this.x_vals = col;
+					this.x_legend = col.map((val) => {
+						return {
+							name: Chart.getDateText(val),
+							x: val,
+							opacity: 255,
+							display: true,
+						};
+					});
 				} else {
 					const graph = {
 						name: this.data.names[key],
@@ -138,6 +146,30 @@
 			return `${months[date.getMonth()]} ${date.getDate()}`;
 		}
 
+		calculateXLabels(isInitial) {
+			if (!this.isDrawAxis) {
+				return;
+			}
+			const itemsOnScreen = Math.floor(this.canv.clientWidth / (x_legend_val_width));
+			const dxOnScreen = this.prev_end_i - this.prev_start_i + 1;
+			let skipItemsEachStep = Math.floor(dxOnScreen / itemsOnScreen);
+			if (skipItemsEachStep < 0) {
+				skipItemsEachStep = 0;
+			}
+			let toSkip = 0;
+			for (let i = this.x_legend.length - 1; i >= 0; i -= 1) {
+				const val = this.x_legend[i];
+				// ToDo: start animation if needed.
+				if (toSkip === 0) {
+					val.display = true;
+					toSkip = skipItemsEachStep;
+				} else {
+					val.display = false;
+					toSkip -= 1;
+				}
+			}
+		}
+
 		drawAxis() {
 			if (!this.isDrawAxis) {
 				return;
@@ -164,16 +196,12 @@
 			// x-legend
 			// ToDo: calculate amount of x-labels, recalculate it on resize or changing of a scale
 			//		 after recalculate - run process for hiding or showing ones that changed.
-			let nextFreePosition = 0;
 
 			for (let i = this.prev_start_i - 1; i < this.prev_end_i; i += 1) {
-				const txt = Chart.getDateText(this.x_vals[i]);
-				let x = this.translateX(this.x_vals[i]) - (x_legend_val_width / 2);
-				if (x < nextFreePosition) {
-					// do nothing - not display text
-				} else {
-					this.ctx.fillText(txt, x, 0);
-					nextFreePosition = x + x_legend_val_width + x_legend_vals_padding;
+				const val = this.x_legend[i];
+				if (val.display) {
+					const x = this.translateX(val.x);
+					this.ctx.fillText(val.name, x, 0);
 				}
 			}
 		}
@@ -205,6 +233,8 @@
 			this.clearChart();
 			this.calcScale();
 			this.drawChart();
+			// ToDo: calculateXLabels only on changing width
+			this.calculateXLabels();
 			this.drawAxis();
 		}
 
@@ -238,8 +268,8 @@
 
 		calculateMaxY(start_i, end_i, force) {
 			if (this.prev_start_i !== start_i || this.prev_end_i !== end_i || force) {
-				this.prev_start_i = start_i || this.prev_start_i;
-				this.prev_end_i = end_i || this.prev_end_i;
+				this.prev_start_i = start_i || this.prev_start_i || 0;
+				this.prev_end_i = end_i || this.prev_end_i || 0;
 				const visibleCharts = this.graphs
 					.filter((ch) => { return ch.display; });
 				if (!visibleCharts.length) {
