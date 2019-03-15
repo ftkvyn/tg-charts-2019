@@ -94,6 +94,7 @@
 			this.data = data;
 			this.prevSkipItemsEachStep = undefined;
 			this.itemsOnScreen = undefined;
+			this.prevLength = undefined;
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
