@@ -218,20 +218,19 @@
 			}
 			// Configuration
 			this.ctx.lineWidth = this.thickness;
-			let strokeStyle = null;
+			let strokeColor = null;
 			if (isLight) {
-				strokeStyle = axis_color;
+				strokeColor = axis_color;
 			} else {
-				strokeStyle = axis_color_dark;
+				strokeColor = axis_color_dark;
 			}
 			this.ctx.font = '14px Arial';
 			const textColor = isLight ? text_color_dark : text_color_dark;
 
 			// y-legend
-			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
 			for (let i = 0; i < this.y_legend.length; i += 1) {
 				const item = this.y_legend[i];
-				this.ctx.strokeStyle = strokeStyle;
+				this.ctx.strokeStyle = strokeColor;
 				this.ctx.beginPath();
 				this.ctx.moveTo(0, this.translateY(item.y));
 				this.ctx.lineTo(this.width, this.translateY(item.y));
@@ -331,22 +330,15 @@
 				newMax += Math.round((newMax - this[zy]) * padding_y);
 				if (newMax !== 0 && newMax !== this[my]) {
 					if (this.isDrawAxis) {
-						for (let i = 0; i < this.y_legend.length; i += 1) {
-							this.y_legend[i].display = false;
-							this.y_legend[i].startTimestamp = Date.now();
-						}
+						this.y_legend = [];
 						let val = 0;
 						const step = Math.floor(newMax / this.yLegendItemsCount);
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
 							const item = {
 								y: val,
-								opacity: 0,
+								opacity: 255,
 								display: true,
 							};
-							if (!this[my]) {
-								// Initial creation
-								item.opacity = 255;
-							}
 							val += step;
 							this.y_legend.push(item);
 						}
@@ -389,25 +381,28 @@
 			if (deltaScale === 1) {
 				val.startTimestamp = -1;
 			}
-			val.opacity = Math.round(255 * deltaScale);
+			return Math.round(255 * deltaScale);
+		}
+
+		static processLegendEntry(val) {
+			let changed = false;
+			if (val.display) {
+				if (val.opacity !== 255) {
+					changed = true;
+					val.opacity = Chart.changeLegendEntry(val);
+				}
+			} else if (val.opacity !== 0) {
+				changed = true;
+				val.opacity = 255 - Chart.changeLegendEntry(val);
+			}
+			return changed;
 		}
 
 		changeAxisStep() {
 			let changed = false;
 			for (let i = 0; i < this.x_legend.length; i += 1) {
 				const val = this.x_legend[i];
-				if (val.display) {
-					if (val.opacity !== 255) {
-						changed = true;
-						val.opacity = Chart.changeLegendEntry(val);
-					}
-				}
-				if (!val.display) {
-					if (val.opacity !== 0) {
-						changed = true;
-						val.opacity = 255 - Chart.changeLegendEntry(val);
-					}
-				}
+				changed = Chart.processLegendEntry(val) || changed;
 			}
 			return changed;
 		}
