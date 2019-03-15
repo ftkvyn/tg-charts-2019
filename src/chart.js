@@ -162,12 +162,8 @@
 			this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
 
 			// x-legend
-			// const startDayTxt = Chart.getDateText(this[zx]);
-			// const endDayTxt = Chart.getDateText(this[mx]);
-			// const endWidth = this.ctx.measureText(endDayTxt).width;
-			// this.ctx.fillText(startDayTxt, 0, 0);
-			// this.ctx.fillText(endDayTxt, this.width - endWidth, 0);
-
+			// ToDo: calculate amount of x-labels, recalculate it on resize or changing of a scale
+			//		 after recalculate - run process for hiding or showing ones that changed.
 			let nextFreePosition = 0;
 
 			for (let i = this.prev_start_i - 1; i < this.prev_end_i; i += 1) {
