@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 /* jshint esversion: 6 */
 (function (global) {
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -25,7 +26,7 @@
 	const min_thumb_width = 50;
 
 	const x_legend_padding = 20;
-	const x_legend_val_width = 55;
+	const x_legend_val_width = 60;
 
 	const mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
@@ -40,6 +41,15 @@
 			deltaValue: -1,
 			originalValue: -1,
 		};
+	}
+
+	function getDateText(timestamp) {
+		const date = new Date(timestamp);
+		return `${months[date.getMonth()]} ${date.getDate()}`;
+	}
+
+	function getOpacity(val) {
+		return (`00${Math.round(val).toString(16)}`).substr(-2);
 	}
 
 	class Chart {
@@ -81,7 +91,7 @@
 					this.x_vals = col;
 					this.x_legend = col.map((val) => {
 						return {
-							name: Chart.getDateText(val),
+							name: getDateText(val),
 							x: val,
 							opacity: 255,
 							display: true,
@@ -141,11 +151,6 @@
 			this[mx] -= dx;
 		}
 
-		static getDateText(timestamp) {
-			const date = new Date(timestamp);
-			return `${months[date.getMonth()]} ${date.getDate()}`;
-		}
-
 		calculateXLabels(isInitial) {
 			if (!this.isDrawAxis) {
 				return;
@@ -159,12 +164,25 @@
 			let toSkip = 0;
 			for (let i = this.x_legend.length - 1; i >= 0; i -= 1) {
 				const val = this.x_legend[i];
-				// ToDo: start animation if needed.
 				if (toSkip === 0) {
-					val.display = true;
+					if (!val.display) {
+						val.display = true;
+						if (!isInitial) {
+							val.startTimestamp = Date.now();
+						} else {
+							val.opacity = 255;
+						}
+					}
 					toSkip = skipItemsEachStep;
 				} else {
-					val.display = false;
+					if (val.display) {
+						val.display = false;
+						if (!isInitial) {
+							val.startTimestamp = Date.now();
+						} else {
+							val.opacity = 0;
+						}
+					}
 					toSkip -= 1;
 				}
 			}
@@ -182,7 +200,7 @@
 				this.ctx.strokeStyle = axis_color_dark;
 			}
 			this.ctx.font = '14px Arial';
-			this.ctx.fillStyle = isLight ? text_color_dark : text_color_dark;
+			const initialColor = isLight ? text_color_dark : text_color_dark;
 
 			// y = C lines
 			this.ctx.beginPath();
@@ -199,7 +217,8 @@
 
 			for (let i = this.prev_start_i - 1; i < this.prev_end_i; i += 1) {
 				const val = this.x_legend[i];
-				if (val.display) {
+				if (val.opacity) {
+					this.ctx.fillStyle = initialColor + getOpacity(val.opacity);
 					const x = this.translateX(val.x);
 					this.ctx.fillText(val.name, x, 0);
 				}
@@ -255,7 +274,7 @@
 
 			this.graphs.forEach((gr) => {
 				if (this[gr.opacityKey]) {
-					const opacity = (`00${Math.round(this[gr.opacityKey]).toString(16)}`).substr(-2);
+					const opacity = getOpacity(this[gr.opacityKey]);
 					this.startDraw(this.x_vals[start_i], gr.y_vals[start_i], `${gr.color}${opacity}`);
 					for (let i = start_i + 1; i < end_i; i += 1) {
 						this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
@@ -308,6 +327,42 @@
 			}
 		}
 
+		changeAxisStep() {
+			let changed = false;
+			for (let i = 0; i < this.x_legend.length; i += 1) {
+				const val = this.x_legend[i];
+				if (val.display) {
+					if (val.opacity !== 255) {
+						changed = true;
+						const delta = Date.now() - val.startTimestamp;
+						let deltaScale = delta / duration;
+						if (deltaScale > 1) {
+							deltaScale = 1;
+						}
+						if (deltaScale === 1) {
+							val.startTimestamp = -1;
+						}
+						val.opacity = Math.round(255 * deltaScale);
+					}
+				}
+				if (!val.display) {
+					if (val.opacity !== 0) {
+						changed = true;
+						const delta = Date.now() - val.startTimestamp;
+						let deltaScale = delta / duration;
+						if (deltaScale > 1) {
+							deltaScale = 1;
+						}
+						if (deltaScale === 1) {
+							val.startTimestamp = -1;
+						}
+						val.opacity = 255 - Math.round(255 * deltaScale);
+					}
+				}
+			}
+			return changed;
+		}
+
 		changeKeyStep(key) {
 			const val = this.changes[key];
 			if (val.startTimestamp === -1) {
@@ -328,7 +383,11 @@
 		}
 
 		changeAllStep() {
-			const somethingChanged = changingFields.reduce((keyChanged, key) => { return this.changeKeyStep(key) || keyChanged; }, false);
+			let somethingChanged = changingFields.reduce((keyChanged, key) => { return this.changeKeyStep(key) || keyChanged; }, false);
+
+			if (this.isDrawAxis) {
+				somethingChanged = this.changeAxisStep() || somethingChanged;
+			}
 
 			this.animateFrameId = null;
 			if (somethingChanged) {
