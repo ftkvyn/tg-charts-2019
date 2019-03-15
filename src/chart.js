@@ -24,6 +24,10 @@
 	let dataNum = 0;
 	const min_thumb_width = 50;
 
+	const x_legend_padding = 20;
+	const x_legend_vals_padding = 20;
+	const x_legend_val_width = 44;
+
 	const mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
 		zx = Symbol('Shift X'),
@@ -55,6 +59,8 @@
 			this.data = null;
 			this.x_vals = [];
 			this.graphs = [];
+
+			this.x_legend = [];
 		}
 
 		setData(data) {
@@ -67,8 +73,6 @@
 			this.x_vals = [];
 			this.graphs = [];
 			this.data = data;
-
-			// this.x_legend = [];
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
@@ -129,30 +133,53 @@
 			this[mx] -= dx;
 		}
 
+		static getDateText(timestamp) {
+			const date = new Date(timestamp);
+			return `${months[date.getMonth()]} ${date.getDate()}`;
+		}
+
 		drawAxis() {
 			if (!this.isDrawAxis) {
 				return;
 			}
-			this.ctx.beginPath();
+			// Configuration
 			this.ctx.lineWidth = this.thickness;
 			if (isLight) {
 				this.ctx.strokeStyle = axis_color;
 			} else {
 				this.ctx.strokeStyle = axis_color_dark;
 			}
-			this.ctx.beginPath();
-			this.ctx.moveTo(this.thickness, -this.height);
-			this.ctx.lineTo(this.thickness, 0 - this.thickness);
-			this.ctx.lineTo(this.width, 0 - this.thickness);
-			this.ctx.stroke();
-
 			this.ctx.font = '14px Arial';
-			const startDay = new Date(this[zx]);
-			const endDay = new Date(this[mx]);
 			this.ctx.fillStyle = isLight ? text_color_dark : text_color_dark;
-			this.ctx.fillText(`${months[startDay.getMonth()]} ${startDay.getDate()}`, 10, -10);
-			this.ctx.fillText(`${months[endDay.getMonth()]} ${endDay.getDate()}`, this.width - 50, -10);
+
+			// y = C lines
+			this.ctx.beginPath();
+			// ToDo: draw lines
+			this.ctx.moveTo(this.thickness, - x_legend_padding - this.thickness);
+			this.ctx.lineTo(this.width, - x_legend_padding - this.thickness);
+			this.ctx.stroke();
+			// y-legend
 			this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
+
+			// x-legend
+			// const startDayTxt = Chart.getDateText(this[zx]);
+			// const endDayTxt = Chart.getDateText(this[mx]);
+			// const endWidth = this.ctx.measureText(endDayTxt).width;
+			// this.ctx.fillText(startDayTxt, 0, 0);
+			// this.ctx.fillText(endDayTxt, this.width - endWidth, 0);
+
+			let nextFreePosition = 0;
+
+			for (let i = this.prev_start_i - 1; i < this.prev_end_i; i += 1) {
+				const txt = Chart.getDateText(this.x_vals[i]);
+				let x = this.translateX(this.x_vals[i]) - (x_legend_val_width / 2);
+				if (x < nextFreePosition) {
+					// do nothing - not display text
+				} else {
+					this.ctx.fillText(txt, x, 0);
+					nextFreePosition = x + x_legend_val_width + x_legend_vals_padding;
+				}
+			}
 		}
 
 		startDraw(orig_x0, orig_y0, color) {
@@ -205,7 +232,6 @@
 					const opacity = (`00${Math.round(this[gr.opacityKey]).toString(16)}`).substr(-2);
 					this.startDraw(this.x_vals[start_i], gr.y_vals[start_i], `${gr.color}${opacity}`);
 					for (let i = start_i + 1; i < end_i; i += 1) {
-						// ToDo: draw only visible points
 						this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
 					}
 					this.endDraw();
