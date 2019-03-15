@@ -70,6 +70,8 @@
 			this.graphs = [];
 
 			this.x_legend = [];
+			this.prevSkipItemsEachStep = undefined;
+			this.itemsOnScreen = undefined;
 		}
 
 		setData(data) {
@@ -83,6 +85,8 @@
 			this.x_legend = [];
 			this.graphs = [];
 			this.data = data;
+			this.prevSkipItemsEachStep = undefined;
+			this.itemsOnScreen = undefined;
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
@@ -155,12 +159,21 @@
 			if (!this.isDrawAxis) {
 				return;
 			}
-			const itemsOnScreen = Math.floor(this.canv.clientWidth / (x_legend_val_width));
+			let itemsOnScreen = Math.floor(this.width / (x_legend_val_width));
+			// Needed to prevent changing on scroll the map box.
+			if (itemsOnScreen % 2) {
+				itemsOnScreen -= 1;
+			}
 			const dxOnScreen = this.prev_end_i - this.prev_start_i + 1;
 			let skipItemsEachStep = Math.floor(dxOnScreen / itemsOnScreen);
 			if (skipItemsEachStep < 0) {
 				skipItemsEachStep = 0;
 			}
+			if (this.prevSkipItemsEachStep === skipItemsEachStep) {
+				return;
+			}
+			this.itemsOnScreen = itemsOnScreen;
+			this.prevSkipItemsEachStep = skipItemsEachStep;
 			let toSkip = 0;
 			for (let i = this.x_legend.length - 1; i >= 0; i -= 1) {
 				const val = this.x_legend[i];
@@ -248,16 +261,15 @@
 			this.ctx.stroke();
 		}
 
-		drawAll() {
+		drawAll(isInitial) {
 			this.clearChart();
 			this.calcScale();
 			this.drawChart();
-			// ToDo: calculateXLabels only on changing width
-			this.calculateXLabels();
+			this.calculateXLabels(isInitial);
 			this.drawAxis();
 		}
 
-		drawChart() {
+		setStartEnd() {
 			let start_i = this.x_vals.findIndex((val) => { return val >= this[zx]; });
 			if (start_i > 0) {
 				start_i -= 1; // Starting from the first point beyond the chart to the left;
@@ -271,24 +283,31 @@
 			if (end_i < this.x_vals.length) {
 				end_i += 1; // Going till the first one beyond the chart to the right;
 			}
+			this.start_i = start_i;
+			this.end_i = end_i;
+		}
+
+		drawChart() {
+			this.setStartEnd();
 
 			this.graphs.forEach((gr) => {
 				if (this[gr.opacityKey]) {
 					const opacity = getOpacity(this[gr.opacityKey]);
-					this.startDraw(this.x_vals[start_i], gr.y_vals[start_i], `${gr.color}${opacity}`);
-					for (let i = start_i + 1; i < end_i; i += 1) {
+					this.startDraw(this.x_vals[this.start_i], gr.y_vals[this.start_i], `${gr.color}${opacity}`);
+					for (let i = this.start_i + 1; i < this.end_i; i += 1) {
 						this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
 					}
 					this.endDraw();
 				}
 			});
-			this.calculateMaxY(start_i, end_i);
+			this.calculateMaxY();
 		}
 
-		calculateMaxY(start_i, end_i, force) {
-			if (this.prev_start_i !== start_i || this.prev_end_i !== end_i || force) {
-				this.prev_start_i = start_i || this.prev_start_i || 0;
-				this.prev_end_i = end_i || this.prev_end_i || 0;
+		calculateMaxY(force) {
+			this.setStartEnd();
+			if (this.prev_start_i !== this.start_i || this.prev_end_i !== this.end_i || force) {
+				this.prev_start_i = this.start_i || this.prev_start_i || 0;
+				this.prev_end_i = this.end_i || this.prev_end_i || 0;
 				const visibleCharts = this.graphs
 					.filter((ch) => { return ch.display; });
 				if (!visibleCharts.length) {
@@ -302,7 +321,7 @@
 						this.startChangeKey(my, newMax);
 					} else {
 						this[my] = newMax;
-						this.drawAll();
+						this.drawAll(true);
 					}
 				}
 			}
@@ -401,7 +420,7 @@
 		toggleChart(key) {
 			const chart = this.graphs.find((ch) => { return ch.opacityKey === key; });
 			chart.display = !chart.display;
-			this.calculateMaxY(null, null, true);
+			this.calculateMaxY(true);
 		}
 
 		generateControlButtons() {
@@ -697,7 +716,7 @@
 		mapChart.init();
 		mapChart.drawAll();
 		setMapBox(true);
-		mainChart.calculateMaxY();
+		mainChart.calculateMaxY(true);
 		mainChart.drawAll();
 	}
 
