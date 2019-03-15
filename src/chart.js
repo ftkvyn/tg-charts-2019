@@ -20,13 +20,16 @@
 	const axis_color_dark = '#344658';
 	const text_color_dark = '#788490';
 	const duration = 200; // ms
-	const padding_y = 0.01;
+	const padding_y = 0.08;
 	const padding_x = 0.003;
 	let dataNum = 0;
 	const min_thumb_width = 50;
 
 	const x_legend_padding = 20;
 	const x_legend_val_width = 60;
+
+	const y_legend_row_height = 50;
+	const y_legend_text_height = 10;
 
 	const mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
@@ -56,6 +59,7 @@
 		constructor(canv, height) {
 			this.width = canv.clientWidth;
 			this.height = height;
+			this.yLegendItemsCount = Math.round(height / (y_legend_row_height));
 			this.animateFrameId = null;
 			this.canv = canv;
 			this.ctx = canv.getContext('2d');
@@ -70,6 +74,8 @@
 			this.graphs = [];
 
 			this.x_legend = [];
+			this.y_legend = [];
+
 			this.prevSkipItemsEachStep = undefined;
 			this.itemsOnScreen = undefined;
 		}
@@ -83,6 +89,7 @@
 			this.prev_start_i = undefined;
 			this.x_vals = [];
 			this.x_legend = [];
+			this.y_legend = [];
 			this.graphs = [];
 			this.data = data;
 			this.prevSkipItemsEachStep = undefined;
@@ -134,7 +141,7 @@
 		}
 
 		translateY(orig_y) {
-			return Math.floor((-orig_y + this[zy]) * this.scale_y);
+			return Math.floor((-orig_y + this[zy]) * this.scale_y) - (this.isDrawAxis ? x_legend_padding : 0);
 		}
 
 		translateBackX(real_x) {
@@ -147,7 +154,11 @@
 
 		calcScale() {
 			this.scale_x = this.width / (this[mx] - this[zx]);
-			this.scale_y = this.height / (this[my] - this[zy]);
+			if (!this.isDrawAxis) {
+				this.scale_y = this.height / (this[my] - this[zy]);
+			} else {
+				this.scale_y = (this.height - x_legend_padding) / (this[my] - this[zy]);
+			}
 		}
 
 		moveX(dx) {
@@ -207,31 +218,40 @@
 			}
 			// Configuration
 			this.ctx.lineWidth = this.thickness;
+			let strokeStyle = null;
 			if (isLight) {
-				this.ctx.strokeStyle = axis_color;
+				strokeStyle = axis_color;
 			} else {
-				this.ctx.strokeStyle = axis_color_dark;
+				strokeStyle = axis_color_dark;
 			}
 			this.ctx.font = '14px Arial';
-			const initialColor = isLight ? text_color_dark : text_color_dark;
+			const textColor = isLight ? text_color_dark : text_color_dark;
 
-			// y = C lines
-			this.ctx.beginPath();
-			// ToDo: draw lines
-			this.ctx.moveTo(this.thickness, - x_legend_padding - this.thickness);
-			this.ctx.lineTo(this.width, - x_legend_padding - this.thickness);
-			this.ctx.stroke();
 			// y-legend
-			this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
+			for (let i = 0; i < this.y_legend.length; i += 1) {
+				const item = this.y_legend[i];
+				this.ctx.strokeStyle = strokeStyle;
+				this.ctx.beginPath();
+				this.ctx.moveTo(0, this.translateY(item.y));
+				this.ctx.lineTo(this.width, this.translateY(item.y));
+				this.ctx.stroke();
+				this.ctx.fillStyle = textColor;
+				this.ctx.fillText(`${item.y}`, 0, this.translateY(item.y) - y_legend_text_height);
+			}
+
+			// this.ctx.beginPath();
+			// // ToDo: draw lines
+			// this.ctx.moveTo(this.thickness, -x_legend_padding - this.thickness);
+			// this.ctx.lineTo(this.width, -x_legend_padding - this.thickness);
+			// this.ctx.stroke();
+			// // y-legend
+			// this.ctx.fillText(`${Math.round(this[my])}`, 10, -this.height + 20);
 
 			// x-legend
-			// ToDo: calculate amount of x-labels, recalculate it on resize or changing of a scale
-			//		 after recalculate - run process for hiding or showing ones that changed.
-
 			for (let i = this.prev_start_i - 1; i < this.prev_end_i; i += 1) {
 				const val = this.x_legend[i];
 				if (val.opacity) {
-					this.ctx.fillStyle = initialColor + getOpacity(val.opacity);
+					this.ctx.fillStyle = textColor + getOpacity(val.opacity);
 					const x = this.translateX(val.x);
 					this.ctx.fillText(val.name, x, 0);
 				}
@@ -264,9 +284,9 @@
 		drawAll(isInitial) {
 			this.clearChart();
 			this.calcScale();
-			this.drawChart();
 			this.calculateXLabels(isInitial);
 			this.drawAxis();
+			this.drawChart();
 		}
 
 		setStartEnd() {
@@ -317,6 +337,21 @@
 					.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
 				newMax += Math.round((newMax - this[zy]) * padding_y);
 				if (newMax !== 0 && newMax !== this[my]) {
+					if (this.isDrawAxis) {
+						// ToDo: start hiding old y-s;
+						this.y_legend = [];
+						let val = 0;
+						const step = Math.floor(newMax / this.yLegendItemsCount);
+						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
+							const item = {
+								y: val,
+								opacity: 255,
+								display: true,
+							};
+							val += step;
+							this.y_legend.push(item);
+						}
+					}
 					if (this[my]) {
 						this.startChangeKey(my, newMax);
 					} else {
