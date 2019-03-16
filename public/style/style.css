@@ -17,6 +17,7 @@ body {
 	position: relative;
 	margin: auto;
 	display: block;
+	padding: 8px;
 }
 
 a {
