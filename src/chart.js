@@ -168,16 +168,60 @@
 			this[mx] -= dx;
 		}
 
+		static hideOrShowXLabel(val, toSkip, isInitial) {
+			if (toSkip === 0) {
+				if (!val.display) {
+					val.display = true;
+					if (!isInitial) {
+						val.startTimestamp = Date.now();
+					} else {
+						val.opacity = 255;
+					}
+				}
+				return true;
+			}
+
+			if (val.display) {
+				val.display = false;
+				if (!isInitial) {
+					val.startTimestamp = Date.now();
+				} else {
+					val.opacity = 0;
+				}
+			} else {
+				// Speeding up hiding.
+				val.startTimestamp -= duration / 2;
+			}
+			return false;
+		}
+
+		processXLabels(from, to, skipItemsEachStep, isInitial) {
+			let step = 1;
+			if (from > to) {
+				step = -1;
+			}
+			let toSkip = 0;
+			for (let i = from; i !== to; i += step) {
+				if (this.x_legend[i]) {
+					if (Chart.hideOrShowXLabel(this.x_legend[i], toSkip, isInitial)) {
+						toSkip = skipItemsEachStep;
+					} else {
+						toSkip -= 1;
+					}
+				}
+			}
+		}
+
 		calculateXLabels(isInitial) {
 			if (!this.isDrawAxis) {
 				return;
 			}
-			const itemsOnScreen = Math.floor(this.width / (x_legend_val_width));
-			const dxOnScreen = this.prev_end_i - this.prev_start_i + 1;
 			const length = this[mx] - this[zx];
-			if (this.prevLength === length) {
+			if (Math.abs(this.prevLength - length) < 5) {
 				return;
 			}
+			const itemsOnScreen = Math.floor(this.width / (x_legend_val_width));
+			const dxOnScreen = this.prev_end_i - this.prev_start_i + 1;
 			this.prevLength = this[mx] - this[zx];
 			let skipItemsEachStep = Math.floor(dxOnScreen / itemsOnScreen);
 			if (skipItemsEachStep < 0) {
@@ -187,31 +231,18 @@
 				return;
 			}
 			this.prevSkipItemsEachStep = skipItemsEachStep;
-			let toSkip = 0;
-			for (let i = this.x_legend.length - 1; i >= 0; i -= 1) {
-				const val = this.x_legend[i];
-				if (toSkip === 0) {
-					if (!val.display) {
-						val.display = true;
-						if (!isInitial) {
-							val.startTimestamp = Date.now();
-						} else {
-							val.opacity = 255;
-						}
-					}
-					toSkip = skipItemsEachStep;
-				} else {
-					if (val.display) {
-						val.display = false;
-						if (!isInitial) {
-							val.startTimestamp = Date.now();
-						} else {
-							val.opacity = 0;
-						}
-					}
-					toSkip -= 1;
+			// this.processXLabels(this.x_legend.length - 1, -1, skipItemsEachStep, isInitial);
+			let start = this.prev_end_i - 1;
+			if (!isInitial) {
+				while (start > 0 && !this.x_legend[start].display) {
+					start -= 1;
 				}
 			}
+			if (start >= this.x_legend.length) {
+				start = this.x_legend.length - 1;
+			}
+			this.processXLabels(start, -1, skipItemsEachStep, isInitial);
+			this.processXLabels(start, this.x_legend.length, skipItemsEachStep, isInitial);
 		}
 
 		drawAxis() {
@@ -253,7 +284,7 @@
 					const val = this.x_legend[i];
 					if (val.opacity) {
 						this.ctx.fillStyle = textColor + getOpacity(val.opacity);
-						const x = this.translateX(val.x);
+						const x = this.translateX(val.x) - Math.round(x_legend_val_width / 2);
 						this.ctx.fillText(val.name, x, -3);
 					}
 				}
@@ -429,9 +460,6 @@
 				changed = Chart.processLegendEntry(val) || changed;
 			}
 
-			// ToDo: change animation here - first disappear in durantion / 2,
-			//		then appear new in dur/2 with delay of dur/2.
-			//		Maybe remove ones that were disappearing long before.
 			for (let i = 0; i < this.y_legend.length; i += 1) {
 				const val = this.y_legend[i];
 				changed = Chart.processLegendEntry(val) || changed;
