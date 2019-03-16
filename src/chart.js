@@ -96,6 +96,7 @@
 			this.prevSkipItemsEachStep = undefined;
 			this.itemsOnScreen = undefined;
 			this.prevLength = undefined;
+			this.prevVisibleItems = undefined;
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
@@ -212,6 +213,15 @@
 			}
 		}
 
+		isXLabelVisible(val) {
+			const x = this.translateX(val.x);
+			// If visible on the screen
+			if (x > (-x_legend_val_width / 2) && x < (this.width + (x_legend_val_width / 2))) {
+				return true;
+			}
+			return false;
+		}
+
 		calculateXLabels(isInitial) {
 			if (!this.isDrawAxis) {
 				return;
@@ -222,7 +232,7 @@
 			}
 			const itemsOnScreen = Math.floor(this.width / (x_legend_val_width));
 			const dxOnScreen = this.prev_end_i - this.prev_start_i + 1;
-			this.prevLength = this[mx] - this[zx];
+			this.prevLength = length;
 			let skipItemsEachStep = Math.floor(dxOnScreen / itemsOnScreen);
 			if (skipItemsEachStep < 0) {
 				skipItemsEachStep = 0;
@@ -230,8 +240,19 @@
 			if (this.prevSkipItemsEachStep === skipItemsEachStep) {
 				return;
 			}
+			if (!isInitial) {
+				let visibleItems = 0;
+				for (let i = 0; i < this.x_legend.length; i += 1) {
+					if (this.x_legend[i] && this.isXLabelVisible(this.x_legend[i]) && this.x_legend[i].display) {
+						visibleItems += 1;
+					}
+				}
+				if (this.prevVisibleItems === visibleItems) {
+					return;
+				}
+				this.prevVisibleItems = visibleItems;
+			}
 			this.prevSkipItemsEachStep = skipItemsEachStep;
-			// this.processXLabels(this.x_legend.length - 1, -1, skipItemsEachStep, isInitial);
 			let start = this.prev_end_i - 1;
 			if (!isInitial) {
 				while (start > 0 && !this.x_legend[start].display) {
