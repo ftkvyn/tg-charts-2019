@@ -247,10 +247,17 @@
 						visibleItems += 1;
 					}
 				}
-				if (this.prevVisibleItems === visibleItems) {
+				// ToDo: handle situation with change 6-7-6-7 or 5-6-5-6 and similar
+				if (visibleItems > 5) {
+					if (this.prevVisibleItems - visibleItems === -1) {
+						return;
+					}
+				}
+				if (visibleItems === this.prevVisibleItems) {
 					return;
 				}
 				this.prevVisibleItems = visibleItems;
+				// console.log(visibleItems);
 			}
 			this.prevSkipItemsEachStep = skipItemsEachStep;
 			let start = this.prev_end_i - 1;
