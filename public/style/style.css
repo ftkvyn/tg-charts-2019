@@ -90,6 +90,7 @@ a {
 
 .selected .thumb .invisible-addition {
 	position: absolute;
+	cursor: w-resize;
 	width: 20px;
 	height: 100%;
 	background: transparent;
