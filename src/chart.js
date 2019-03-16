@@ -341,8 +341,14 @@
 				if (newMax !== 0 && newMax !== this[my]) {
 					if (this.isDrawAxis) {
 						for (let i = 0; i < this.y_legend.length; i += 1) {
-							this.y_legend[i].display = false;
-							this.y_legend[i].startTimestamp = Date.now();
+							const item = this.y_legend[i];
+							if (item.display) {
+								item.display = false;
+								item.startTimestamp = Date.now();
+							} else {
+								// Speed up disappearing
+								item.startTimestamp -= duration / 2;
+							}
 						}
 						let val = 0;
 						const step = Math.floor(newMax / this.yLegendItemsCount);
@@ -425,6 +431,7 @@
 
 			// ToDo: change animation here - first disappear in durantion / 2,
 			//		then appear new in dur/2 with delay of dur/2.
+			//		Maybe remove ones that were disappearing long before.
 			for (let i = 0; i < this.y_legend.length; i += 1) {
 				const val = this.y_legend[i];
 				changed = Chart.processLegendEntry(val) || changed;
