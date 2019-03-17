@@ -97,6 +97,7 @@
 			this.itemsOnScreen = undefined;
 			this.prevLength = undefined;
 			this.prevVisibleItems = undefined;
+			this.prevVisibleItemsChange = undefined;
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
@@ -247,17 +248,18 @@
 						visibleItems += 1;
 					}
 				}
-				// ToDo: handle situation with change 6-7-6-7 or 5-6-5-6 and similar
-				if (visibleItems > 5) {
-					if (this.prevVisibleItems - visibleItems === -1) {
-						return;
-					}
-				}
 				if (visibleItems === this.prevVisibleItems) {
 					return;
 				}
+				if (this.prevVisibleItems) {
+					const visibleItemsChange = this.prevVisibleItems - visibleItems;
+					if (visibleItemsChange === -this.prevVisibleItemsChange) {
+						// Handling situation with change 6-7-6-7 or 5-6-5-6 and similar
+						return;
+					}
+					this.prevVisibleItemsChange = visibleItemsChange;
+				}
 				this.prevVisibleItems = visibleItems;
-				// console.log(visibleItems);
 			}
 			this.prevSkipItemsEachStep = skipItemsEachStep;
 			let start = this.prev_end_i - 1;
