@@ -953,6 +953,7 @@
 			mapChart.drawAll();
 			container_width = map_container.clientWidth;
 			moveChart(0);
+			// ToDo: handle when a lot of chart is visible and window is resized down.
 			setMapBox();
 		};
 
