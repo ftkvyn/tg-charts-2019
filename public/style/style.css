@@ -207,7 +207,7 @@ a {
 
 .info {
 	position: absolute;
-	top: 20px;
+	top: 0px;
 	border-width: 1px;
 	border-style: solid;
   border-color: #e3e3e3;
