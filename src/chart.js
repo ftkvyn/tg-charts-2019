@@ -12,6 +12,7 @@
 		return false;
 	};
 
+	const dark_background_color = '#1d2837';
 	const dark_color = '#242f3e';
 	const white_color = '#ffffff';
 	const black_color = '#000000';
@@ -342,12 +343,25 @@
 				} else {
 					strokeColor = axis_color_dark;
 				}
+				const x = this.translateX(this.x_vals[this.details_num]);
 				this.detailsCtx.lineWidth = this.axisThickness * 2;
 				this.detailsCtx.strokeStyle = strokeColor;
 				this.detailsCtx.beginPath();
-				this.detailsCtx.moveTo(this.translateX(this.x_vals[this.details_num]), this.translateY(0));
-				this.detailsCtx.lineTo(this.translateX(this.x_vals[this.details_num]), -this.height);
+				this.detailsCtx.moveTo(x, this.translateY(0));
+				this.detailsCtx.lineTo(x, -this.height);
 				this.detailsCtx.stroke();
+
+				this.graphs.forEach((gr) => {
+					if (gr.display) {
+						this.detailsCtx.lineWidth = this.thickness;
+						this.detailsCtx.strokeStyle = gr.color;
+						this.detailsCtx.fillStyle = isLight ? white_color : dark_background_color;
+						this.detailsCtx.beginPath();
+						this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
+						this.detailsCtx.fill();
+						this.detailsCtx.stroke();
+					}
+				});
 			}
 		}
 
