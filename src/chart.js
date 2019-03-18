@@ -343,6 +343,7 @@
 				} else {
 					strokeColor = axis_color_dark;
 				}
+				// ToDo: check if detailed_num changed. If not - do nothing.
 				const x = this.translateX(this.x_vals[this.details_num]);
 				this.detailsCtx.lineWidth = this.axisThickness * 2;
 				this.detailsCtx.strokeStyle = strokeColor;
@@ -350,6 +351,14 @@
 				this.detailsCtx.moveTo(x, this.translateY(0));
 				this.detailsCtx.lineTo(x, -this.height);
 				this.detailsCtx.stroke();
+
+				const oldInfo = this.infoBox.getElementsByClassName('item');
+				while (oldInfo.length > 0) {
+					this.infoBox.removeChild(oldInfo[0]);
+				}
+
+				// ToDo: add week day
+				this.infoBox.getElementsByClassName('date')[0].innerText = this.x_legend[this.details_num].name;
 
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
@@ -360,8 +369,26 @@
 						this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
 						this.detailsCtx.fill();
 						this.detailsCtx.stroke();
+
+						const infoHtml = `<div class="item">
+							<div class="value"></div>
+							<div class="name"></div>
+						</div>`;
+						const template = document.createElement('template');
+						template.innerHTML = infoHtml;
+						const infoEl = template.content.firstChild;
+						// ToDo: handle long values
+						infoEl.getElementsByClassName('value')[0].innerText = gr.y_vals[this.details_num];
+						infoEl.getElementsByClassName('name')[0].innerText = gr.name;
+						infoEl.style.color = gr.color;
+						this.infoBox.appendChild(infoEl);
 					}
 				});
+
+				this.infoBox.style.display = 'block';
+				// ToDo: check and set also top not to hide charts
+				// ToDo: limit possible left position
+				this.infoBox.style.left = `${x - 50}px`;
 			}
 		}
 
@@ -614,6 +641,7 @@
 			this.details_num = -1;
 			this.clearDetails();
 			this.drawDetails();
+			this.infoBox.style.display = 'none';
 		}
 
 		calculateDetailsOffset() {
@@ -640,6 +668,15 @@
 			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
 			this.detailsCanv.addEventListener('touchend', this.hideDetails.bind(this));
 			this.detailsCanv.addEventListener('touchcancel', this.hideDetails.bind(this));
+
+			const infoBoxHtml = `<div class="info" style="display:none;">
+				<div class="date"></div>
+			</div>`;
+			const template = document.createElement('template');
+			template.innerHTML = infoBoxHtml;
+			this.infoBox = template.content.firstChild;
+
+			this.detailsCanv.parentElement.appendChild(this.infoBox);
 		}
 
 		generateControlButtons() {

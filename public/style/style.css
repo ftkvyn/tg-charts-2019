@@ -22,6 +22,13 @@ body {
 
 .main-chart-container {
 	position: relative;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
+#details_chart {
+	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 
 a {
@@ -196,4 +203,41 @@ a {
     overflow: hidden;
     height: 60px;
     left: 0;
+}
+
+.info {
+	position: absolute;
+	top: 20px;
+	border-width: 1px;
+	border-style: solid;
+  border-color: #e3e3e3;
+	border-radius: 10px;
+	background: white;
+	padding: 10px;
+	z-index: 2;
+	box-shadow: 0px 0px 1px 1px rgba(227,227,227,0.5);
+	pointer-events: none;
+}
+
+.dark-theme .info {
+	background: #253241;
+	box-shadow: 0px 0px 2px 2px #1c242f96;
+	border-color: #253241;
+}
+
+.info .date {
+	font-size: 18px;
+	margin-bottom: 10px;
+	font-weight: bolder;
+}
+
+.info .item {
+	display:inline-block;
+	float: left;
+	margin-right: 10px;
+}
+
+.info .item .value {
+	font-size: 18px;
+	font-weight: bold;
 }
