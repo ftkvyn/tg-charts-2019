@@ -602,16 +602,30 @@
 			this.drawDetails();
 		}
 
+		calculateDetailsOffset() {
+			let parent = this.detailsCanv;
+			let offsetX = 0;
+			while (parent.offsetParent) {
+				offsetX += parent.offsetLeft - parent.scrollLeft;
+				parent = parent.offsetParent;
+			}
+			this.detailsCanvOffset = offsetX;
+		}
+
 		setUpHoverDetails(detailsCanvas) {
 			this.detailsCanv = detailsCanvas;
 			this.detailsCtx = detailsCanvas.getContext('2d');
+			this.calculateDetailsOffset();
 
 			this.detailsCanv.onmousemove = (event) => { this.showDetails(event.offsetX); };
-			// this.detailsCanv.addEventListener('touchmove', this.showDetails.bind(this));
+			this.detailsCanv.addEventListener('touchmove', (event) => {
+				const touch = event.changedTouches[0];
+				this.showDetails(touch.clientX - this.detailsCanvOffset);
+			});
 
 			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
-			// this.detailsCanv.addEventListener('touchend', this.hideDetails.bind(this));
-			// this.detailsCanv.addEventListener('touchcancel', this.hideDetails.bind(this));
+			this.detailsCanv.addEventListener('touchend', this.hideDetails.bind(this));
+			this.detailsCanv.addEventListener('touchcancel', this.hideDetails.bind(this));
 		}
 
 		generateControlButtons() {
@@ -920,6 +934,7 @@
 		global.onresize = () => {
 			// ToDo: handle animations that are in progress
 			mainChart.init();
+			mainChart.calculateDetailsOffset();
 			mapChart.init();
 			mapChart.drawAll();
 			container_width = map_container.clientWidth;
