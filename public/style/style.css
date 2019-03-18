@@ -20,6 +20,10 @@ body {
 	padding: 8px;
 }
 
+.main-chart-container {
+	position: relative;
+}
+
 a {
   color: #00B7FF;
 }

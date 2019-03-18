@@ -90,6 +90,9 @@
 			this.prev_start_i = undefined;
 			this.x_vals = [];
 			this.x_legend = [];
+
+			this.details_x = undefined;
+
 			this.y_legend = [];
 			this.graphs = [];
 			this.data = data;
@@ -138,6 +141,9 @@
 		setChartWidths() {
 			this.width = this.canv.clientWidth;
 			this.canv.width = this.width * 2;
+			if (this.detailsCanv) {
+				this.detailsCanv.width = this.width * 2;
+			}
 		}
 
 		translateX(orig_x) {
@@ -154,6 +160,10 @@
 
 		clearChart() {
 			this.ctx.clearRect(0, 0, this.canv.width, -this.canv.height);
+		}
+
+		clearDetails() {
+			this.detailsCtx.clearRect(0, 0, this.canv.width, -this.canv.height);
 		}
 
 		calcScale() {
@@ -232,6 +242,7 @@
 				return;
 			}
 			const itemsOnScreen = Math.floor(this.width / (x_legend_val_width));
+			// eslint-disable-next-line no-mixed-operators
 			const dxOnScreen = this.prev_end_i - this.prev_start_i + 1;
 			this.prevLength = length;
 			let skipItemsEachStep = Math.floor(dxOnScreen / itemsOnScreen);
@@ -321,6 +332,25 @@
 			}
 		}
 
+		drawDetails() {
+			// details
+			if (this.isDrawAxis && this.details_num > -1) {
+				// Configuration
+				let strokeColor = null;
+				if (isLight) {
+					strokeColor = axis_color;
+				} else {
+					strokeColor = axis_color_dark;
+				}
+				this.detailsCtx.lineWidth = this.axisThickness * 2;
+				this.detailsCtx.strokeStyle = strokeColor;
+				this.detailsCtx.beginPath();
+				this.detailsCtx.moveTo(this.translateX(this.x_vals[this.details_num]), this.translateY(0));
+				this.detailsCtx.lineTo(this.translateX(this.x_vals[this.details_num]), -this.height);
+				this.detailsCtx.stroke();
+			}
+		}
+
 		startDraw(orig_x0, orig_y0, color) {
 			this.ctx.lineWidth = this.thickness;
 			this.ctx.strokeStyle = color;
@@ -350,6 +380,10 @@
 			this.calculateXLabels(isInitial);
 			this.drawAxis();
 			this.drawChart();
+			if (this.detailsCanv) {
+				this.clearDetails();
+				this.drawDetails();
+			}
 		}
 
 		setStartEnd() {
@@ -443,6 +477,11 @@
 			this.setChartWidths();
 			this.ctx.scale(2, 2);
 			this.ctx.translate(0, this.height);
+
+			if (this.detailsCtx) {
+				this.detailsCtx.scale(2, 2);
+				this.detailsCtx.translate(0, this.height);
+			}
 		}
 
 		startChangeKey(key, targetVal) {
@@ -538,6 +577,43 @@
 			this.calculateMaxY(true);
 		}
 
+		showDetails(offsetX) {
+			// console.log(event);
+			// this.details_x = event.offsetX;
+			const data_x = this.translateBackX(offsetX);
+			this.details_num = -1;
+			let prevDelta = Infinity;
+			for (let i = this.prev_start_i; i < this.prev_end_i; i += 1) {
+				if (this.x_vals[i]) {
+					const delta = Math.abs(this.x_vals[i] - data_x);
+					if (delta < prevDelta) {
+						prevDelta = delta;
+						this.details_num = i;
+					}
+				}
+			}
+			this.clearDetails();
+			this.drawDetails();
+		}
+
+		hideDetails() {
+			this.details_num = -1;
+			this.clearDetails();
+			this.drawDetails();
+		}
+
+		setUpHoverDetails(detailsCanvas) {
+			this.detailsCanv = detailsCanvas;
+			this.detailsCtx = detailsCanvas.getContext('2d');
+
+			this.detailsCanv.onmousemove = (event) => { this.showDetails(event.offsetX); };
+			// this.detailsCanv.addEventListener('touchmove', this.showDetails.bind(this));
+
+			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
+			// this.detailsCanv.addEventListener('touchend', this.hideDetails.bind(this));
+			// this.detailsCanv.addEventListener('touchcancel', this.hideDetails.bind(this));
+		}
+
 		generateControlButtons() {
 			const btns = this.graphs.map((gr) => {
 				const template = document.createElement('template');
@@ -574,6 +650,7 @@
 	const bodyEl = document.getElementsByTagName('body')[0];
 	const appEl = document.getElementById('app');
 	const main_chart = document.getElementById('main_chart');
+	const details_chart = document.getElementById('details_chart');
 	const chart_map = document.getElementById('chart_map');
 	const height = 300,
 		map_height = 40;
@@ -583,6 +660,7 @@
 	mapChart.isDrawAxis = false;
 	mapChart.thickness = 1.2;
 	mapChart.entangledChart = mainChart;
+	mainChart.setUpHoverDetails(details_chart);
 
 	// ====== UI setup ====== //
 
