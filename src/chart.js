@@ -1,44 +1,39 @@
 /* eslint-disable no-continue */
 /* jshint esversion: 6 */
 (function (global) {
-	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+	// ==== Common things ==== //
 	// eslint-disable-next-line prefer-destructuring
-	const document = global.document;
-	const requestAnimationFrame = global.requestAnimationFrame || global.mozRequestAnimationFrame ||
+	const document = global.document,
+		requestAnimationFrame = global.requestAnimationFrame || global.mozRequestAnimationFrame ||
 	global.webkitRequestAnimationFrame || global.msRequestAnimationFrame;
 	global.requestAnimationFrame = requestAnimationFrame;
 
-	document.getElementById('app').onselectstart = function () {
-		return false;
-	};
-
-	const dark_background_color = '#1d2837';
-	const dark_color = '#242f3e';
-	const white_color = '#ffffff';
-	const black_color = '#000000';
 	let isLight = false;
-	const axis_color = '#f2f4f5';
-	const axis_color_dark = '#303d4a';
-	const text_color_dark = '#788490';
-	const duration = 200; // ms
-	const padding_y = 0.08;
-	const padding_x = 0.003;
-	let dataNum = 0;
-	const min_thumb_width = 50;
 
-	const x_legend_padding = 20;
-	const x_legend_val_width = 60;
-
-	const y_legend_row_height = 50;
-	const y_legend_text_height = 10;
-
-	const mx = Symbol('Max X'),
+	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+		days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+		dark_background_color = '#1d2837',
+		dark_color = '#242f3e',
+		white_color = '#ffffff',
+		black_color = '#000000',
+		axis_color = '#f2f4f5',
+		axis_color_dark = '#303d4a',
+		text_color_dark = '#788490',
+		duration = 200, // mS
+		padding_y = 0.08,
+		padding_x = 0.003,
+		min_thumb_width = 50,
+		x_legend_padding = 20,
+		x_legend_val_width = 60,
+		y_legend_row_height = 50,
+		y_legend_text_height = 10,
+		mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
 		zx = Symbol('Shift X'),
-		zy = Symbol('Shift Y');
+		zy = Symbol('Shift Y'),
+		changingFields = [mx, my, zx, zy];
 
-	const changingFields = [mx, my, zx, zy];
+	let dataNum = 0;
 
 	function initChangesObject(key) {
 		this[key] = {
