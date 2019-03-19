@@ -9,8 +9,6 @@
 	global.webkitRequestAnimationFrame || global.msRequestAnimationFrame;
 	global.requestAnimationFrame = requestAnimationFrame;
 
-	let isLight = false;
-
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 		days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
 		dark_background_color = '#1d2837',
@@ -303,13 +301,13 @@
 			}
 			// Configuration
 			let strokeColor = null;
-			if (isLight) {
+			if (this.isLight) {
 				strokeColor = axis_color;
 			} else {
 				strokeColor = axis_color_dark;
 			}
 			this.ctx.font = '14px Arial';
-			const textColor = isLight ? text_color_dark : text_color_dark;
+			const textColor = this.isLight ? text_color_dark : text_color_dark;
 
 			// y-legend
 			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
@@ -353,7 +351,7 @@
 				this.clearDetails();
 				// Configuration
 				let strokeColor = null;
-				if (isLight) {
+				if (this.isLight) {
 					strokeColor = axis_color;
 				} else {
 					strokeColor = axis_color_dark;
@@ -380,7 +378,7 @@
 					if (gr.display) {
 						this.detailsCtx.lineWidth = this.thickness;
 						this.detailsCtx.strokeStyle = gr.color;
-						this.detailsCtx.fillStyle = isLight ? white_color : dark_background_color;
+						this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
 						this.detailsCtx.beginPath();
 						this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
 						this.detailsCtx.fill();
@@ -803,6 +801,8 @@
 			this.thumb_width = this.thumb.offsetWidth;
 			this.overlay_left.style.width = `${this.container_width - this.thumb_width}px`;
 
+			this.isLight = false;
+
 			this.setupAllEvents();
 		}
 
@@ -1006,7 +1006,7 @@
 		}
 
 		setColors() {
-			if (isLight) {
+			if (this.isLight) {
 				this.appContainerEl.style.background = white_color;
 				this.appContainerEl.style.color = black_color;
 				this.appContainerEl.classList.remove('dark-theme');
@@ -1015,6 +1015,8 @@
 				this.appContainerEl.style.color = white_color;
 				this.appContainerEl.classList.add('dark-theme');
 			}
+			this.mainChart.isLight = this.isLight;
+			this.mapChart.isLight = this.isLight;
 		}
 
 		run(chartNum) {
@@ -1055,14 +1057,14 @@
 			};
 
 			this.dark_link.onclick = () => {
-				isLight = false;
+				this.isLight = false;
 				this.run(this.dataNum);
 				this.dark_link.style.display = 'none';
 				this.light_link.style.display = 'initial';
 			};
 
 			this.light_link.onclick = () => {
-				isLight = true;
+				this.isLight = true;
 				this.run(this.dataNum);
 				this.light_link.style.display = 'none';
 				this.dark_link.style.display = 'initial';
