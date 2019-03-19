@@ -3,13 +3,18 @@ html{
 }
 
 body {
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+	font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 	margin: 0;
 	height: 100%;
 }
 
-#app {
-  -moz-user-select: none;
+.app-container {
+	width: 100%;
+	clear: both;
+}
+
+.app {
+	-moz-user-select: none;
 	-webkit-user-select: none;
 	max-width: 1000px;
 	min-height: 560px;
@@ -26,7 +31,7 @@ body {
 	-webkit-user-select: none;
 }
 
-#details_chart {
+.details_chart {
 	-moz-user-select: none;
 	-webkit-user-select: none;
 }

@@ -9,41 +9,6 @@
 	<title>Charts</title>
 </head>
 <body>
-	<div id="app">
-		<p>Chart</p>
-		<div class="main-chart-container">
-			<canvas height="600" style="width:100%;height:300px;" id="main_chart"></canvas>
-			<canvas height="600" style="width:100%;height:300px;position: absolute;left: 0;top: 0;z-index: 1;" id="details_chart"></canvas>
-		</div>
-		<div style="padding-top:20px;">
-			<div class="map_container" id='map_container'>
-				<div class="overlay overlay_left" id="overlay_left"></div>
-				<div class="selected" id="thumb" style="right:0;width:100px;">
-					<div id="thumb_left" class="thumb thumb_left">
-						<div class="invisible-addition"></div>
-					</div>
-					<div id="thumb_right" class="thumb thumb_right">
-						<div class="invisible-addition"></div>
-					</div>
-				</div>
-				<div class="overlay overlay_right" id="overlay_right"></div>
-				<canvas height="80" style="width:100%;height:40px;margin-top:2px;" id="chart_map"></canvas>
-			</div>
-		</div>
-		<div class="bottom-container">
-			<div class="chart-links">
-				<a class="chart-link">1</a>
-				<a class="chart-link">2</a>
-				<a class="chart-link">3</a>
-				<a class="chart-link">4</a>
-				<a class="chart-link">5</a>
-			</div>
-			<div class="chart-links" style="bottom:0;">
-				<a id="set-theme-dark" style="display:none;" class="theme-link">Switch to night mode</a>
-				<a id="set-theme-light" class="theme-link">Switch to day mode</a>
-			</div>
-		</div>
-	</div>
 	<script src="/js/data.js"></script>
 	<script src="/js/chart.js"></script>
 </body>

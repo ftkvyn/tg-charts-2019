@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable no-continue */
 /* jshint esversion: 6 */
 (function (global) {
@@ -32,8 +33,6 @@
 		zx = Symbol('Shift X'),
 		zy = Symbol('Shift Y'),
 		changingFields = [mx, my, zx, zy];
-
-	let dataNum = 0;
 
 	function initChangesObject(key) {
 		this[key] = {
@@ -651,8 +650,6 @@
 		}
 
 		showDetails(offsetX) {
-			// console.log(event);
-			// this.details_x = event.offsetX;
 			const data_x = this.translateBackX(offsetX);
 			this.details_num = -1;
 			let prevDelta = Infinity;
@@ -742,313 +739,337 @@
 		}
 	}
 
-	const bodyEl = document.getElementsByTagName('body')[0];
-	const appEl = document.getElementById('app');
-	const main_chart = document.getElementById('main_chart');
-	const details_chart = document.getElementById('details_chart');
-	const chart_map = document.getElementById('chart_map');
-	const height = 300,
-		map_height = 40;
+	class ChartContainer {
+		constructor(parentEl) {
+			this.rootEl = parentEl;
+			const template = document.createElement('template');
+			const appElHtml = `<div class="app-container">
+				<div class="app">
+					<p>Chart</p>
+					<div class="main-chart-container">
+						<canvas height="600" style="width:100%;height:300px;" class="main_chart"></canvas>
+						<canvas height="600" style="width:100%;height:300px;position: absolute;left: 0;top: 0;z-index: 1;" class="details_chart"></canvas>
+					</div>
+					<div style="padding-top:20px;">
+						<div class="map_container" class='map_container'>
+							<div class="overlay overlay_left" ></div>
+							<div class="selected" style="right:0;width:100px;">
+								<div class="thumb thumb_left">
+									<div class="invisible-addition"></div>
+								</div>
+								<div class="thumb thumb_right">
+									<div class="invisible-addition"></div>
+								</div>
+							</div>
+							<div class="overlay overlay_right"></div>
+							<canvas height="80" style="width:100%;height:40px;margin-top:2px;" class="chart_map"></canvas>
+						</div>
+					</div>
+					<div class="bottom-container">
+						<div class="chart-links" style="bottom:0;">
+							<a style="display:none;" class="theme-link set-theme-dark">Switch to night mode</a>
+							<a class="theme-link set-theme-light">Switch to day mode</a>
+						</div>
+					</div>
+				</div>
+				</div>`;
+			template.innerHTML = appElHtml;
+			this.appContainerEl = template.content.firstChild;
+			this.rootEl.appendChild(this.appContainerEl);
+			this.appEl = this.appContainerEl.firstElementChild;
+			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
+			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
+			this.chart_map = this.appEl.getElementsByClassName('chart_map')[0];
+			this.height = 300;
+			this.map_height = 40;
 
-	const mainChart = new Chart(main_chart, height);
-	const mapChart = new Chart(chart_map, map_height);
-	mapChart.isDrawAxis = false;
-	mapChart.thickness = 1.2;
-	mapChart.entangledChart = mainChart;
-	mainChart.setUpHoverDetails(details_chart);
+			this.mainChart = new Chart(this.main_chart, this.height);
+			this.mapChart = new Chart(this.chart_map, this.map_height);
+			this.mapChart.isDrawAxis = false;
+			this.mapChart.thickness = 1.2;
+			this.mapChart.entangledChart = this.mainChart;
+			this.mainChart.setUpHoverDetails(this.details_chart);
 
-	// ====== UI setup ====== //
+			this.map_container = this.appEl.getElementsByClassName('map_container')[0];
+			this.container_width = this.map_container.clientWidth;
+			this.thumb = this.appEl.getElementsByClassName('selected')[0];
+			this.thumb_left = this.appEl.getElementsByClassName('thumb_left')[0];
+			this.thumb_right = this.appEl.getElementsByClassName('thumb_right')[0];
+			this.overlay_left = this.appEl.getElementsByClassName('overlay_left')[0];
+			this.overlay_right = this.appEl.getElementsByClassName('overlay_right')[0];
+			this.dark_link = this.appEl.getElementsByClassName('set-theme-dark')[0];
+			this.light_link = this.appEl.getElementsByClassName('set-theme-light')[0];
 
-	const map_container = document.getElementById('map_container');
-	let container_width = map_container.clientWidth;
-	const thumb = document.getElementById('thumb');
-	const thumb_left = document.getElementById('thumb_left');
-	const thumb_right = document.getElementById('thumb_right');
-	const overlay_left = document.getElementById('overlay_left');
-	const overlay_right = document.getElementById('overlay_right');
-	const dark_link = document.getElementById('set-theme-dark');
-	const light_link = document.getElementById('set-theme-light');
+			this.thumb_width = this.thumb.offsetWidth;
+			this.overlay_left.style.width = `${this.container_width - this.thumb_width}px`;
 
-	thumb.onselectstart = function () {
-		return false;
-	};
-
-	let thumb_width = thumb.offsetWidth;
-	overlay_left.style.width = `${container_width - thumb_width}px`;
-
-	function setMapBox(isInitial) {
-		if (container_width < thumb_width) {
-			thumb_width = 200;
-			thumb.style.width = `${thumb_width}px`;
+			this.setupAllEvents();
 		}
-		const right = +thumb.style.right.slice(0, -2);
-		const real_from = container_width - thumb_width - right;
-		const real_to = real_from + thumb_width;
-		const from = mapChart.translateBackX(real_from);
-		const to = mapChart.translateBackX(real_to);
 
-		if (!isInitial) {
-			mainChart.startChangeKey(zx, from);
-			mainChart.startChangeKey(mx, to);
-		} else {
-			mainChart[zx] = from;
-			mainChart[mx] = to;
-		}
-	}
+		setMapBox(isInitial) {
+			if (this.container_width < this.thumb_width) {
+				this.thumb_width = 200;
+				this.thumb.style.width = `${this.thumb_width}px`;
+			}
+			const right = +this.thumb.style.right.slice(0, -2);
+			const real_from = this.container_width - this.thumb_width - right;
+			const real_to = real_from + this.thumb_width;
+			const from = this.mapChart.translateBackX(real_from);
+			const to = this.mapChart.translateBackX(real_to);
 
-	function moveChart(dx) {
-		let dx_int = Math.round(dx);
-		const right = +thumb.style.right.slice(0, -2);
-		if (right - dx_int < 0) {
-			dx_int = right;
+			if (!isInitial) {
+				this.mainChart.startChangeKey(zx, from);
+				this.mainChart.startChangeKey(mx, to);
+			} else {
+				this.mainChart[zx] = from;
+				this.mainChart[mx] = to;
+			}
 		}
-		// eslint-disable-next-line no-mixed-operators
-		if (container_width - right - thumb_width + dx_int < 0) {
+
+		moveChart(dx) {
+			let dx_int = Math.round(dx);
+			const right = +this.thumb.style.right.slice(0, -2);
+			if (right - dx_int < 0) {
+				dx_int = right;
+			}
 			// eslint-disable-next-line no-mixed-operators
-			dx_int = right + thumb_width - container_width;
-		}
-		thumb.style.right = `${right - dx_int}px`;
-
-		overlay_right.style.width = `${right - dx_int}px`;
-		// eslint-disable-next-line no-mixed-operators
-		overlay_left.style.width = `${container_width - right - thumb_width + dx_int}px`;
-
-		setMapBox();
-	}
-
-	function moveLeftBorder(dx) {
-		let dx_int = Math.round(dx);
-		const left_width = overlay_left.offsetWidth;
-		if (left_width + dx_int < 0) {
-			dx_int = -left_width;
-		}
-		if (thumb_width - dx_int < min_thumb_width) {
-			dx_int = thumb_width - min_thumb_width;
-		}
-		thumb_width -= dx_int;
-		thumb.style.width = `${thumb_width}px`;
-
-		overlay_left.style.width = `${left_width + dx_int}px`;
-
-		setMapBox();
-	}
-
-	function moveRightBorder(dx) {
-		let dx_int = Math.round(dx);
-		const right_width = overlay_right.offsetWidth;
-		const right = +thumb.style.right.slice(0, -2);
-		if (right_width - dx_int < 0) {
-			dx_int = right_width;
-		}
-		if (thumb_width + dx_int < min_thumb_width) {
-			dx_int = min_thumb_width - thumb_width;
-		}
-		thumb_width += dx_int;
-		thumb.style.width = `${thumb_width}px`;
-		thumb.style.right = `${right - dx_int}px`;
-
-		overlay_right.style.width = `${right_width - dx_int}px`;
-
-		setMapBox();
-	}
-
-	function setupTouchEvents() {
-		let prevTouch = null;
-		let dragThumbStart = false;
-		let dragLeftStart = false;
-		let dragRightStart = false;
-
-		function touchMove(event) {
-			let touch = event.changedTouches[0];
-			if (event.changedTouches.length > 1 && prevTouch) {
-				const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
-				if (touches.length) {
-					[touch] = touches;
-				}
+			if (this.container_width - right - this.thumb_width + dx_int < 0) {
+				// eslint-disable-next-line no-mixed-operators
+				dx_int = right + this.thumb_width - this.container_width;
 			}
-			if (prevTouch && touch) {
-				const dx = touch.pageX - prevTouch.pageX;
+			this.thumb.style.right = `${right - dx_int}px`;
+
+			this.overlay_right.style.width = `${right - dx_int}px`;
+			// eslint-disable-next-line no-mixed-operators
+			this.overlay_left.style.width = `${this.container_width - right - this.thumb_width + dx_int}px`;
+
+			this.setMapBox();
+		}
+
+		moveLeftBorder(dx) {
+			let dx_int = Math.round(dx);
+			const left_width = this.overlay_left.offsetWidth;
+			if (left_width + dx_int < 0) {
+				dx_int = -left_width;
+			}
+			if (this.thumb_width - dx_int < min_thumb_width) {
+				dx_int = this.thumb_width - min_thumb_width;
+			}
+			this.thumb_width -= dx_int;
+			this.thumb.style.width = `${this.thumb_width}px`;
+
+			this.overlay_left.style.width = `${left_width + dx_int}px`;
+
+			this.setMapBox();
+		}
+
+		moveRightBorder(dx) {
+			let dx_int = Math.round(dx);
+			const right_width = this.overlay_right.offsetWidth;
+			const right = +this.thumb.style.right.slice(0, -2);
+			if (right_width - dx_int < 0) {
+				dx_int = right_width;
+			}
+			if (this.thumb_width + dx_int < min_thumb_width) {
+				dx_int = min_thumb_width - this.thumb_width;
+			}
+			this.thumb_width += dx_int;
+			this.thumb.style.width = `${this.thumb_width}px`;
+			this.thumb.style.right = `${right - dx_int}px`;
+
+			this.overlay_right.style.width = `${right_width - dx_int}px`;
+
+			this.setMapBox();
+		}
+
+		setupTouchEvents() {
+			let prevTouch = null;
+			let dragThumbStart = false;
+			let dragLeftStart = false;
+			let dragRightStart = false;
+
+			function touchMove(event) {
+				let touch = event.changedTouches[0];
+				if (event.changedTouches.length > 1 && prevTouch) {
+					const touches = event.changedTouches.filter((e) => { return e.identifier === prevTouch.identifier; });
+					if (touches.length) {
+						[touch] = touches;
+					}
+				}
+				if (prevTouch && touch) {
+					const dx = touch.pageX - prevTouch.pageX;
+					if (dragThumbStart) {
+						this.moveChart(dx);
+					} else if (dragLeftStart) {
+						this.moveLeftBorder(dx);
+					} if (dragRightStart) {
+						this.moveRightBorder(dx);
+					}
+				}
+				prevTouch = touch;
+			}
+
+			this.thumb.addEventListener('touchstart', (event) => {
+				if (!prevTouch) {
+					// Handling only the first touch
+					[prevTouch] = event.changedTouches;
+					dragThumbStart = true;
+				}
+			});
+
+			this.thumb_left.addEventListener('touchstart', (event) => {
+				if (!prevTouch) {
+					// Handling only the first touch
+					[prevTouch] = event.changedTouches;
+					dragLeftStart = true;
+				}
+			});
+
+			this.thumb_right.addEventListener('touchstart', (event) => {
+				if (!prevTouch) {
+					// Handling only the first touch
+					[prevTouch] = event.changedTouches;
+					dragRightStart = true;
+				}
+			});
+
+			this.thumb.addEventListener('touchmove', touchMove.bind(this));
+			this.thumb_left.addEventListener('touchmove', touchMove.bind(this));
+			this.thumb_right.addEventListener('touchmove', touchMove.bind(this));
+			this.overlay_left.addEventListener('touchmove', touchMove.bind(this));
+			this.overlay_left.addEventListener('touchmove', touchMove.bind(this));
+
+			function touchEnd() {
+				prevTouch = null;
+				dragThumbStart = false;
+				dragLeftStart = false;
+				dragRightStart = false;
+			}
+
+			this.thumb.addEventListener('touchend', touchEnd.bind(this));
+
+			this.thumb.addEventListener('touchcancel', touchEnd.bind(this));
+		}
+
+		setupMouseEvents() {
+			let dragThumbStart = false;
+			let dragLeftStart = false;
+			let dragRightStart = false;
+			let prevMouseX = 0;
+
+			function handleMouseMove(event) {
+				if (!dragThumbStart && !dragLeftStart && !dragRightStart) {
+					return;
+				}
+				const dx = event.clientX - prevMouseX;
+				prevMouseX = event.clientX;
 				if (dragThumbStart) {
-					moveChart(dx);
+					this.moveChart(dx);
 				} else if (dragLeftStart) {
-					moveLeftBorder(dx);
+					this.moveLeftBorder(dx);
 				} if (dragRightStart) {
-					moveRightBorder(dx);
+					this.moveRightBorder(dx);
 				}
 			}
-			prevTouch = touch;
-		}
 
-		thumb.addEventListener('touchstart', (event) => {
-			if (!prevTouch) {
-				// Handling only the first touch
-				[prevTouch] = event.changedTouches;
-				dragThumbStart = true;
-			}
-		});
-
-		thumb_left.addEventListener('touchstart', (event) => {
-			if (!prevTouch) {
-				// Handling only the first touch
-				[prevTouch] = event.changedTouches;
+			this.thumb_left.onmousedown = (event) => {
 				dragLeftStart = true;
-			}
-		});
+				event.cancelBubble = true;
+				prevMouseX = event.clientX;
+				return false;
+			};
 
-		thumb_right.addEventListener('touchstart', (event) => {
-			if (!prevTouch) {
-				// Handling only the first touch
-				[prevTouch] = event.changedTouches;
+			this.thumb_right.onmousedown = (event) => {
 				dragRightStart = true;
-			}
-		});
+				event.cancelBubble = true;
+				prevMouseX = event.clientX;
+				return false;
+			};
 
-		thumb.addEventListener('touchmove', touchMove);
-		thumb_left.addEventListener('touchmove', touchMove);
-		thumb_right.addEventListener('touchmove', touchMove);
-		overlay_left.addEventListener('touchmove', touchMove);
-		overlay_left.addEventListener('touchmove', touchMove);
+			this.thumb.onmousedown = (event) => {
+				dragThumbStart = true;
+				prevMouseX = event.clientX;
+			};
 
-		function touchEnd() {
-			prevTouch = null;
-			dragThumbStart = false;
-			dragLeftStart = false;
-			dragRightStart = false;
+			this.thumb.onmousemove = handleMouseMove.bind(this);
+			this.thumb_left.onmousemove = handleMouseMove.bind(this);
+			this.thumb_right.onmousemove = handleMouseMove.bind(this);
+			this.overlay_left.onmousemove = handleMouseMove.bind(this);
+			this.overlay_right.onmousemove = handleMouseMove.bind(this);
+
+			document.onmouseup = () => {
+				dragThumbStart = false;
+				dragLeftStart = false;
+				dragRightStart = false;
+				prevMouseX = 0;
+			};
 		}
 
-		thumb.addEventListener('touchend', touchEnd);
-
-		thumb.addEventListener('touchcancel', touchEnd);
-	}
-
-	function setupMouseEvents() {
-		let dragThumbStart = false;
-		let dragLeftStart = false;
-		let dragRightStart = false;
-		let prevMouseX = 0;
-
-		function handleMouseMove(event) {
-			if (!dragThumbStart && !dragLeftStart && !dragRightStart) {
-				return;
-			}
-			const dx = event.clientX - prevMouseX;
-			prevMouseX = event.clientX;
-			if (dragThumbStart) {
-				moveChart(dx);
-			} else if (dragLeftStart) {
-				moveLeftBorder(dx);
-			} if (dragRightStart) {
-				moveRightBorder(dx);
+		setColors() {
+			if (isLight) {
+				this.appContainerEl.style.background = white_color;
+				this.appContainerEl.style.color = black_color;
+				this.appContainerEl.classList.remove('dark-theme');
+			} else {
+				this.appContainerEl.style.background = dark_color;
+				this.appContainerEl.style.color = white_color;
+				this.appContainerEl.classList.add('dark-theme');
 			}
 		}
 
-		thumb_left.onmousedown = (event) => {
-			dragLeftStart = true;
-			event.cancelBubble = true;
-			prevMouseX = event.clientX;
-			return false;
-		};
+		run(chartNum) {
+			this.dataNum = chartNum;
+			this.setColors();
+			this.mainChart.setData(data[chartNum]);
+			this.mapChart.entangledChart = this.mainChart;
+			this.mapChart.setData(data[chartNum]);
 
-		thumb_right.onmousedown = (event) => {
-			dragRightStart = true;
-			event.cancelBubble = true;
-			prevMouseX = event.clientX;
-			return false;
-		};
+			const btns = this.mapChart.generateControlButtons();
+			const oldBtns = this.appEl.getElementsByClassName('btn');
+			while (oldBtns.length > 0) {
+				this.appEl.removeChild(oldBtns[0]);
+			}
+			btns.forEach((btn) => {
+				this.appEl.appendChild(btn);
+			});
 
-		thumb.onmousedown = (event) => {
-			dragThumbStart = true;
-			prevMouseX = event.clientX;
-		};
+			this.mainChart.init();
+			this.mapChart.init();
+			this.mapChart.calculateMaxY(true);
+			this.setMapBox(true);
+			this.mainChart.calculateMaxY(true);
+		}
 
-		thumb.onmousemove = handleMouseMove;
-		thumb_left.onmousemove = handleMouseMove;
-		thumb_right.onmousemove = handleMouseMove;
-		overlay_left.onmousemove = handleMouseMove;
-		overlay_right.onmousemove = handleMouseMove;
+		setupAllEvents() {
+			this.setupTouchEvents();
+			this.setupMouseEvents();
 
-		document.onmouseup = () => {
-			dragThumbStart = false;
-			dragLeftStart = false;
-			dragRightStart = false;
-			prevMouseX = 0;
-		};
-	}
+			global.onresize = () => {
+				this.mainChart.init();
+				this.mainChart.calculateDetailsOffset();
+				this.mapChart.init();
+				this.mapChart.drawAll();
+				this.container_width = this.map_container.clientWidth;
+				this.moveChart(0);
+				this.setMapBox();
+			};
 
-	function setColors() {
-		if (isLight) {
-			bodyEl.style.background = white_color;
-			bodyEl.style.color = black_color;
-			bodyEl.classList.remove('dark-theme');
-		} else {
-			bodyEl.style.background = dark_color;
-			bodyEl.style.color = white_color;
-			bodyEl.classList.add('dark-theme');
+			this.dark_link.onclick = () => {
+				isLight = false;
+				this.run(this.dataNum);
+				this.dark_link.style.display = 'none';
+				this.light_link.style.display = 'initial';
+			};
+
+			this.light_link.onclick = () => {
+				isLight = true;
+				this.run(this.dataNum);
+				this.light_link.style.display = 'none';
+				this.dark_link.style.display = 'initial';
+			};
 		}
 	}
 
-	function run(chartNum) {
-		dataNum = chartNum;
-		setColors();
-		mainChart.setData(data[chartNum]);
-		mapChart.entangledChart = mainChart;
-		mapChart.setData(data[chartNum]);
-
-		const btns = mapChart.generateControlButtons();
-		const oldBtns = appEl.getElementsByClassName('btn');
-		while (oldBtns.length > 0) {
-			appEl.removeChild(oldBtns[0]);
-		}
-		btns.forEach((btn) => {
-			appEl.appendChild(btn);
-		});
-
-		mainChart.init();
-		mapChart.init();
-		mapChart.calculateMaxY(true);
-		setMapBox(true);
-		mainChart.calculateMaxY(true);
-	}
-
-	function setupAllEvents() {
-		setupTouchEvents();
-		setupMouseEvents();
-
-		global.onresize = () => {
-			mainChart.init();
-			mainChart.calculateDetailsOffset();
-			mapChart.init();
-			mapChart.drawAll();
-			container_width = map_container.clientWidth;
-			moveChart(0);
-			setMapBox();
-		};
-
-		dark_link.onclick = () => {
-			isLight = false;
-			run(dataNum);
-			dark_link.style.display = 'none';
-			light_link.style.display = 'initial';
-		};
-
-		light_link.onclick = () => {
-			isLight = true;
-			run(dataNum);
-			light_link.style.display = 'none';
-			dark_link.style.display = 'initial';
-		};
-	}
-	setupAllEvents();
-
-	const links = appEl.getElementsByClassName('chart-link');
-	for (let i = 0; i < links.length; i += 1) {
-		const link = links[i];
-		link.onclick = () => {
-			const num = +link.innerText - 1;
-			run(num);
-			moveChart(0);
-		};
-	}
-
-	run(0);
+	const firstChart = new ChartContainer(document.body);
+	firstChart.run(0);
 }(window));
