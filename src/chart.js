@@ -57,6 +57,18 @@
 		return (`00${Math.round(val).toString(16)}`).substr(-2);
 	}
 
+	function formatNumber(val) {
+		let str = val.toString();
+		const parts = [];
+		while (str.length > 3) {
+			parts.push(str.substr(str.length - 3));
+			str = str.substr(0, str.length - 3);
+		}
+		parts.push(str);
+
+		return parts.reverse().join(' ');
+	}
+
 	class Chart {
 		constructor(canv, height) {
 			this.width = canv.clientWidth;
@@ -319,7 +331,7 @@
 				this.ctx.lineTo(this.width, this.translateY(item.y));
 				this.ctx.stroke();
 				this.ctx.fillStyle = textColor + getOpacity(item.opacity);
-				this.ctx.fillText(`${item.y}`, 0, this.translateY(item.y) - y_legend_text_height);
+				this.ctx.fillText(`${formatNumber(item.y)}`, 0, this.translateY(item.y) - y_legend_text_height);
 			}
 
 			this.ctx.lineWidth = this.axisThickness;
@@ -352,7 +364,6 @@
 				} else {
 					strokeColor = axis_color_dark;
 				}
-				// ToDo: check if detailed_num changed. If not - do nothing.
 				const x = this.translateX(this.x_vals[this.details_num]);
 				this.detailsCtx.lineWidth = this.axisThickness * 2;
 				this.detailsCtx.strokeStyle = strokeColor;
@@ -393,8 +404,7 @@
 						const template = document.createElement('template');
 						template.innerHTML = infoHtml;
 						const infoEl = template.content.firstChild;
-						// ToDo: handle long values
-						infoEl.getElementsByClassName('value')[0].innerText = gr.y_vals[this.details_num];
+						infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num]);
 						infoEl.getElementsByClassName('name')[0].innerText = gr.name;
 						infoEl.style.color = gr.color;
 						this.infoBox.appendChild(infoEl);
@@ -905,7 +915,6 @@
 		overlay_left.addEventListener('touchmove', touchMove);
 
 		function touchEnd() {
-			// ToDo: handle the end of some different touch
 			prevTouch = null;
 			dragThumbStart = false;
 			dragLeftStart = false;
@@ -1011,14 +1020,12 @@
 		setupMouseEvents();
 
 		global.onresize = () => {
-			// ToDo: handle animations that are in progress
 			mainChart.init();
 			mainChart.calculateDetailsOffset();
 			mapChart.init();
 			mapChart.drawAll();
 			container_width = map_container.clientWidth;
 			moveChart(0);
-			// ToDo: handle when a lot of chart is visible and window is resized down.
 			setMapBox();
 		};
 
