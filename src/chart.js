@@ -1005,7 +1005,7 @@
 			};
 		}
 
-		setColors() {
+		setColors(isInitial) {
 			if (this.isLight) {
 				this.appContainerEl.style.background = white_color;
 				this.appContainerEl.style.color = black_color;
@@ -1017,14 +1017,18 @@
 			}
 			this.mainChart.isLight = this.isLight;
 			this.mapChart.isLight = this.isLight;
+			if (!isInitial) {
+				this.mainChart.drawAll();
+				this.mapChart.drawAll();
+			}
 		}
 
-		run(chartNum) {
-			this.dataNum = chartNum;
-			this.setColors();
-			this.mainChart.setData(data[chartNum]);
+		run(collection) {
+			this.collection = collection;
+			this.setColors(true);
+			this.mainChart.setData(collection);
 			this.mapChart.entangledChart = this.mainChart;
-			this.mapChart.setData(data[chartNum]);
+			this.mapChart.setData(collection);
 
 			const btns = this.mapChart.generateControlButtons();
 			const oldBtns = this.appEl.getElementsByClassName('btn');
@@ -1058,14 +1062,16 @@
 
 			this.dark_link.onclick = () => {
 				this.isLight = false;
-				this.run(this.dataNum);
+				// this.run(this.dataNum);
+				this.setColors();
 				this.dark_link.style.display = 'none';
 				this.light_link.style.display = 'initial';
 			};
 
 			this.light_link.onclick = () => {
 				this.isLight = true;
-				this.run(this.dataNum);
+				// this.run(this.dataNum);
+				this.setColors();
 				this.light_link.style.display = 'none';
 				this.dark_link.style.display = 'initial';
 			};
@@ -1073,5 +1079,6 @@
 	}
 
 	const firstChart = new ChartContainer(document.body);
-	firstChart.run(0);
+	debugger;
+	firstChart.run(data[0]);
 }(window));
