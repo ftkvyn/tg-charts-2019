@@ -361,6 +361,9 @@
 				}
 
 				this.infoBox.getElementsByClassName('date')[0].innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
+				let moreThanHalf = 0;
+				let lessThanHalf = 0;
+				const half = (this[my] - this[zy]) / 2;
 
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
@@ -371,6 +374,11 @@
 						this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
 						this.detailsCtx.fill();
 						this.detailsCtx.stroke();
+						if (gr.y_vals[this.details_num] > half) {
+							moreThanHalf += 1;
+						} else {
+							lessThanHalf += 1;
+						}
 
 						const infoHtml = `<div class="item">
 							<div class="value"></div>
@@ -388,9 +396,21 @@
 				});
 
 				this.infoBox.style.display = 'block';
-				// ToDo: check and set also top not to hide charts
-				// ToDo: limit possible left position
-				this.infoBox.style.left = `${x - 50}px`;
+				let left = x - 50;
+				if (this.width - left < 140) {
+					left = this.width - 140;
+				}
+				if (left < 0) {
+					left = 0;
+				}
+				this.infoBox.style.left = `${left}px`;
+				if (moreThanHalf > lessThanHalf) {
+					this.infoBox.style.top = '';
+					this.infoBox.style.bottom = `${x_legend_padding}px`;
+				} else {
+					this.infoBox.style.bottom = '';
+					this.infoBox.style.top = '0px';
+				}
 			}
 		}
 
