@@ -103,6 +103,7 @@
 			this.prevLength = undefined;
 			this.prevVisibleItems = undefined;
 			this.prevVisibleItemsChange = undefined;
+			this.prev_details_num = undefined;
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
@@ -339,6 +340,11 @@
 		drawDetails() {
 			// details
 			if (this.isDrawAxis && this.details_num > -1) {
+				if (this.details_num === this.prev_details_num) {
+					return;
+				}
+				this.prev_details_num = this.details_num;
+				this.clearDetails();
 				// Configuration
 				let strokeColor = null;
 				if (isLight) {
@@ -444,7 +450,6 @@
 			this.drawAxis();
 			this.drawChart();
 			if (this.detailsCanv) {
-				this.clearDetails();
 				this.drawDetails();
 			}
 		}
@@ -655,14 +660,12 @@
 					}
 				}
 			}
-			this.clearDetails();
 			this.drawDetails();
 		}
 
 		hideDetails() {
 			this.details_num = -1;
 			this.clearDetails();
-			this.drawDetails();
 			this.infoBox.style.display = 'none';
 		}
 
