@@ -1058,7 +1058,7 @@
 			this.setupTouchEvents();
 			this.setupMouseEvents();
 
-			global.onresize = () => {
+			global.addEventListener('resize', () => {
 				this.mainChart.init();
 				this.mainChart.calculateDetailsOffset();
 				this.mapChart.init();
@@ -1066,7 +1066,7 @@
 				this.container_width = this.map_container.clientWidth;
 				this.moveChart(0);
 				this.setMapBox();
-			};
+			});
 
 			this.dark_link.onclick = () => {
 				this.isLight = false;
