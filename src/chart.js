@@ -1001,10 +1001,9 @@
 
 		mainChart.init();
 		mapChart.init();
-		mapChart.drawAll();
+		mapChart.calculateMaxY(true);
 		setMapBox(true);
 		mainChart.calculateMaxY(true);
-		mainChart.drawAll();
 	}
 
 	function setupAllEvents() {
