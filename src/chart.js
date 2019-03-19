@@ -29,8 +29,7 @@
 		mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
 		zx = Symbol('Shift X'),
-		zy = Symbol('Shift Y'),
-		changingFields = [mx, my, zx, zy];
+		zy = Symbol('Shift Y');
 
 	function initChangesObject(key) {
 		this[key] = {
@@ -73,6 +72,8 @@
 
 			this.thickness = 2;
 			this.axisThickness = 1;
+
+			this.changingFields = [mx, my, zx, zy];
 
 			this.entangledChart = null;
 			this.isDrawAxis = true;
@@ -134,8 +135,8 @@
 					};
 					this[graph.opacityKey] = 255;
 					this.graphs.push(graph);
-					if (changingFields.findIndex((val) => { return val === graph.opacityKey; }) === -1) {
-						changingFields.push(graph.opacityKey);
+					if (this.changingFields.findIndex((val) => { return val === graph.opacityKey; }) === -1) {
+						this.changingFields.push(graph.opacityKey);
 					}
 				}
 			}
@@ -543,7 +544,7 @@
 		}
 
 		init() {
-			changingFields.forEach(initChangesObject.bind(this.changes));
+			this.changingFields.forEach(initChangesObject.bind(this.changes));
 			this.setChartWidths();
 			this.ctx.scale(2, 2);
 			this.ctx.translate(0, this.height);
@@ -626,7 +627,7 @@
 		}
 
 		changeAllStep() {
-			let somethingChanged = changingFields.reduce((keyChanged, key) => { return this.changeKeyStep(key) || keyChanged; }, false);
+			let somethingChanged = this.changingFields.reduce((keyChanged, key) => { return this.changeKeyStep(key) || keyChanged; }, false);
 
 			if (this.isDrawAxis) {
 				somethingChanged = this.changeAxisStep() || somethingChanged;
@@ -997,12 +998,12 @@
 			this.overlay_left.onmousemove = handleMouseMove.bind(this);
 			this.overlay_right.onmousemove = handleMouseMove.bind(this);
 
-			document.onmouseup = () => {
+			document.addEventListener('mouseup', () => {
 				dragThumbStart = false;
 				dragLeftStart = false;
 				dragRightStart = false;
 				prevMouseX = 0;
-			};
+			});
 		}
 
 		setColors(isInitial) {
@@ -1078,7 +1079,9 @@
 		}
 	}
 
-	const firstChart = new ChartContainer(document.body);
-	debugger;
-	firstChart.run(data[0]);
+	for (let i = 0; i < 5; i += 1) {
+		console.log(i);
+		const chart = new ChartContainer(document.body);
+		chart.run(data[i]);
+	}
 }(window));
