@@ -16,8 +16,11 @@
 		white_color = '#ffffff',
 		black_color = '#000000',
 		axis_color = '#f2f4f5',
-		axis_color_dark = '#303d4a',
-		text_color_dark = '#788490',
+		axis_color_zero = '#ecf0f3',
+		axis_color_dark = '#293544',
+		axis_color_dark_zero = '#313d4d',
+		text_color_dark = '#546778',
+		text_color_light = '#96a2aa',
 		duration = 200, // mS
 		padding_y = 0.08,
 		padding_x = 0.003,
@@ -307,8 +310,8 @@
 			} else {
 				strokeColor = axis_color_dark;
 			}
-			this.ctx.font = '14px Arial';
-			const textColor = this.isLight ? text_color_dark : text_color_dark;
+			this.ctx.font = '12px Arial';
+			const textColor = this.isLight ? text_color_light : text_color_dark;
 
 			// y-legend
 			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
@@ -316,7 +319,11 @@
 				this.ctx.lineWidth = this.axisThickness;
 				const item = this.y_legend[i];
 				if (item.y === 0) {
-					this.ctx.lineWidth = this.axisThickness * 2;
+					if (this.isLight) {
+						strokeColor = axis_color_zero;
+					} else {
+						strokeColor = axis_color_dark_zero;
+					}
 				}
 				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity);
 				this.ctx.beginPath();
@@ -353,9 +360,9 @@
 				// Configuration
 				let strokeColor = null;
 				if (this.isLight) {
-					strokeColor = axis_color;
+					strokeColor = axis_color_zero;
 				} else {
-					strokeColor = axis_color_dark;
+					strokeColor = axis_color_dark_zero;
 				}
 				const x = this.translateX(this.x_vals[this.details_num]);
 				this.detailsCtx.lineWidth = this.axisThickness * 2;
@@ -744,7 +751,7 @@
 			const template = document.createElement('template');
 			const appElHtml = `<div class="app-container">
 				<div class="app">
-					<p>Chart</p>
+					<p class="title">Chart</p>
 					<div class="main-chart-container">
 						<canvas height="600" style="width:100%;height:300px;" class="main_chart"></canvas>
 						<canvas height="600" style="width:100%;height:300px;position: absolute;left: 0;top: 0;z-index: 1;" class="details_chart"></canvas>
