@@ -2,6 +2,7 @@
 /* jshint esversion: 6 */
 (function (global) {
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 	// eslint-disable-next-line prefer-destructuring
 	const document = global.document;
 	const requestAnimationFrame = global.requestAnimationFrame || global.mozRequestAnimationFrame ||
@@ -49,7 +50,7 @@
 
 	function getDateText(timestamp) {
 		const date = new Date(timestamp);
-		return `${months[date.getMonth()]} ${date.getDate()}`;
+		return [`${months[date.getMonth()]} ${date.getDate()}`, days[date.getDay()]];
 	}
 
 	function getOpacity(val) {
@@ -109,8 +110,10 @@
 				if (key === 'x') {
 					this.x_vals = col;
 					this.x_legend = col.map((val) => {
+						const dayNames = getDateText(val);
 						return {
-							name: getDateText(val),
+							name: dayNames[0],
+							day: dayNames[1],
 							x: val,
 							opacity: 255,
 							display: true,
@@ -357,8 +360,7 @@
 					this.infoBox.removeChild(oldInfo[0]);
 				}
 
-				// ToDo: add week day
-				this.infoBox.getElementsByClassName('date')[0].innerText = this.x_legend[this.details_num].name;
+				this.infoBox.getElementsByClassName('date')[0].innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
 
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
