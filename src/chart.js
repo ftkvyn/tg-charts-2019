@@ -747,6 +747,10 @@
 	overlay_left.style.width = `${container_width - thumb_width}px`;
 
 	function setMapBox(isInitial) {
+		if (container_width < thumb_width) {
+			thumb_width = 200;
+			thumb.style.width = `${thumb_width}px`;
+		}
 		const right = +thumb.style.right.slice(0, -2);
 		const real_from = container_width - thumb_width - right;
 		const real_to = real_from + thumb_width;
