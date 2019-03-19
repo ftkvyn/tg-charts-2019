@@ -29,11 +29,13 @@ body {
 	position: relative;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-webkit-tap-highlight-color: transparent;
 }
 
 .details_chart {
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-webkit-tap-highlight-color: transparent;
 }
 
 a {
@@ -112,6 +114,9 @@ a {
 	height: 100%;
 	background: transparent;
 	left: -7px;
+	-webkit-tap-highlight-color: transparent;
+	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 
 .btn{
