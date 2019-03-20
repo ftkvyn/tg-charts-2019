@@ -773,8 +773,8 @@
 					</div>
 					<div class="bottom-container">
 						<div class="chart-links" style="bottom:0;">
-							<a style="display:none;" class="theme-link set-theme-dark">Switch to night mode</a>
-							<a class="theme-link set-theme-light">Switch to day mode</a>
+							<a class="theme-link set-theme-dark">Switch to night mode</a>
+							<a style="display:none;" class="theme-link set-theme-light">Switch to day mode</a>
 						</div>
 					</div>
 				</div>
