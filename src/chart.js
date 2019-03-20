@@ -797,7 +797,6 @@
 			this.mainChart.setUpHoverDetails(this.details_chart);
 
 			this.map_container = this.appEl.getElementsByClassName('map_container')[0];
-			this.container_width = this.map_container.clientWidth;
 			this.thumb = this.appEl.getElementsByClassName('selected')[0];
 			this.thumb_left = this.appEl.getElementsByClassName('thumb_left')[0];
 			this.thumb_right = this.appEl.getElementsByClassName('thumb_right')[0];
@@ -806,12 +805,15 @@
 			this.dark_link = this.appEl.getElementsByClassName('set-theme-dark')[0];
 			this.light_link = this.appEl.getElementsByClassName('set-theme-light')[0];
 
-			this.thumb_width = this.thumb.offsetWidth;
-			this.overlay_left.style.width = `${this.container_width - this.thumb_width}px`;
-
-			this.isLight = false;
+			this.isLight = true;
 
 			this.setupAllEvents();
+		}
+
+		initMapBox() {
+			this.container_width = this.map_container.offsetWidth;
+			this.thumb_width = this.thumb.offsetWidth;
+			this.overlay_left.style.width = `${this.container_width - this.thumb_width}px`;
 		}
 
 		setMapBox(isInitial) {
@@ -1086,8 +1088,12 @@
 		}
 	}
 
+
 	for (let i = 0; i < 5; i += 1) {
 		const chart = new ChartContainer(document.body);
-		chart.run(data[i]);
+		setTimeout(() => {
+			chart.initMapBox();
+			chart.run(data[i]);
+		});
 	}
 }(window));
