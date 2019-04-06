@@ -33,7 +33,7 @@
 		axis_color_dark_zero = '#313d4d',
 		text_color_dark = '#546778',
 		text_color_light = '#96a2aa',
-		duration = 200, // mS
+		duration = 300, // mS
 		padding_y = 0.08,
 		padding_x = 0.003,
 		min_thumb_width = 50,
@@ -576,9 +576,7 @@
 
 		startChangeKey(key, targetVal) {
 			const val = this.changes[key];
-			if (val.startTimestamp === -1) {
-				val.startTimestamp = Date.now();
-			}
+			val.startTimestamp = Date.now();
 			val.deltaValue = targetVal - this[key];
 			val.originalValue = this[key];
 			if (!this.animateFrameId) {
