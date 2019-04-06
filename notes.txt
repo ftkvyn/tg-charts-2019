@@ -1,0 +1,8 @@
+1. in terms of speed, especially when zooming out of graphs.
+2. the graph headers are disproportionately smaller than the dark mode button. 
+3. It is hardly necessary to support individual theme settings for each of the graphs – one button is more than enough.
+4. We recommend using a relative scale so that lines on graphs can always occupy as much vertical space as possible. 
+Note that lines “hang” on graphs three and five in your implementation.
+5. It would be better to use rounded numbers on the Y-axis – the effect is especially noticeable on the final graph. 
+For exact numbers, users can select a point on the graph.
+6. It would be better for usability if scrolling the graphs didn't result in simultaneous vertical scrolling of the page.

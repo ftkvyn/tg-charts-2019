@@ -9,6 +9,16 @@
 	global.webkitRequestAnimationFrame || global.msRequestAnimationFrame;
 	global.requestAnimationFrame = requestAnimationFrame;
 
+	function noScroll() {
+		const x = window.scrollX;
+		const y = window.scrollY;
+		window.onscroll = function () { window.scrollTo(x, y); };
+	}
+
+	function yesScroll() {
+		window.onscroll = function () { };
+	}
+
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 		days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
 		dark_background_color = '#1d2837',
@@ -924,6 +934,7 @@
 					// Handling only the first touch
 					[prevTouch] = event.changedTouches;
 					dragThumbStart = true;
+					noScroll();
 				}
 			});
 
@@ -932,6 +943,7 @@
 					// Handling only the first touch
 					[prevTouch] = event.changedTouches;
 					dragLeftStart = true;
+					noScroll();
 				}
 			});
 
@@ -940,6 +952,7 @@
 					// Handling only the first touch
 					[prevTouch] = event.changedTouches;
 					dragRightStart = true;
+					noScroll();
 				}
 			});
 
@@ -954,6 +967,7 @@
 				dragThumbStart = false;
 				dragLeftStart = false;
 				dragRightStart = false;
+				yesScroll();
 			}
 
 			this.thumb.addEventListener('touchend', touchEnd.bind(this));
