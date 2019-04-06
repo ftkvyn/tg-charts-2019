@@ -10,6 +10,8 @@
 	global.requestAnimationFrame = requestAnimationFrame;
 
 	function noScroll() {
+		// ToDo: fix it
+		return;
 		const x = window.scrollX;
 		const y = window.scrollY;
 		window.onscroll = function () { window.scrollTo(x, y); };
