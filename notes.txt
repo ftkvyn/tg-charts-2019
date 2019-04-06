@@ -1,5 +1,3 @@
-1. in terms of speed, especially when zooming out of graphs.
-2. the graph headers are disproportionately smaller than the dark mode button. 
 3. It is hardly necessary to support individual theme settings for each of the graphs – one button is more than enough.
 4. We recommend using a relative scale so that lines on graphs can always occupy as much vertical space as possible. 
 Note that lines “hang” on graphs three and five in your implementation.
