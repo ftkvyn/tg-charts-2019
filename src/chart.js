@@ -113,6 +113,8 @@
 			this.prevVisibleItems = undefined;
 			this.prevVisibleItemsChange = undefined;
 			this.prev_details_num = undefined;
+			this.details_num = -1;
+			this.type = type;
 
 			if (type === 'line') {
 				this.drawChart = this.drawLineChart;
@@ -364,46 +366,53 @@
 				if (this.details_num === this.prev_details_num) {
 					return;
 				}
+				if (this.type === 'bar') {
+					this.clearChart();
+					this.drawAxis();
+					this.drawChart();
+				}
 				this.prev_details_num = this.details_num;
 				this.clearDetails();
-				// Configuration
-				let strokeColor = null;
-				if (this.isLight) {
-					strokeColor = axis_color_zero;
-				} else {
-					strokeColor = axis_color_dark_zero;
-				}
 				const x = this.translateX(this.x_vals[this.details_num]);
-				this.detailsCtx.lineWidth = this.axisThickness * 2;
-				this.detailsCtx.strokeStyle = strokeColor;
-				this.detailsCtx.beginPath();
-				this.detailsCtx.moveTo(x, this.translateY(0));
-				this.detailsCtx.lineTo(x, -this.height);
-				this.detailsCtx.stroke();
+				let moreThanHalf = 0;
+				let lessThanHalf = 0;
+				const half = ((this[my] - this[zy]) / 2) + this[zy];
+				// Configuration
+				if (this.type === 'line') {
+					let strokeColor = null;
+					if (this.isLight) {
+						strokeColor = axis_color_zero;
+					} else {
+						strokeColor = axis_color_dark_zero;
+					}
+					this.detailsCtx.lineWidth = this.axisThickness * 2;
+					this.detailsCtx.strokeStyle = strokeColor;
+					this.detailsCtx.beginPath();
+					this.detailsCtx.moveTo(x, this.translateY(0));
+					this.detailsCtx.lineTo(x, -this.height);
+					this.detailsCtx.stroke();
+				}
 
 				const oldInfo = this.infoBox.getElementsByClassName('item');
 				while (oldInfo.length > 0) {
 					this.infoBox.removeChild(oldInfo[0]);
 				}
 
-				this.infoBox.getElementsByClassName('date')[0].innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
-				let moreThanHalf = 0;
-				let lessThanHalf = 0;
-				const half = ((this[my] - this[zy]) / 2) + this[zy];
-
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
-						this.detailsCtx.lineWidth = this.thickness;
-						this.detailsCtx.strokeStyle = gr.color;
-						this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
-						this.detailsCtx.beginPath();
-						this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
-						this.detailsCtx.fill();
-						this.detailsCtx.stroke();
-						if (gr.y_vals[this.details_num] > half) {
-							moreThanHalf += 1;
-						} else {
-							lessThanHalf += 1;
+						if (this.type === 'line') {
+							this.detailsCtx.lineWidth = this.thickness;
+							this.detailsCtx.strokeStyle = gr.color;
+							this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
+							this.detailsCtx.beginPath();
+							this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
+							this.detailsCtx.fill();
+							this.detailsCtx.stroke();
+							if (gr.y_vals[this.details_num] > half) {
+								moreThanHalf += 1;
+							} else {
+								lessThanHalf += 1;
+							}
 						}
 
 						const infoHtml = `<div class="item">
@@ -420,8 +429,13 @@
 					}
 				});
 
+				this.infoBox.getElementsByClassName('date')[0].innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
+
 				this.infoBox.style.display = 'block';
 				let left = x - 50;
+				if (this.type === 'bar') {
+					left = x - this.infoBox.clientWidth + this.bar_width - 10;
+				}
 				if (this.width - left < 140) {
 					left = this.width - 140;
 				}
@@ -507,13 +521,20 @@
 			this.calculateMaxY();
 		}
 
-		drawNextBarItem(orig_x1, orig_x2, from_y, to_y, color) {
+		drawNextBarItem(orig_x1, orig_x2, from_y, to_y, num, color) {
 			const x1 = this.translateX(orig_x1),
 				x2 = this.translateX(orig_x2),
 				y1 = this.translateY(from_y),
 				y2 = this.translateY(to_y);
-			this.ctx.fillStyle = `${color}aa`;
-			this.ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+			if (this.details_num === -1) {
+				this.ctx.fillStyle = `${color}aa`;
+			} else if (this.details_num === num) {
+				this.ctx.fillStyle = `${color}cc`;
+			} else {
+				this.ctx.fillStyle = `${color}50`;
+			}
+			this.bar_width = x2 - x1;
+			this.ctx.fillRect(x1, y1, this.bar_width, y2 - y1);
 		}
 
 		drawBarChart() {
@@ -527,7 +548,7 @@
 						// bar charts won't disappear, they will shrink
 						const multiplier = this[gr.opacityKey] / 255;
 						const dy = multiplier * gr.y_vals[i];
-						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, gr.color);
+						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, gr.color);
 						currentHeight += dy;
 					}
 				}
@@ -739,10 +760,16 @@
 			let prevDelta = Infinity;
 			for (let i = this.prev_start_i; i < this.prev_end_i; i += 1) {
 				if (this.x_vals[i]) {
-					const delta = Math.abs(this.x_vals[i] - data_x);
-					if (delta < prevDelta) {
-						prevDelta = delta;
-						this.details_num = i;
+					if (this.type === 'line') {
+						const delta = Math.abs(this.x_vals[i] - data_x);
+						if (data < prevDelta) {
+							prevDelta = delta;
+							this.details_num = i;
+						}
+					} else if (this.type === 'bar') {
+						if (this.x_vals[i - 1] && (data_x > this.x_vals[i - 1])) {
+							this.details_num = i;
+						}
 					}
 				}
 			}
@@ -753,6 +780,11 @@
 			this.details_num = -1;
 			this.clearDetails();
 			this.infoBox.style.display = 'none';
+			if (this.type === 'bar') {
+				this.clearChart();
+				this.drawAxis();
+				this.drawChart();
+			}
 		}
 
 		calculateDetailsOffset() {
