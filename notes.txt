@@ -1,6 +1,7 @@
 1. Area chart (%, no calculation of maxY)
 2. Pie chart
 3. Details popup position (above or near)
-5. Dates legend
+5. Dates legend (on top)
 6. Changing dates animation on popup
 7. Transition animation (hide one chart, show another)
+8. Axis colors

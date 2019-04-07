@@ -382,18 +382,22 @@
 				let lessThanHalf = 0;
 				const half = ((this[my] - this[zy]) / 2) + this[zy];
 				// Configuration
-				if (this.type === 'line') {
+				if (this.type === 'line' || this.type === 'area') {
 					let strokeColor = null;
 					if (this.isLight) {
 						strokeColor = axis_color_zero;
 					} else {
 						strokeColor = axis_color_dark_zero;
 					}
-					this.detailsCtx.lineWidth = this.axisThickness * 2;
+					this.detailsCtx.lineWidth = this.axisThickness;
 					this.detailsCtx.strokeStyle = strokeColor;
 					this.detailsCtx.beginPath();
 					this.detailsCtx.moveTo(x, this.translateY(0));
-					this.detailsCtx.lineTo(x, -this.height);
+					if (this.type === 'line') {
+						this.detailsCtx.lineTo(x, -this.height);
+					} else {
+						this.detailsCtx.lineTo(x, this.translateY(100));
+					}
 					this.detailsCtx.stroke();
 				}
 
@@ -439,6 +443,9 @@
 				let left = x - 50;
 				if (this.type === 'bar') {
 					left = x - this.infoBox.clientWidth + this.bar_width - 10;
+				}
+				if (this.type === 'area') {
+					left = x - this.infoBox.clientWidth - 10;
 				}
 				if (this.width - left < 140) {
 					left = this.width - 140;
@@ -579,17 +586,6 @@
 					this.endDrawArea(gr.color);
 				}
 			}
-
-			// this.graphs.forEach((gr) => {
-			// 	if (this[gr.opacityKey]) {
-			// 		const opacity = getOpacity(this[gr.opacityKey]);
-			// 		this.startDraw(this.x_vals[this.start_i], gr.y_vals[this.start_i], `${gr.color}${opacity}`);
-			// 		for (let i = this.start_i + 1; i < this.end_i; i += 1) {
-			// 			this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
-			// 		}
-			// 		this.endDraw();
-			// 	}
-			// });
 			this.calculateMaxY();
 		}
 
@@ -632,7 +628,7 @@
 		getAreaMinAndMax() {
 			// ToDo: smaller value for newMax with the same lines.
 			if (this.isDrawAxis) {
-				return { newMin: 0, newMax: 125 };
+				return { newMin: 0, newMax: 108 };
 			}
 			return { newMin: 0, newMax: 100 };
 		}
@@ -691,7 +687,10 @@
 							}
 						}
 						let val = newMin;
-						const step = Math.floor((newMax - newMin) / this.yLegendItemsCount);
+						let step = Math.floor((newMax - newMin) / this.yLegendItemsCount);
+						if (this.type === 'area') {
+							step = 25;
+						}
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
 							let displayVal = val;
 							let pow = 0;
@@ -836,7 +835,7 @@
 			let prevDelta = Infinity;
 			for (let i = this.prev_start_i; i < this.prev_end_i; i += 1) {
 				if (this.x_vals[i]) {
-					if (this.type === 'line') {
+					if (this.type === 'line' || this.type === 'area') {
 						const delta = Math.abs(this.x_vals[i] - data_x);
 						if (delta < prevDelta) {
 							prevDelta = delta;
@@ -1254,9 +1253,14 @@
 	const chart = new ChartContainer(chartsEls[0]);
 	charts.push(chart);
 	chart.initMapBox();
-	chart.run(data[0], 'area');
+	chart.run(data[0], 'line');
 
-	const chart2 = new ChartContainer(chartsEls[1]);
+	const chart1 = new ChartContainer(chartsEls[1]);
+	charts.push(chart1);
+	chart1.initMapBox();
+	chart1.run(data[4], 'area');
+
+	const chart2 = new ChartContainer(chartsEls[2]);
 	charts.push(chart2);
 	chart2.initMapBox();
 	chart2.run(data[4], 'bar');
