@@ -58,8 +58,8 @@ a {
 .overlay{
   position: absolute;
   height: 100%;
-  background: #f4fafd;
-  opacity: 0.8;
+  background: #e7f5fc;
+  opacity: 0.7;
   width: 100px;
   -webkit-tap-highlight-color: transparent;
   -moz-user-select: none;
@@ -77,15 +77,15 @@ a {
 }
 .selected{
   position: absolute;
-  border-top-width: 1px;
-  border-bottom-width: 1px;
+  border-top-width: 2px;
+  border-bottom-width: 2px;
   border-left-width: 0;
   border-right-width: 0;
   border-style: solid;
-  border-color: #bdd5e670;
+  border-color: #c0d1e1;
   cursor: pointer;
-  height: 100%;
-  box-sizing: border-box;
+	height: 100%;
+	top: -2px;
   -webkit-tap-highlight-color: transparent;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -98,9 +98,25 @@ a {
 
 .selected .thumb{
   position: absolute;
-  width: 5px;
-  background: #bdd5e670;
-  height: 100%;
+  width: 12px;
+  background: #c0d1e1;
+	height: 100%;
+	    height: calc(100% + 4px);
+    top: -2px;
+}
+
+.selected .thumb::after{
+	    position: absolute;
+    background: white;
+    width: 3px;
+    border-radius: 4px;
+    height: 15px;
+    left: 5px;
+    top: 17px;
+    display: block;
+    content: ' ';
+		z-index: 1;
+		cursor: w-resize;
 }
 
 .dark-theme .selected .thumb{
@@ -109,11 +125,15 @@ a {
 
 
 .selected .thumb.thumb_left{
-  left: 0;
+	left: -5px;
+	    border-bottom-left-radius: 6px;
+    border-top-left-radius: 6px;
 }
 
 .selected .thumb.thumb_right{
-  right: 0;
+	right: -5px;
+	    border-bottom-right-radius: 6px;
+    border-top-right-radius: 6px;
 }
 
 .selected .thumb .invisible-addition {
@@ -122,7 +142,7 @@ a {
 	width: 20px;
 	height: 100%;
 	background: transparent;
-	left: -7px;
+	left: -4px;
 	-webkit-tap-highlight-color: transparent;
 	-moz-user-select: none;
 	-webkit-user-select: none;

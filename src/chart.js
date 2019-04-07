@@ -825,6 +825,7 @@
 				this.nextfrom = from;
 				this.nextto = to;
 				this.tryStartMovingX();
+				this.mainChart.hideDetails();
 			} else {
 				this.mainChart[zx] = from;
 				this.mainChart[mx] = to;
