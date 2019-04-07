@@ -31,7 +31,8 @@ body.isDark {
 }
 
 .title {
-	font-size: 20px;
+	font-size: 18px;
+	font-weight: bolder
 }
 
 .main-chart-container {
@@ -120,7 +121,7 @@ a {
 }
 
 .dark-theme .selected .thumb{
- background: #548db570;
+ background: #56626d;
 }
 
 
