@@ -706,17 +706,21 @@
 			this.detailsCanv = detailsCanvas;
 			this.detailsCtx = detailsCanvas.getContext('2d');
 			this.calculateDetailsOffset();
+			let endId,
+				cancelId;
 
 			this.detailsCanv.onmousemove = (event) => { this.showDetails(event.offsetX); };
 			this.detailsCanv.addEventListener('touchmove', (event) => {
 				const touch = event.changedTouches[0];
 				this.showDetails(touch.clientX - this.detailsCanvOffset);
+				clearTimeout(endId);
+				clearTimeout(cancelId);
 				event.preventDefault();
 			});
 
 			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
-			this.detailsCanv.addEventListener('touchend', () => setTimeout(this.hideDetails.bind(this), 1000));
-			this.detailsCanv.addEventListener('touchcancel', () => setTimeout(this.hideDetails.bind(this), 1000));
+			this.detailsCanv.addEventListener('touchend', () => { endId = setTimeout(this.hideDetails.bind(this), 1200); });
+			this.detailsCanv.addEventListener('touchcancel', () => { cancelId = setTimeout(this.hideDetails.bind(this), 1200); });
 
 			const infoBoxHtml = `<div class="info" style="display:none;">
 				<div class="date"></div>
