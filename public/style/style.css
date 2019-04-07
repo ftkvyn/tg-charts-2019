@@ -27,7 +27,7 @@ body.isDark {
 	position: relative;
 	margin: auto;
 	display: block;
-	padding: 8px;
+	padding: 16px;
 }
 
 .title {
@@ -40,6 +40,9 @@ body.isDark {
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	-webkit-tap-highlight-color: transparent;
+
+	margin-left: -16px;
+	margin-right: -16px;
 }
 
 .details_chart {
@@ -118,6 +121,9 @@ a {
     content: ' ';
 		z-index: 1;
 		cursor: w-resize;
+		-moz-user-select: none;
+	-webkit-user-select: none;
+	-webkit-tap-highlight-color: transparent;
 }
 
 .dark-theme .selected .thumb{

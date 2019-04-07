@@ -24,6 +24,7 @@
 		duration = 220, // ms
 		padding_y = 0.08,
 		padding_x = 0.003,
+		main_chart_padding = 16,
 		min_thumb_width = 50,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,
@@ -327,11 +328,11 @@
 				}
 				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity);
 				this.ctx.beginPath();
-				this.ctx.moveTo(0, this.translateY(item.y));
-				this.ctx.lineTo(this.width, this.translateY(item.y));
+				this.ctx.moveTo(main_chart_padding, this.translateY(item.y));
+				this.ctx.lineTo(this.width - main_chart_padding, this.translateY(item.y));
 				this.ctx.stroke();
 				this.ctx.fillStyle = textColor + getOpacity(item.opacity);
-				this.ctx.fillText(`${formatNumber(item.y)}`, 0, this.translateY(item.y) - y_legend_text_height);
+				this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
 			}
 
 			this.ctx.lineWidth = this.axisThickness;
