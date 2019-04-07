@@ -706,6 +706,7 @@
 			this.detailsCanv.addEventListener('touchmove', (event) => {
 				const touch = event.changedTouches[0];
 				this.showDetails(touch.clientX - this.detailsCanvOffset);
+				event.preventDefault();
 			});
 
 			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
@@ -890,6 +891,7 @@
 					}
 				}
 				prevTouch = touch;
+				event.preventDefault();
 			}
 
 			this.thumb.addEventListener('touchstart', (event) => {
