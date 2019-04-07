@@ -1,7 +1,6 @@
 1. Area chart (%, no calculation of maxY)
 2. Pie chart
 3. Details popup position (above or near)
-4. Button style (as on area charts)
 5. Dates legend
 6. Changing dates animation on popup
 7. Transition animation (hide one chart, show another)
