@@ -1071,7 +1071,7 @@
 	const charts = [];
 	const chartsEls = document.body.getElementsByClassName('app-container');
 
-	for (let i = 0; i < 5; i += 1) {
+	for (let i = 0; i < 1; i += 1) {
 		const chart = new ChartContainer(chartsEls[i]);
 		charts.push(chart);
 		chart.initMapBox();
