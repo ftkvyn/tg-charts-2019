@@ -715,8 +715,8 @@
 			});
 
 			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
-			this.detailsCanv.addEventListener('touchend', setTimeout(this.hideDetails.bind(this), 1000));
-			this.detailsCanv.addEventListener('touchcancel', setTimeout(this.hideDetails.bind(this), 1000));
+			this.detailsCanv.addEventListener('touchend', () => setTimeout(this.hideDetails.bind(this), 1000));
+			this.detailsCanv.addEventListener('touchcancel', () => setTimeout(this.hideDetails.bind(this), 1000));
 
 			const infoBoxHtml = `<div class="info" style="display:none;">
 				<div class="date"></div>
