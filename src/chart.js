@@ -33,7 +33,7 @@
 		axis_color_dark_zero = '#313d4d',
 		text_color_dark = '#546778',
 		text_color_light = '#96a2aa',
-		duration = 300, // mS
+		duration = 220, // ms
 		padding_y = 0.08,
 		padding_x = 0.003,
 		min_thumb_width = 50,
@@ -756,42 +756,8 @@
 	}
 
 	class ChartContainer {
-		constructor(parentEl) {
-			this.rootEl = parentEl;
-			const template = document.createElement('template');
-			const appElHtml = `<div class="app-container">
-				<div class="app">
-					<p class="title">Chart</p>
-					<div class="main-chart-container">
-						<canvas height="600" style="width:100%;height:300px;" class="main_chart"></canvas>
-						<canvas height="600" style="width:100%;height:300px;position: absolute;left: 0;top: 0;z-index: 1;" class="details_chart"></canvas>
-					</div>
-					<div style="padding-top:20px;">
-						<div class="map_container" class='map_container'>
-							<div class="overlay overlay_left" ></div>
-							<div class="selected" style="right:0;width:100px;">
-								<div class="thumb thumb_left">
-									<div class="invisible-addition"></div>
-								</div>
-								<div class="thumb thumb_right">
-									<div class="invisible-addition"></div>
-								</div>
-							</div>
-							<div class="overlay overlay_right"></div>
-							<canvas height="80" style="width:100%;height:40px;margin-top:2px;" class="chart_map"></canvas>
-						</div>
-					</div>
-					<div class="bottom-container">
-						<div class="chart-links" style="bottom:0;">
-							<a class="theme-link set-theme-dark">Switch to night mode</a>
-							<a style="display:none;" class="theme-link set-theme-light">Switch to day mode</a>
-						</div>
-					</div>
-				</div>
-				</div>`;
-			template.innerHTML = appElHtml;
-			this.appContainerEl = template.content.firstChild;
-			this.rootEl.appendChild(this.appContainerEl);
+		constructor(appContainerEl) {
+			this.appContainerEl = appContainerEl;
 			this.appEl = this.appContainerEl.firstElementChild;
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
 			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
@@ -812,9 +778,6 @@
 			this.thumb_right = this.appEl.getElementsByClassName('thumb_right')[0];
 			this.overlay_left = this.appEl.getElementsByClassName('overlay_left')[0];
 			this.overlay_right = this.appEl.getElementsByClassName('overlay_right')[0];
-			this.dark_link = this.appEl.getElementsByClassName('set-theme-dark')[0];
-			this.light_link = this.appEl.getElementsByClassName('set-theme-light')[0];
-
 			this.isLight = true;
 
 			this.setupAllEvents();
@@ -1083,31 +1046,39 @@
 				this.moveChart(0);
 				this.setMapBox();
 			});
-
-			this.dark_link.onclick = () => {
-				this.isLight = false;
-				// this.run(this.dataNum);
-				this.setColors();
-				this.dark_link.style.display = 'none';
-				this.light_link.style.display = 'initial';
-			};
-
-			this.light_link.onclick = () => {
-				this.isLight = true;
-				// this.run(this.dataNum);
-				this.setColors();
-				this.light_link.style.display = 'none';
-				this.dark_link.style.display = 'initial';
-			};
 		}
 	}
 
+	const charts = [];
+	const chartsEls = document.body.getElementsByClassName('app-container');
 
 	for (let i = 0; i < 5; i += 1) {
-		const chart = new ChartContainer(document.body);
-		setTimeout(() => {
-			chart.initMapBox();
-			chart.run(data[i]);
-		});
+		const chart = new ChartContainer(chartsEls[i]);
+		charts.push(chart);
+		chart.initMapBox();
+		chart.run(data[i]);
 	}
+
+	const dark_link = document.body.getElementsByClassName('set-theme-dark')[0];
+	const light_link = document.body.getElementsByClassName('set-theme-light')[0];
+
+	dark_link.onclick = () => {
+		for (let i = 0; i < charts.length; i += 1) {
+			charts[i].isLight = false;
+			charts[i].setColors();
+		}
+		dark_link.style.display = 'none';
+		light_link.style.display = 'initial';
+		document.body.classList.add('isDark');
+	};
+
+	light_link.onclick = () => {
+		for (let i = 0; i < charts.length; i += 1) {
+			charts[i].isLight = true;
+			charts[i].setColors();
+		}
+		light_link.style.display = 'none';
+		dark_link.style.display = 'initial';
+		document.body.classList.remove('isDark');
+	};
 }(window));

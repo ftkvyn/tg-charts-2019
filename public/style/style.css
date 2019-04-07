@@ -6,6 +6,11 @@ body {
 	font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 	margin: 0;
 	height: 100%;
+	padding-bottom: 50px;
+}
+
+body.isDark {
+	background: rgb(36, 47, 62);
 }
 
 .app-container {
@@ -26,7 +31,6 @@ body {
 }
 
 .title {
-	font-weight: bolder;
 	font-size: 20px;
 }
 
@@ -193,32 +197,18 @@ a {
 	border-color: #f34c44;
 }
 
-.chart-links {
-	position: absolute;
-	bottom: 30px;
-	width: 100%;
-}
-
-.chart-link {
-	margin: 10px;
-	font-size: 16px;
-	cursor: pointer;
-}
 
 .theme-link {
-	font-size: 20px;
+	font-size: 21px;
 	cursor: pointer;
 	text-decoration: none;
 }
 
 .bottom-container {
 	text-align: center;
-    position: absolute;
-    bottom: 40px;
     width: 100%;
     overflow: hidden;
     height: 60px;
-    left: 0;
 }
 
 .info {
