@@ -805,7 +805,6 @@
 				this.showDetails(touch.clientX - this.detailsCanvOffset);
 				clearTimeout(endId);
 				clearTimeout(cancelId);
-				event.preventDefault();
 			});
 
 			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
