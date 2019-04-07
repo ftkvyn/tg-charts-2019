@@ -92,7 +92,7 @@
 			this.itemsOnScreen = undefined;
 		}
 
-		setData(data) {
+		setData(data, type) {
 			this[mx] = undefined;
 			this[zx] = undefined;
 			this[my] = undefined;
@@ -113,6 +113,14 @@
 			this.prevVisibleItems = undefined;
 			this.prevVisibleItemsChange = undefined;
 			this.prev_details_num = undefined;
+
+			if (type === 'line') {
+				this.drawChart = this.drawLineChart;
+				this.getMinAndMax = this.getLinesMinAndMax;
+			} else if (type === 'bar') {
+				this.drawChart = this.drawBarChart;
+				this.getMinAndMax = this.getBarsMinAndMax;
+			}
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
@@ -483,7 +491,7 @@
 			this.end_i = end_i;
 		}
 
-		drawChart() {
+		drawLineChart() {
 			this.setStartEnd();
 
 			this.graphs.forEach((gr) => {
@@ -499,25 +507,79 @@
 			this.calculateMaxY();
 		}
 
+		drawNextBarItem(orig_x1, orig_x2, from_y, to_y, color) {
+			const x1 = this.translateX(orig_x1),
+				x2 = this.translateX(orig_x2),
+				y1 = this.translateY(from_y),
+				y2 = this.translateY(to_y);
+			this.ctx.fillStyle = `${color}aa`;
+			this.ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+		}
+
+		drawBarChart() {
+			this.setStartEnd();
+			const x_step = this.x_vals[this.end_i - 1] - this.x_vals[this.end_i - 2];
+			for (let i = this.start_i + 1; i < this.end_i; i += 1) {
+				let currentHeight = 0;
+				for (let k = 0; k < this.graphs.length; k += 1) {
+					const gr = this.graphs[k];
+					if (this[gr.opacityKey]) {
+						// bar charts won't disappear, they will shrink
+						const multiplier = this[gr.opacityKey] / 255;
+						const dy = multiplier * gr.y_vals[i];
+						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, gr.color);
+						currentHeight += dy;
+					}
+				}
+			}
+			this.calculateMaxY();
+		}
+
+		getLinesMinAndMax() {
+			const visibleCharts = this.graphs
+				.filter((ch) => { return ch.display; });
+			if (!visibleCharts.length) {
+				return { };
+			}
+			let newMax = Math.max(...visibleCharts
+				.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
+			newMax += Math.round((newMax - this[zy]) * padding_y);
+			let newMin = Math.min(...visibleCharts
+				.map((gr) => { return Math.min(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
+			newMin -= Math.round(newMin * padding_y);
+			if (newMin < 0) {
+				newMin = 0;
+			}
+			return { newMin, newMax };
+		}
+
+		getBarsMinAndMax() {
+			const visibleCharts = this.graphs
+				.filter((ch) => { return ch.display; });
+			if (!visibleCharts.length) {
+				return { };
+			}
+			let newMax = -1;
+			for (let i = this.prev_start_i; i < this.prev_end_i; i += 1) {
+				let currentSum = 0;
+				for (let k = 0; k < visibleCharts.length; k += 1) {
+					currentSum += visibleCharts[k].y_vals[i];
+				}
+				if (currentSum > newMax) {
+					newMax = currentSum;
+				}
+			}
+			newMax += Math.round((newMax - this[zy]) * padding_y);
+			const newMin = 0;
+			return { newMin, newMax };
+		}
+
 		calculateMaxY(force) {
 			this.setStartEnd();
 			if (this.prev_start_i !== this.start_i || this.prev_end_i !== this.end_i || force) {
 				this.prev_start_i = this.start_i || this.prev_start_i || 0;
 				this.prev_end_i = this.end_i || this.prev_end_i || 0;
-				const visibleCharts = this.graphs
-					.filter((ch) => { return ch.display; });
-				if (!visibleCharts.length) {
-					return;
-				}
-				let newMax = Math.max(...visibleCharts
-					.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
-				newMax += Math.round((newMax - this[zy]) * padding_y);
-				let newMin = Math.min(...visibleCharts
-					.map((gr) => { return Math.min(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
-				newMin -= Math.round(newMin * padding_y);
-				if (newMin < 0) {
-					newMin = 0;
-				}
+				const { newMax, newMin } = this.getMinAndMax();
 				if ((newMax !== 0 && newMax !== this[my]) ||
 					(newMin !== this[zy])) {
 					if (this.isDrawAxis) {
@@ -1035,9 +1097,9 @@
 		run(collection) {
 			this.collection = collection;
 			this.setColors(true);
-			this.mainChart.setData(collection);
+			this.mainChart.setData(collection, 'bar');
 			this.mapChart.entangledChart = this.mainChart;
-			this.mapChart.setData(collection);
+			this.mapChart.setData(collection, 'bar');
 
 			const btns = this.mapChart.generateControlButtons();
 			const oldBtns = this.appEl.getElementsByClassName('btn');
