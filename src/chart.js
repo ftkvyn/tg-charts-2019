@@ -22,7 +22,7 @@
 		text_color_dark = '#546778',
 		text_color_light = '#96a2aa',
 		duration = 220, // ms
-		padding_y = 0.08,
+		padding_y = 0.0,
 		padding_x = 0.003,
 		main_chart_padding = 16,
 		min_thumb_width = 50,
@@ -762,7 +762,7 @@
 				if (this.x_vals[i]) {
 					if (this.type === 'line') {
 						const delta = Math.abs(this.x_vals[i] - data_x);
-						if (data < prevDelta) {
+						if (delta < prevDelta) {
 							prevDelta = delta;
 							this.details_num = i;
 						}
@@ -1126,12 +1126,12 @@
 			}
 		}
 
-		run(collection) {
+		run(collection, type) {
 			this.collection = collection;
 			this.setColors(true);
-			this.mainChart.setData(collection, 'bar');
+			this.mainChart.setData(collection, type);
 			this.mapChart.entangledChart = this.mainChart;
-			this.mapChart.setData(collection, 'bar');
+			this.mapChart.setData(collection, type);
 
 			const btns = this.mapChart.generateControlButtons();
 			const oldBtns = this.appEl.getElementsByClassName('btn');
@@ -1168,12 +1168,21 @@
 	const charts = [];
 	const chartsEls = document.body.getElementsByClassName('app-container');
 
-	for (let i = 0; i < 1; i += 1) {
-		const chart = new ChartContainer(chartsEls[i]);
-		charts.push(chart);
-		chart.initMapBox();
-		chart.run(data[i]);
-	}
+	// for (let i = 0; i < 1; i += 1) {
+	// 	const chart = new ChartContainer(chartsEls[i]);
+	// 	charts.push(chart);
+	// 	chart.initMapBox();
+	// 	chart.run(data[i]);
+	// }
+	const chart = new ChartContainer(chartsEls[0]);
+	charts.push(chart);
+	chart.initMapBox();
+	chart.run(data[0], 'line');
+
+	const chart2 = new ChartContainer(chartsEls[1]);
+	charts.push(chart2);
+	chart2.initMapBox();
+	chart2.run(data[4], 'bar');
 
 	const dark_link = document.body.getElementsByClassName('set-theme-dark')[0];
 	const light_link = document.body.getElementsByClassName('set-theme-light')[0];
