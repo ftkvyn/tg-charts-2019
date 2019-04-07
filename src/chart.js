@@ -738,7 +738,7 @@
 				const template = document.createElement('template');
 				const html = `<div class="btn">
 				<div class="btn-filler" style="background: ${gr.color};"></div>
-				<div class="btn-mark"><img src="/img/ch2.png" /></div>
+				<div class="btn-mark"><img class="on-img" src="/img/ch2.png" /><img class="off-img" src="/img/xg.png" /></div>
 				<div class="btn-text">${gr.name}</div>
 			</div>`;
 				template.innerHTML = html;

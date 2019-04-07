@@ -172,6 +172,7 @@ a {
 	overflow: hidden;
 	transition: border-width .2s;
 	background: #e0e0e0;
+	cursor: pointer;
 }
 
 
@@ -215,9 +216,16 @@ a {
 	transform: scale(1);
 	transition: transform .15s;
 }
+.btn .btn-mark img.off-img {
+	transform: scale(0)
+}
 
-.btn.btn-off .btn-mark img{
+.btn.btn-off .btn-mark img.on-img{
 	transform: scale(0);
+}
+
+.btn.btn-off .btn-mark img.off-img{
+	transform: scale(1);
 }
 
 .btn .btn-text{
