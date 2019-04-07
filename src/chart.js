@@ -564,15 +564,7 @@
 
 		startChangeKey(key, targetVal) {
 			const val = this.changes[key];
-			// if (val.startTimestamp === -1) {
-				val.startTimestamp = Date.now();
-			// } else {
-			// 	const delta = Date.now() - val.startTimestamp;
-			// 	const deltaScale = delta / duration;
-			// 	if (deltaScale > 0.5) {
-			// 		val.startTimestamp += duration / 3;
-			// 	}
-			// }
+			val.startTimestamp = Date.now();
 			val.deltaValue = targetVal - this[key];
 			val.originalValue = this[key];
 			if (!this.animateFrameId) {
