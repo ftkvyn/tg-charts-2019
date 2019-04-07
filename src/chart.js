@@ -533,8 +533,16 @@
 						let val = newMin;
 						const step = Math.floor((newMax - newMin) / this.yLegendItemsCount);
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
+							let displayVal = val;
+							let pow = 0;
+							while (displayVal > 100) {
+								displayVal /= 10;
+								pow += 1;
+							}
+							displayVal = Math.round(displayVal);
+							displayVal *= 10 ** pow;
 							const item = {
-								y: val,
+								y: displayVal,
 								opacity: 0,
 								display: true,
 								startTimestamp: Date.now(),
