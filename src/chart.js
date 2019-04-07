@@ -737,7 +737,7 @@
 			const btns = this.graphs.map((gr) => {
 				const template = document.createElement('template');
 				const html = `<div class="btn">
-				<div class="btn-filler" style="border-color: ${gr.color}"></div>
+				<div class="btn-filler" style="background: ${gr.color};"></div>
 				<div class="btn-mark"><img src="/img/ch2.png" /></div>
 				<div class="btn-text">${gr.name}</div>
 			</div>`;
