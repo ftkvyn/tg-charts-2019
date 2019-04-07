@@ -511,7 +511,14 @@
 				let newMax = Math.max(...visibleCharts
 					.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
 				newMax += Math.round((newMax - this[zy]) * padding_y);
-				if (newMax !== 0 && newMax !== this[my]) {
+				let newMin = Math.min(...visibleCharts
+					.map((gr) => { return Math.min(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
+				newMin -= Math.round(newMin * padding_y);
+				if (newMin < 0) {
+					newMin = 0;
+				}
+				if ((newMax !== 0 && newMax !== this[my]) ||
+					(newMin !== this[zy])) {
 					if (this.isDrawAxis) {
 						for (let i = 0; i < this.y_legend.length; i += 1) {
 							const item = this.y_legend[i];
@@ -523,8 +530,8 @@
 								item.startTimestamp -= duration / 2;
 							}
 						}
-						let val = 0;
-						const step = Math.floor(newMax / this.yLegendItemsCount);
+						let val = newMin;
+						const step = Math.floor((newMax - newMin) / this.yLegendItemsCount);
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
 							const item = {
 								y: val,
@@ -542,8 +549,10 @@
 					}
 					if (this[my]) {
 						this.startChangeKey(my, newMax);
+						this.startChangeKey(zy, newMin);
 					} else {
 						this[my] = newMax;
+						this[zy] = newMin;
 						this.drawAll(true);
 					}
 				}
