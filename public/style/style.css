@@ -170,13 +170,16 @@ a {
 	position: relative;
 	border-radius: 30px;
 	overflow: hidden;
-	transition: border-width .2s;
-	background: #e0e0e0;
+	transition: background-color .2s;
+	
 	cursor: pointer;
 }
 
+.btn.btn-off {
+	background-color: #e0e0e0 !important;
+}
 
-.btn-filler {
+/* .btn-filler {
 	  transition: width .2s, opacity .2s;
     position: absolute;
     left: 0;
@@ -189,7 +192,7 @@ a {
 .btn.btn-off .btn-filler{
 	width: 0;
 	opacity: 0;
-}
+} */
 
 .btn.btn-off .btn-text{
 	color: gray;
