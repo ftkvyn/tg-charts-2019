@@ -153,10 +153,6 @@ a {
 	display: inline-block;
 	margin-right: 20px;
 	margin-top: 20px;
-	border-radius: 30px;
-	border-width: 1px;
-	border-style: solid;
-	border-color: #e6ecf0;
 	padding: 7px;
 	cursor: pointer;
 	-webkit-tap-highlight-color: transparent;
@@ -166,6 +162,28 @@ a {
 	position: relative;
 }
 
+.btn-filler {
+	    border-radius: 30px;
+    border-width: 18px;
+    border-style: solid;
+    box-sizing: border-box;
+    transition: border-width .2s;
+    transition-delay: .05s;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.btn.btn-off .btn-filler{
+	border-width: 2px;
+}
+
+.btn.btn-off .btn-text{
+	color: gray;
+}
+
 .dark-theme .btn {
 	border-color: #344658;
 }
@@ -173,14 +191,8 @@ a {
 .btn .btn-mark{
 	height: 22px;
 	width: 22px;
-	border-radius: 20px;
 	display: inline-block;
 	text-align: center;
-	border-width: 11px;
-	border-style: solid;
-	box-sizing: border-box;
-	transition: border-width .2s;
-	transition-delay: .05s;
 }
 
 
@@ -204,18 +216,10 @@ a {
 	padding-top: 3px;
 	padding-left: 7px;
 	padding-right: 7px;
-}
-
-.btn.btn-off .btn-mark{
-	border-width: 2px;
-}
-
-.btn.btn-green .btn-mark{
-	border-color: #3cc23f;
-}
-
-.btn.btn-red .btn-mark{
-	border-color: #f34c44;
+	color: white;
+	position: relative;
+	font-weight: 500;
+	transition: color .30s;
 }
 
 
