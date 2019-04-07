@@ -380,7 +380,7 @@
 				this.infoBox.getElementsByClassName('date')[0].innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
 				let moreThanHalf = 0;
 				let lessThanHalf = 0;
-				const half = (this[my] - this[zy]) / 2;
+				const half = ((this[my] - this[zy]) / 2) + this[zy];
 
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
