@@ -556,12 +556,7 @@
 			this.calculateMaxY();
 		}
 
-		getLinesMinAndMax() {
-			const visibleCharts = this.graphs
-				.filter((ch) => { return ch.display; });
-			if (!visibleCharts.length) {
-				return { };
-			}
+		getLinesMinAndMax(visibleCharts) {
 			let newMax = Math.max(...visibleCharts
 				.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
 			newMax += Math.round((newMax - this[zy]) * padding_y);
@@ -574,12 +569,7 @@
 			return { newMin, newMax };
 		}
 
-		getBarsMinAndMax() {
-			const visibleCharts = this.graphs
-				.filter((ch) => { return ch.display; });
-			if (!visibleCharts.length) {
-				return { };
-			}
+		getBarsMinAndMax(visibleCharts) {
 			let newMax = -1;
 			for (let i = this.prev_start_i; i < this.prev_end_i; i += 1) {
 				let currentSum = 0;
@@ -600,7 +590,12 @@
 			if (this.prev_start_i !== this.start_i || this.prev_end_i !== this.end_i || force) {
 				this.prev_start_i = this.start_i || this.prev_start_i || 0;
 				this.prev_end_i = this.end_i || this.prev_end_i || 0;
-				const { newMax, newMin } = this.getMinAndMax();
+				const visibleCharts = this.graphs
+					.filter((ch) => { return ch.display; });
+				if (!visibleCharts.length) {
+					return;
+				}
+				const { newMax, newMin } = this.getMinAndMax(visibleCharts);
 				if ((newMax !== 0 && newMax !== this[my]) ||
 					(newMin !== this[zy])) {
 					if (this.isDrawAxis) {
