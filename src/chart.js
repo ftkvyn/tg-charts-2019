@@ -119,6 +119,10 @@
 			if (type === 'line') {
 				this.drawChart = this.drawLineChart;
 				this.getMinAndMax = this.getLinesMinAndMax;
+			} else if (type === 'area') {
+				this.drawChart = this.drawAreaChart;
+				this.getMinAndMax = this.getAreaMinAndMax;
+				this.yLegendItemsCount = 5;
 			} else if (type === 'bar') {
 				this.drawChart = this.drawBarChart;
 				this.getMinAndMax = this.getBarsMinAndMax;
@@ -453,29 +457,6 @@
 			}
 		}
 
-		startDraw(orig_x0, orig_y0, color) {
-			this.ctx.lineWidth = this.thickness;
-			this.ctx.strokeStyle = color;
-			this.ctx.lineJoin = 'round';
-			this.ctx.lineCap = 'round';
-			this.ctx.miterLimit = 0;
-			this.ctx.beginPath();
-
-			const x0 = this.translateX(orig_x0),
-				y0 = this.translateY(orig_y0);
-			this.ctx.moveTo(x0, y0);
-		}
-
-		drawNextPoint(orig_x, orig_y) {
-			const x = this.translateX(orig_x),
-				y = this.translateY(orig_y);
-			this.ctx.lineTo(x, y);
-		}
-
-		endDraw() {
-			this.ctx.stroke();
-		}
-
 		drawAll(isInitial) {
 			this.clearChart();
 			this.calcScale();
@@ -505,6 +486,29 @@
 			this.end_i = end_i;
 		}
 
+		startDraw(orig_x0, orig_y0, color) {
+			this.ctx.lineWidth = this.thickness;
+			this.ctx.strokeStyle = color;
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
+			this.ctx.miterLimit = 0;
+			this.ctx.beginPath();
+
+			const x0 = this.translateX(orig_x0),
+				y0 = this.translateY(orig_y0);
+			this.ctx.moveTo(x0, y0);
+		}
+
+		drawNextPoint(orig_x, orig_y) {
+			const x = this.translateX(orig_x),
+				y = this.translateY(orig_y);
+			this.ctx.lineTo(x, y);
+		}
+
+		endDraw() {
+			this.ctx.stroke();
+		}
+
 		drawLineChart() {
 			this.setStartEnd();
 
@@ -518,6 +522,74 @@
 					this.endDraw();
 				}
 			});
+			this.calculateMaxY();
+		}
+
+		startDrawArea(prevLine) {
+			this.ctx.lineWidth = 0;
+			// this.ctx.strokeStyle = color;
+			// this.ctx.lineJoin = 'round';
+			// this.ctx.lineCap = 'round';
+			// this.ctx.miterLimit = 0;
+			this.ctx.beginPath();
+			const x0 = this.translateX(prevLine[prevLine.length - 1].x),
+				y0 = this.translateY(prevLine[prevLine.length - 1].y);
+			this.ctx.moveTo(x0, y0);
+			for (let i = prevLine.length - 2; i >= 0; i -= 1) {
+				this.drawNextPoint(prevLine[i].x, prevLine[i].y);
+			}
+		}
+
+		endDrawArea(color) {
+			this.ctx.closePath();
+			this.ctx.fillStyle = `${color}aa`;
+			this.ctx.fill();
+		}
+
+		calcAreaTotal(num) {
+			let total = 0;
+			for (let k = 0; k < this.graphs.length; k += 1) {
+				const gr = this.graphs[k];
+				total += gr.y_vals[num] * (this[gr.opacityKey] / 255);
+			}
+			return total;
+		}
+
+		drawAreaChart() {
+			this.setStartEnd();
+
+			let prevLine = [];
+			for (let i = this.start_i; i < this.end_i; i += 1) {
+				prevLine.push({ x: this.x_vals[i], y: 0 });
+			}
+
+			for (let k = 0; k < this.graphs.length; k += 1) {
+				const gr = this.graphs[k];
+				if (this[gr.opacityKey]) {
+					this.startDrawArea(prevLine);
+					// Areas shrink, not disappear.
+					const multiplier = this[gr.opacityKey] / 255;
+					const line = [];
+					for (let i = this.start_i; i < this.end_i; i += 1) {
+						const y = prevLine[i - this.start_i].y + 100 * (gr.y_vals[i] * multiplier) / this.calcAreaTotal(i);
+						line.push({ x: this.x_vals[i], y });
+						this.drawNextPoint(this.x_vals[i], y);
+					}
+					prevLine = line;
+					this.endDrawArea(gr.color);
+				}
+			}
+
+			// this.graphs.forEach((gr) => {
+			// 	if (this[gr.opacityKey]) {
+			// 		const opacity = getOpacity(this[gr.opacityKey]);
+			// 		this.startDraw(this.x_vals[this.start_i], gr.y_vals[this.start_i], `${gr.color}${opacity}`);
+			// 		for (let i = this.start_i + 1; i < this.end_i; i += 1) {
+			// 			this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
+			// 		}
+			// 		this.endDraw();
+			// 	}
+			// });
 			this.calculateMaxY();
 		}
 
@@ -554,6 +626,15 @@
 				}
 			}
 			this.calculateMaxY();
+		}
+
+		// eslint-disable-next-line class-methods-use-this
+		getAreaMinAndMax() {
+			// ToDo: smaller value for newMax with the same lines.
+			if (this.isDrawAxis) {
+				return { newMin: 0, newMax: 125 };
+			}
+			return { newMin: 0, newMax: 100 };
 		}
 
 		getLinesMinAndMax(visibleCharts) {
@@ -1173,7 +1254,7 @@
 	const chart = new ChartContainer(chartsEls[0]);
 	charts.push(chart);
 	chart.initMapBox();
-	chart.run(data[0], 'line');
+	chart.run(data[0], 'area');
 
 	const chart2 = new ChartContainer(chartsEls[1]);
 	charts.push(chart2);
