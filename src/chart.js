@@ -824,9 +824,10 @@
 		generateControlButtons() {
 			const btns = this.graphs.map((gr) => {
 				const template = document.createElement('template');
-				const html = `<div class="btn" style="background-color: ${gr.color};">
-				<div class="btn-mark"><img class="on-img" src="/img/ch2.png" /><img class="off-img" src="/img/xg.png" /></div>
-				<div class="btn-text">${gr.name}</div>
+				const html = `<div class="btn btn-on">
+				<div class="btn-filler" style="border-color: ${gr.color}"></div>
+				<div class="btn-mark"><img class="on-img" src="/img/ch2.png" /></div>
+				<div class="btn-text" style="color: ${gr.color}">${gr.name}</div>
 			</div>`;
 				template.innerHTML = html;
 				const el = template.content.firstChild;
@@ -844,7 +845,9 @@
 
 					if (isOff) {
 						el.classList.remove('btn-off');
+						el.classList.add('btn-on');
 					} else {
+						el.classList.remove('btn-on');
 						el.classList.add('btn-off');
 					}
 				};
