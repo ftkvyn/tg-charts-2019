@@ -36,6 +36,8 @@
 		zx = Symbol('Shift X'),
 		zy = Symbol('Shift Y');
 
+	let windowWidth = global.innerWidth;
+
 	function initChangesObject(key) {
 		this[key] = {
 			startTimestamp: -1,
@@ -1290,6 +1292,10 @@
 			this.setupMouseEvents();
 
 			global.addEventListener('resize', () => {
+				if (windowWidth === global.innerWidth) {
+					return;
+				}
+				windowWidth = global.innerWidth;
 				this.mainChart.init();
 				this.mainChart.calculateDetailsOffset();
 				this.mapChart.init();
@@ -1337,7 +1343,6 @@
 
 	for (let i = 0; i < 5; i += 1) {
 		loadData(i + 1).then((jsonData) => {
-			console.log(jsonData);
 			const chart = new ChartContainer(chartsEls[i]);
 			charts.push(chart);
 			chart.initMapBox();
