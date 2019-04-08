@@ -36,8 +36,6 @@
 		zx = Symbol('Shift X'),
 		zy = Symbol('Shift Y');
 
-	let windowWidth = global.outerWidth;
-
 	function initChangesObject(key) {
 		this[key] = {
 			startTimestamp: -1,
@@ -1048,6 +1046,7 @@
 			this.overlay_left = this.appEl.getElementsByClassName('overlay_left')[0];
 			this.overlay_right = this.appEl.getElementsByClassName('overlay_right')[0];
 			this.isLight = true;
+			this.windowWidth = global.outerWidth;
 
 			this.setupAllEvents();
 		}
@@ -1099,15 +1098,12 @@
 			if (right - dx_int < 0) {
 				dx_int = right;
 			}
-			// eslint-disable-next-line no-mixed-operators
 			if (this.container_width - right - this.thumb_width + dx_int < 0) {
-				// eslint-disable-next-line no-mixed-operators
 				dx_int = right + this.thumb_width - this.container_width;
 			}
 			this.thumb.style.right = `${right - dx_int}px`;
 
 			this.overlay_right.style.width = `${right - dx_int}px`;
-			// eslint-disable-next-line no-mixed-operators
 			this.overlay_left.style.width = `${this.container_width - right - this.thumb_width + dx_int}px`;
 
 			this.setMapBox();
@@ -1328,10 +1324,10 @@
 			this.setupMouseEvents();
 
 			global.addEventListener('resize', () => {
-				if (windowWidth === global.outerWidth) {
+				if (this.windowWidth === global.outerWidth) {
 					return;
 				}
-				windowWidth = global.outerWidth;
+				this.windowWidth = global.outerWidth;
 				this.mainChart.init();
 				this.mainChart.calculateDetailsOffset();
 				this.mapChart.init();
