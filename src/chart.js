@@ -36,7 +36,7 @@
 		zx = Symbol('Shift X'),
 		zy = Symbol('Shift Y');
 
-	let windowWidth = global.innerWidth;
+	let windowWidth = global.outerWidth;
 
 	function initChangesObject(key) {
 		this[key] = {
@@ -1292,10 +1292,11 @@
 			this.setupMouseEvents();
 
 			global.addEventListener('resize', () => {
-				if (windowWidth === global.innerWidth) {
+				if (windowWidth === global.outerWidth) {
 					return;
 				}
-				windowWidth = global.innerWidth;
+				windowWidth = global.outerWidth;
+				console.log(windowWidth);
 				this.mainChart.init();
 				this.mainChart.calculateDetailsOffset();
 				this.mapChart.init();
