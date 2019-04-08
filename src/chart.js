@@ -92,7 +92,7 @@
 			this.itemsOnScreen = undefined;
 		}
 
-		setData(data, type) {
+		setData(data, type, options) {
 			this[mx] = undefined;
 			this[zx] = undefined;
 			this[my] = undefined;
@@ -115,6 +115,7 @@
 			this.prev_details_num = undefined;
 			this.details_num = -1;
 			this.type = type;
+			this.y_scaled = options.y_scaled;
 
 			if (type === 'line') {
 				this.drawChart = this.drawLineChart;
@@ -345,8 +346,16 @@
 				this.ctx.moveTo(main_chart_padding, this.translateY(item.y));
 				this.ctx.lineTo(this.width - main_chart_padding, this.translateY(item.y));
 				this.ctx.stroke();
-				this.ctx.fillStyle = textColor + getOpacity(item.opacity);
-				this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
+				if (this.y_scaled) {
+					this.ctx.fillStyle = this.graphs[0].color + getOpacity(item.opacity);
+					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
+
+					this.ctx.fillStyle = this.graphs[1].color + getOpacity(item.opacity);
+					this.ctx.fillText(`${formatNumber(item.y)}`, this.width - main_chart_padding - 30, this.translateY(item.y) - y_legend_text_height);
+				} else {
+					this.ctx.fillStyle = textColor + getOpacity(item.opacity);
+					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
+				}
 			}
 
 			this.ctx.lineWidth = this.axisThickness;
@@ -1211,12 +1220,19 @@
 			}
 		}
 
-		run(collection, type) {
+		run(collection, type, optionsOrig) {
 			this.collection = collection;
 			this.setColors(true);
-			this.mainChart.setData(collection, type);
+			const mainOptions = {};
+			const mapOptions = {};
+			const options = optionsOrig || {};
+			if (options.y_scaled) {
+				mainOptions.y_scaled = true;
+				mapOptions.y_scaled = true;
+			}
+			this.mainChart.setData(collection, type, mainOptions);
 			this.mapChart.entangledChart = this.mainChart;
-			this.mapChart.setData(collection, type);
+			this.mapChart.setData(collection, type, mapOptions);
 
 			const btns = this.mapChart.generateControlButtons();
 			const oldBtns = this.appEl.getElementsByClassName('btn');
@@ -1262,7 +1278,7 @@
 	const chart = new ChartContainer(chartsEls[0]);
 	charts.push(chart);
 	chart.initMapBox();
-	chart.run(data[0], 'line');
+	chart.run(data[0], 'line', { y_scaled: true });
 
 	const chart1 = new ChartContainer(chartsEls[1]);
 	charts.push(chart1);
@@ -1306,8 +1322,7 @@ fetch('/data_1/1/overview.json')
 	})
 	.then((jsonData) => {
 		console.log(jsonData);
-	})
-	.catch(alert);
+	});
 
 fetch('/data_2/1/2018-07/13.json')
 	.then((response) => {
@@ -1316,5 +1331,4 @@ fetch('/data_2/1/2018-07/13.json')
 	})
 	.then((jsonData) => {
 		console.log(jsonData);
-	})
-	.catch(alert);
+	});
