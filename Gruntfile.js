@@ -13,7 +13,6 @@ module.exports = function (grunt) {
 				files: {
 					'public/js/chart.js': 'src/chart.js',
 					'public/js/data.js': 'src/data.js',
-					// 'public/js/test.min.js': 'src/test.js',
 				},
 			},
 		},
@@ -40,8 +39,6 @@ module.exports = function (grunt) {
 					port: 3000,
 					server: './app.js',
 				},
-				// server: './fwefwe.js', // path.resolve(__dirname, 'app.js'),
-				// if you do not define a port it will start your server at port 3000
 			},
 		},
 	});

@@ -1288,3 +1288,24 @@
 		document.body.classList.remove('isDark');
 	};
 }(window));
+
+
+fetch('/data_1/1/overview.json')
+	.then((response) => {
+		const jsonData = response.json();
+		return jsonData;
+	})
+	.then((jsonData) => {
+		console.log(jsonData);
+	})
+	.catch(alert);
+
+fetch('/data_2/1/2018-07/13.json')
+	.then((response) => {
+		const jsonData = response.json();
+		return jsonData;
+	})
+	.then((jsonData) => {
+		console.log(jsonData);
+	})
+	.catch(alert);
