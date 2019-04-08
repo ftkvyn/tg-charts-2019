@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-continue */
 /* jshint esversion: 6 */
@@ -21,7 +22,7 @@
 		axis_color_dark_zero = '#313d4d',
 		text_color_dark = '#546778',
 		text_color_light = '#96a2aa',
-		duration = 220, // ms
+		duration = 180, // ms
 		padding_y = 0.0,
 		padding_x = 0.003,
 		main_chart_padding = 16,
@@ -43,6 +44,21 @@
 		};
 	}
 
+	function prettifyNumber(val) {
+		let displayVal = val;
+		let pow = 0;
+		while (displayVal > 100) {
+			displayVal /= 10;
+			pow += 1;
+		}
+		displayVal = Math.round(displayVal);
+		while (pow > 0) {
+			displayVal *= 10;
+			pow -= 1;
+		}
+		return displayVal;
+	}
+
 	function getDateText(timestamp) {
 		const date = new Date(timestamp);
 		return [`${months[date.getMonth()]} ${date.getDate()}`, days[date.getDay()]];
@@ -53,7 +69,7 @@
 	}
 
 	function formatNumber(val) {
-		let str = val.toString();
+		let str = Math.round(val).toString();
 		const parts = [];
 		while (str.length > 3) {
 			parts.push(str.substr(str.length - 3));
@@ -151,6 +167,7 @@
 						opacityKey: key,
 						display: true,
 						y_vals: col,
+						scale: 1,
 					};
 					this[graph.opacityKey] = 255;
 					this.graphs.push(graph);
@@ -158,6 +175,11 @@
 						this.changingFields.push(graph.opacityKey);
 					}
 				}
+			}
+
+			if (this.y_scaled) {
+				this.graphs[1].scale = 15;
+				this.graphs[1].y_vals = this.graphs[1].y_vals.map((val) => { return val * this.graphs[1].scale; });
 			}
 
 			this[zx] = Math.min(...this.x_vals);
@@ -347,11 +369,21 @@
 				this.ctx.lineTo(this.width - main_chart_padding, this.translateY(item.y));
 				this.ctx.stroke();
 				if (this.y_scaled) {
-					this.ctx.fillStyle = this.graphs[0].color + getOpacity(item.opacity);
-					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
+					if (!item.hideLeft) {
+						this.ctx.fillStyle = this.graphs[0].color + getOpacity(item.opacity);
+						if (!this.graphs[0].display) {
+							this.ctx.fillStyle = this.graphs[0].color + getOpacity(this[this.graphs[0].opacityKey]);
+						}
+						this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
+					}
 
-					this.ctx.fillStyle = this.graphs[1].color + getOpacity(item.opacity);
-					this.ctx.fillText(`${formatNumber(item.y)}`, this.width - main_chart_padding - 30, this.translateY(item.y) - y_legend_text_height);
+					if (!item.hideRight) {
+						this.ctx.fillStyle = this.graphs[1].color + getOpacity(item.opacity);
+						if (!this.graphs[1].display) {
+							this.ctx.fillStyle = this.graphs[1].color + getOpacity(this[this.graphs[1].opacityKey]);
+						}
+						this.ctx.fillText(`${formatNumber(item.scaled_y)}`, this.width - main_chart_padding - 30, this.translateY(item.y) - y_legend_text_height);
+					}
 				} else {
 					this.ctx.fillStyle = textColor + getOpacity(item.opacity);
 					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
@@ -439,7 +471,11 @@
 						const template = document.createElement('template');
 						template.innerHTML = infoHtml;
 						const infoEl = template.content.firstChild;
-						infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num]);
+						if (gr.scale) {
+							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num] / gr.scale);
+						} else {
+							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num]);
+						}
 						infoEl.getElementsByClassName('name')[0].innerText = gr.name;
 						infoEl.style.color = gr.color;
 						this.infoBox.appendChild(infoEl);
@@ -543,10 +579,6 @@
 
 		startDrawArea(prevLine) {
 			this.ctx.lineWidth = 0;
-			// this.ctx.strokeStyle = color;
-			// this.ctx.lineJoin = 'round';
-			// this.ctx.lineCap = 'round';
-			// this.ctx.miterLimit = 0;
 			this.ctx.beginPath();
 			const x0 = this.translateX(prevLine[prevLine.length - 1].x),
 				y0 = this.translateY(prevLine[prevLine.length - 1].y);
@@ -701,20 +733,21 @@
 							step = 25;
 						}
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
-							let displayVal = val;
-							let pow = 0;
-							while (displayVal > 100) {
-								displayVal /= 10;
-								pow += 1;
-							}
-							displayVal = Math.round(displayVal);
-							displayVal *= 10 ** pow;
 							const item = {
-								y: displayVal,
+								y: prettifyNumber(val),
 								opacity: 0,
 								display: true,
 								startTimestamp: Date.now(),
 							};
+							if (this.y_scaled) {
+								item.scaled_y = prettifyNumber(Math.round(val / this.graphs[1].scale));
+								if (!this.graphs[0].display) {
+									item.hideLeft = true;
+								}
+								if (!this.graphs[1].display) {
+									item.hideRight = true;
+								}
+							}
 							if (!this[my]) {
 								// Initial creation
 								item.opacity = 255;
@@ -990,11 +1023,12 @@
 
 		tryStartMovingX() {
 			if (this.mainChart.changes[zx].startTimestamp === -1 ||
-				(Date.now() - this.mainChart.changes[zx].startTimestamp < (duration / 2))) {
+				(Date.now() - this.mainChart.changes[zx].startTimestamp > (duration * 0.75))) {
 				this.mainChart.startChangeKey(zx, this.nextfrom);
 				this.mainChart.startChangeKey(mx, this.nextto);
 			} else {
-				requestAnimationFrame(() => {
+				cancelAnimationFrame(this.moveXFrame);
+				this.moveXFrame = requestAnimationFrame(() => {
 					this.tryStartMovingX();
 				});
 			}
@@ -1275,20 +1309,20 @@
 	// 	chart.initMapBox();
 	// 	chart.run(data[i]);
 	// }
-	const chart = new ChartContainer(chartsEls[0]);
-	charts.push(chart);
-	chart.initMapBox();
-	chart.run(data[0], 'line', { y_scaled: true });
+	// const chart = new ChartContainer(chartsEls[0]);
+	// charts.push(chart);
+	// chart.initMapBox();
+	// chart.run(data[0], 'line', { y_scaled: true });
 
-	const chart1 = new ChartContainer(chartsEls[1]);
-	charts.push(chart1);
-	chart1.initMapBox();
-	chart1.run(data[4], 'area');
+	// const chart1 = new ChartContainer(chartsEls[1]);
+	// charts.push(chart1);
+	// chart1.initMapBox();
+	// chart1.run(data[4], 'area');
 
-	const chart2 = new ChartContainer(chartsEls[2]);
-	charts.push(chart2);
-	chart2.initMapBox();
-	chart2.run(data[4], 'bar');
+	// const chart2 = new ChartContainer(chartsEls[2]);
+	// charts.push(chart2);
+	// chart2.initMapBox();
+	// chart2.run(data[4], 'bar');
 
 	const dark_link = document.body.getElementsByClassName('set-theme-dark')[0];
 	const light_link = document.body.getElementsByClassName('set-theme-light')[0];
@@ -1312,23 +1346,20 @@
 		dark_link.style.display = 'initial';
 		document.body.classList.remove('isDark');
 	};
+
+	function loadData(num) {
+		return fetch(`/data_1/${num}/overview.json`)
+			.then((response) => {
+				const jsonData = response.json();
+				return jsonData;
+			});
+	}
+
+	loadData(2).then((jsonData) => {
+		console.log(jsonData);
+		const chart = new ChartContainer(chartsEls[0]);
+		charts.push(chart);
+		chart.initMapBox();
+		chart.run(jsonData, jsonData.types.y0, { y_scaled: jsonData.y_scaled });
+	});
 }(window));
-
-
-fetch('/data_1/1/overview.json')
-	.then((response) => {
-		const jsonData = response.json();
-		return jsonData;
-	})
-	.then((jsonData) => {
-		console.log(jsonData);
-	});
-
-fetch('/data_2/1/2018-07/13.json')
-	.then((response) => {
-		const jsonData = response.json();
-		return jsonData;
-	})
-	.then((jsonData) => {
-		console.log(jsonData);
-	});
