@@ -955,6 +955,9 @@
 		}
 
 		generateControlButtons() {
+			if (this.graphs.length < 2) {
+				return null;
+			}
 			const btns = this.graphs.map((gr) => {
 				const template = document.createElement('template');
 				const html = `<div class="btn btn-on">
@@ -964,7 +967,12 @@
 			</div>`;
 				template.innerHTML = html;
 				const el = template.content.firstChild;
+				let justTurnedOff = false;
 				el.onclick = () => {
+					if (justTurnedOff) {
+						justTurnedOff = false;
+						return;
+					}
 					const isOff = el.classList.contains('btn-off');
 					const targetOpacity = isOff ? 255 : 0;
 
@@ -984,6 +992,32 @@
 						el.classList.add('btn-off');
 					}
 				};
+				let swichOtherOffId = null;
+				const turnOffFn = function turnOffFn() {
+					for (let i = 0; i < btns.length; i += 1) {
+						if (btns[i] !== el && btns[i].classList.contains('btn-on')) {
+							btns[i].click();
+						}
+						if (btns[i] === el && btns[i].classList.contains('btn-off')) {
+							btns[i].click();
+						}
+					}
+					justTurnedOff = true;
+				};
+				el.addEventListener('touchstart', (event) => {
+					// ToDo: handle force touch as well.
+					// ToDo: only off others, not click.
+					event.preventDefault();
+					clearTimeout(swichOtherOffId);
+					if (event.changedTouches[0].force > 1) {
+						turnOffFn();
+						return;
+					}
+					swichOtherOffId = setTimeout(turnOffFn, 1000);
+				});
+
+				el.addEventListener('touchend', () => { clearTimeout(swichOtherOffId); el.click(); });
+				el.addEventListener('touchcancel', () => { clearTimeout(swichOtherOffId); el.click(); });
 				return el;
 			});
 			return btns;
@@ -1276,9 +1310,11 @@
 			while (oldBtns.length > 0) {
 				this.appEl.removeChild(oldBtns[0]);
 			}
-			btns.forEach((btn) => {
-				this.appEl.appendChild(btn);
-			});
+			if (btns) {
+				btns.forEach((btn) => {
+					this.appEl.appendChild(btn);
+				});
+			}
 
 			this.mainChart.init();
 			this.mapChart.init();
@@ -1296,7 +1332,6 @@
 					return;
 				}
 				windowWidth = global.outerWidth;
-				console.log(windowWidth);
 				this.mainChart.init();
 				this.mainChart.calculateDetailsOffset();
 				this.mapChart.init();
