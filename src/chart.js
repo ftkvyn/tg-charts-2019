@@ -980,8 +980,15 @@
 		}
 
 		tryStartMovingX() {
-			this.mainChart.startChangeKey(zx, this.nextfrom);
-			this.mainChart.startChangeKey(mx, this.nextto);
+			if (this.mainChart.changes[zx].startTimestamp === -1 ||
+				(Date.now() - this.mainChart.changes[zx].startTimestamp < (duration / 2))) {
+				this.mainChart.startChangeKey(zx, this.nextfrom);
+				this.mainChart.startChangeKey(mx, this.nextto);
+			} else {
+				requestAnimationFrame(() => {
+					this.tryStartMovingX();
+				});
+			}
 		}
 
 		setMapBox(isInitial) {
