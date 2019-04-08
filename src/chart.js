@@ -888,8 +888,16 @@
 			});
 
 			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
-			this.detailsCanv.addEventListener('touchend', () => { endId = setTimeout(this.hideDetails.bind(this), 1200); });
-			this.detailsCanv.addEventListener('touchcancel', () => { cancelId = setTimeout(this.hideDetails.bind(this), 1200); });
+			this.detailsCanv.addEventListener('touchend', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
+			this.detailsCanv.addEventListener('touchcancel', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
 
 			const infoBoxHtml = `<div class="info" style="display:none;">
 				<div class="date"></div>
@@ -972,14 +980,8 @@
 		}
 
 		tryStartMovingX() {
-			if (this.mainChart.changes[zx].startTimestamp === -1) {
-				this.mainChart.startChangeKey(zx, this.nextfrom);
-				this.mainChart.startChangeKey(mx, this.nextto);
-			} else {
-				requestAnimationFrame(() => {
-					this.tryStartMovingX();
-				});
-			}
+			this.mainChart.startChangeKey(zx, this.nextfrom);
+			this.mainChart.startChangeKey(mx, this.nextto);
 		}
 
 		setMapBox(isInitial) {
