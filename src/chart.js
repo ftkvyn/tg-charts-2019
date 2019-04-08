@@ -365,8 +365,8 @@
 				}
 				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity);
 				this.ctx.beginPath();
-				this.ctx.moveTo(main_chart_padding, this.translateY(item.y));
-				this.ctx.lineTo(this.width - main_chart_padding, this.translateY(item.y));
+				this.ctx.moveTo(main_chart_padding, this.translateY(item.realY));
+				this.ctx.lineTo(this.width - main_chart_padding, this.translateY(item.realY));
 				this.ctx.stroke();
 				if (this.y_scaled) {
 					if (!item.hideLeft) {
@@ -735,6 +735,7 @@
 						for (let i = 0; i < this.yLegendItemsCount; i += 1) {
 							const item = {
 								y: prettifyNumber(val),
+								realY: val,
 								opacity: 0,
 								display: true,
 								startTimestamp: Date.now(),
@@ -1303,27 +1304,6 @@
 	const charts = [];
 	const chartsEls = document.body.getElementsByClassName('app-container');
 
-	// for (let i = 0; i < 1; i += 1) {
-	// 	const chart = new ChartContainer(chartsEls[i]);
-	// 	charts.push(chart);
-	// 	chart.initMapBox();
-	// 	chart.run(data[i]);
-	// }
-	// const chart = new ChartContainer(chartsEls[0]);
-	// charts.push(chart);
-	// chart.initMapBox();
-	// chart.run(data[0], 'line', { y_scaled: true });
-
-	// const chart1 = new ChartContainer(chartsEls[1]);
-	// charts.push(chart1);
-	// chart1.initMapBox();
-	// chart1.run(data[4], 'area');
-
-	// const chart2 = new ChartContainer(chartsEls[2]);
-	// charts.push(chart2);
-	// chart2.initMapBox();
-	// chart2.run(data[4], 'bar');
-
 	const dark_link = document.body.getElementsByClassName('set-theme-dark')[0];
 	const light_link = document.body.getElementsByClassName('set-theme-light')[0];
 
@@ -1355,7 +1335,7 @@
 			});
 	}
 
-	loadData(2).then((jsonData) => {
+	loadData(1).then((jsonData) => {
 		console.log(jsonData);
 		const chart = new ChartContainer(chartsEls[0]);
 		charts.push(chart);

@@ -4,4 +4,5 @@
 5. Dates legend (on top)
 6. Changing dates animation on popup
 7. Transition animation (hide one chart, show another)
-8. Axis colors
+8. Colors
+9. Handle long tap
