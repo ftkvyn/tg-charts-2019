@@ -1335,11 +1335,13 @@
 			});
 	}
 
-	loadData(1).then((jsonData) => {
-		console.log(jsonData);
-		const chart = new ChartContainer(chartsEls[0]);
-		charts.push(chart);
-		chart.initMapBox();
-		chart.run(jsonData, jsonData.types.y0, { y_scaled: jsonData.y_scaled });
-	});
+	for (let i = 0; i < 5; i += 1) {
+		loadData(i + 1).then((jsonData) => {
+			console.log(jsonData);
+			const chart = new ChartContainer(chartsEls[i]);
+			charts.push(chart);
+			chart.initMapBox();
+			chart.run(jsonData, jsonData.types.y0, { y_scaled: jsonData.y_scaled });
+		});
+	}
 }(window));
