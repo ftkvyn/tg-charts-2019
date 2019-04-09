@@ -1015,7 +1015,7 @@
 				});
 
 				el.addEventListener('touchend', () => { clearTimeout(swichOtherOffId); el.click(); });
-				el.addEventListener('touchcancel', () => { clearTimeout(swichOtherOffId); el.click(); });
+				el.addEventListener('touchcancel', () => { clearTimeout(swichOtherOffId); });
 				return el;
 			});
 			return btns;
