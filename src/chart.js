@@ -738,7 +738,7 @@
 			return { newMin, newMax };
 		}
 
-		calculateMaxY(force) {
+		calculateMaxY(force, noDraw) {
 			this.setStartEnd();
 			if (this.prev_start_i !== this.start_i || this.prev_end_i !== this.end_i || force) {
 				this.prev_start_i = this.start_i || this.prev_start_i || 0;
@@ -759,14 +759,14 @@
 					const newScale = dBig / dSmall;
 					const newScalePad = newBigVals.newMin - (newSmallVals.newMin * newScale);
 					if (newScale !== this.scale) {
-						if (this.scale) {
+						if (this.scale && !noDraw) {
 							this.startChangeKey('scale', newScale);
 						} else {
 							this.scale = newScale;
 						}
 					}
 					if (newScalePad !== this.scale_pad) {
-						if (this.scale_pad) {
+						if (this.scale_pad && !noDraw) {
 							this.startChangeKey('scale_pad', newScalePad);
 						} else {
 							this.scale_pad = newScalePad;
@@ -824,7 +824,11 @@
 					} else {
 						this[my] = newMax;
 						this[zy] = newMin;
-						this.drawAll(true);
+						if (!noDraw) {
+							this.drawAll(true);
+						} else {
+							this.calcScale();
+						}
 					}
 				}
 			}
@@ -1347,6 +1351,9 @@
 
 			this.mainChart.detailsCanv.onclick = () => {
 				this.disappear();
+				setTimeout(() => {
+					this.run(this.collection, this.type, { isAppear: true });
+				}, 500);
 			};
 		}
 
@@ -1405,13 +1412,36 @@
 			}
 		}
 
+		// eslint-disable-next-line class-methods-use-this
+		appearChart(chart) {
+			const origMx = chart[mx];
+			const origZx = chart[zx];
+			const delta = origMx - origZx;
+			chart[mx] -= delta * 0.45;
+			chart[zx] += delta * 0.45;
+			chart.startChangeKey(zx, origZx);
+			chart.startChangeKey(mx, origMx);
+
+			chart.graphs.forEach((gr) => {
+				chart[gr.opacityKey] = 0;
+				chart.startChangeKey(gr.opacityKey, 255);
+			});
+		}
+
+		appear() {
+			this.appearChart(this.mainChart);
+			this.appearChart(this.mapChart);
+		}
+
 		run(collection, type, optionsOrig) {
 			this.collection = collection;
+			this.type = type;
+			this.optionsOrig = this.optionsOrig;
 			this.setColors(true);
 			const mainOptions = {};
 			const mapOptions = {};
 			const options = optionsOrig || {};
-			if (options.y_scaled) {
+			if (collection.y_scaled) {
 				mainOptions.y_scaled = true;
 				mapOptions.y_scaled = true;
 			}
@@ -1432,10 +1462,14 @@
 
 			this.mainChart.init();
 			this.mapChart.init();
-			this.mapChart.calculateMaxY(true);
+			this.mapChart.calculateMaxY(true, options.isAppear);
 			this.setMapBox(true);
-			this.mainChart.calculateMaxY(true);
+			this.mainChart.calculateMaxY(true, options.isAppear);
 			this.updateLegend();
+			if (options.isAppear) {
+				// this.mainChart.calculateXLabels(true);
+				this.appear();
+			}
 		}
 
 		setupAllEvents() {
@@ -1497,7 +1531,7 @@
 			const chart = new ChartContainer(chartsEls[i]);
 			charts.push(chart);
 			chart.initMapBox();
-			chart.run(jsonData, jsonData.types.y0, { y_scaled: jsonData.y_scaled });
+			chart.run(jsonData, jsonData.types.y0);
 		});
 	}
 }(window));
