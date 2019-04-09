@@ -30,9 +30,21 @@ body.isDark {
 	padding: 16px;
 }
 
+.appHeader {
+	overflow: hidden;
+}
+
 .title {
 	font-size: 18px;
-	font-weight: bolder
+	font-weight: bolder;
+	float: left;
+}
+
+.legend {
+	font-size: 16px;
+	font-weight: bolder;
+	float: right;
+	margin-top: 1.25em;
 }
 
 .main-chart-container {

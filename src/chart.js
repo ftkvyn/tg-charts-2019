@@ -10,7 +10,8 @@
 	global.webkitRequestAnimationFrame || global.msRequestAnimationFrame;
 	global.requestAnimationFrame = requestAnimationFrame;
 
-	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+	const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+		months = monthsFull.map((m) => { return m.substr(0, 3); }),
 		days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
 		dark_background_color = '#1d2837',
 		dark_color = '#242f3e',
@@ -62,6 +63,11 @@
 	function getDateText(timestamp) {
 		const date = new Date(timestamp);
 		return [`${months[date.getMonth()]} ${date.getDate()}`, days[date.getDay()]];
+	}
+
+	function getFullDateText(timestamp) {
+		const date = new Date(timestamp);
+		return `${date.getDate()} ${monthsFull[date.getMonth()]} ${date.getFullYear()}`;
 	}
 
 	function getOpacity(val) {
@@ -732,7 +738,6 @@
 					const dSmall = newSmallVals.newMax - newSmallVals.newMin;
 					const newScale = dBig / dSmall;
 					const newScalePad = newBigVals.newMin - (newSmallVals.newMin * newScale);
-					console.log(newScalePad);
 					if (newScale !== this.scale) {
 						if (this.scale) {
 							this.startChangeKey('scale', newScale);
@@ -1067,6 +1072,7 @@
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
 			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
 			this.chart_map = this.appEl.getElementsByClassName('chart_map')[0];
+			this.legend_el = this.appEl.getElementsByClassName('legend')[0];
 			this.height = 300;
 			this.map_height = 40;
 
@@ -1100,6 +1106,8 @@
 				(Date.now() - this.mainChart.changes[zx].startTimestamp > (duration * 0.75))) {
 				this.mainChart.startChangeKey(zx, this.nextfrom);
 				this.mainChart.startChangeKey(mx, this.nextto);
+				this.updateLegend();
+				setTimeout(this.updateLegend.bind(this), duration * 1.2);
 			} else {
 				cancelAnimationFrame(this.moveXFrame);
 				this.moveXFrame = requestAnimationFrame(() => {
@@ -1128,6 +1136,12 @@
 				this.mainChart[zx] = from;
 				this.mainChart[mx] = to;
 			}
+		}
+
+		updateLegend() {
+			const fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
+			const toDate = this.mainChart.x_vals[this.mainChart.end_i - 1];
+			this.legend_el.innerText = `${getFullDateText(fromDate)} - ${getFullDateText(toDate)}`;
 		}
 
 		moveChart(dx) {
@@ -1355,6 +1369,7 @@
 			this.mapChart.calculateMaxY(true);
 			this.setMapBox(true);
 			this.mainChart.calculateMaxY(true);
+			this.updateLegend();
 		}
 
 		setupAllEvents() {
