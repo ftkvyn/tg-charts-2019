@@ -45,10 +45,6 @@
 		};
 	}
 
-	function prettifyMillionNumber(val) {
-		return `${Math.round(val / 1000000)}M`;
-	}
-
 	function prettifyNumber(val) {
 		let displayVal = val;
 		let pow = 0;
@@ -394,7 +390,7 @@
 						if (!this.graphs[0].display) {
 							this.ctx.fillStyle = this.graphs[0].color + getOpacity(this[this.graphs[0].opacityKey]);
 						}
-						this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
+						this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.realY) - y_legend_text_height);
 					}
 
 					if (!item.hideRight) {
@@ -402,11 +398,11 @@
 						if (!this.graphs[1].display) {
 							this.ctx.fillStyle = this.graphs[1].color + getOpacity(this[this.graphs[1].opacityKey]);
 						}
-						this.ctx.fillText(`${formatNumber(item.scaled_y)}`, this.width - main_chart_padding - 30, this.translateY(item.y) - y_legend_text_height);
+						this.ctx.fillText(`${formatNumber(item.scaled_y)}`, this.width - main_chart_padding - 30, this.translateY(item.realY) - y_legend_text_height);
 					}
 				} else {
 					this.ctx.fillStyle = textColor + getOpacity(item.opacity);
-					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.y) - y_legend_text_height);
+					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.realY) - y_legend_text_height);
 				}
 			}
 
