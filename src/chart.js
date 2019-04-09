@@ -24,7 +24,7 @@
 		text_color_dark = '#546778',
 		text_color_light = '#96a2aa',
 		duration = 180, // ms
-		padding_y = 0.0,
+		padding_y = 0.03,
 		padding_x = 0.003,
 		main_chart_padding = 16,
 		min_thumb_width = 50,
@@ -65,13 +65,22 @@
 		return [`${months[date.getMonth()]} ${date.getDate()}`, days[date.getDay()]];
 	}
 
+	function padZeros(val) {
+		return (`00${val}`).substr(-2);
+	}
+
+	function getHoursText(timestamp) {
+		const date = new Date(timestamp);
+		return `${padZeros(date.getHours())}:${padZeros(date.getMinutes())}`;
+	}
+
 	function getFullDateText(timestamp) {
 		const date = new Date(timestamp);
 		return `${date.getDate()} ${monthsFull[date.getMonth()]} ${date.getFullYear()}`;
 	}
 
 	function getOpacity(val) {
-		return (`00${Math.round(val).toString(16)}`).substr(-2);
+		return padZeros(Math.round(val).toString(16));
 	}
 
 	function formatNumber(val) {
@@ -162,13 +171,17 @@
 					this.x_vals = col;
 					this.x_legend = col.map((val) => {
 						const dayNames = getDateText(val);
-						return {
+						const result = {
 							name: dayNames[0],
 							day: dayNames[1],
 							x: val,
 							opacity: 255,
 							display: true,
 						};
+						if (this.isDetails) {
+							result.name = getHoursText(val);
+						}
+						return result;
 					});
 				} else {
 					const graph = {
@@ -498,7 +511,11 @@
 					}
 				});
 
-				this.infoBox.getElementsByClassName('date')[0].innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
+				let text = this.x_legend[this.details_num].name;
+				if (!this.isDetails) {
+					text = `${this.x_legend[this.details_num].day}, ${text}`;
+				}
+				this.infoBox.getElementsByClassName('date')[0].innerText = text;
 
 				this.infoBox.style.display = 'block';
 				let left = x - 50;
@@ -707,10 +724,13 @@
 		getLinesMinAndMax(visibleCharts) {
 			let newMax = Math.max(...visibleCharts
 				.map((gr) => { return Math.max(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
-			newMax += Math.round((newMax - this[zy]) * padding_y);
 			let newMin = Math.min(...visibleCharts
 				.map((gr) => { return Math.min(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
-			newMin -= Math.round(newMin * padding_y);
+
+			if (!this.y_scaled) {
+				newMax += Math.round((newMax - this[zy]) * padding_y);
+				newMin -= Math.round(newMin * padding_y);
+			}
 			if (newMin < 0) {
 				newMin = 0;
 			}
@@ -767,6 +787,10 @@
 							this.scale_pad = newScalePad;
 						}
 					}
+				}
+				if (this.y_scaled) {
+					newMax += Math.round((newMax - this[zy]) * padding_y);
+					newMin -= Math.round(newMin * padding_y);
 				}
 				if ((newMax !== 0 && newMax !== this[my]) ||
 					(newMin !== this[zy])) {
@@ -1508,6 +1532,7 @@
 			this.loadDetails()
 				.then((detailsData) => {
 					this.isOverview = false;
+					this.mainChart.isDetails = true;
 					this.run(detailsData, { isAppear: true });
 				});
 		}
@@ -1516,6 +1541,7 @@
 			this.loadMainData()
 				.then((jsonData) => {
 					this.isOverview = true;
+					this.mainChart.isDetails = false;
 					this.run(jsonData, { isAppear: !isInitial });
 				});
 		}
