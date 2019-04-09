@@ -180,9 +180,8 @@
 			if (this.y_scaled) {
 				this.graphs[1].y_scaled = true;
 				this.changingFields.push('scale');
-				this.scale = 15;
+				this.changingFields.push('scale_pad');
 				this.graphs[1].y_vals_orig = this.graphs[1].y_vals.map((val) => { return val; });
-				this.setupScaledY();
 			}
 
 			this[zx] = Math.min(...this.x_vals);
@@ -192,8 +191,8 @@
 			this[zy] = 0;
 		}
 
-		setupScaledY() {
-			this.graphs[1].y_vals = this.graphs[1].y_vals_orig.map((val) => { return val * this.scale; });
+		recalculateScaledY() {
+			this.graphs[1].y_vals = this.graphs[1].y_vals_orig.map((val) => { return this.scale_pad + val * this.scale; });
 		}
 
 		setChartWidths() {
@@ -479,7 +478,7 @@
 						template.innerHTML = infoHtml;
 						const infoEl = template.content.firstChild;
 						if (gr.y_scaled) {
-							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num] / this.scale);
+							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals_orig[this.details_num]);
 						} else {
 							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num]);
 						}
@@ -520,6 +519,9 @@
 			this.clearChart();
 			this.calcScale();
 			this.calculateXLabels(isInitial);
+			if (this.y_scaled) {
+				this.recalculateScaledY();
+			}
 			this.drawAxis();
 			this.drawChart();
 			if (this.detailsCanv) {
@@ -720,7 +722,32 @@
 				if (!visibleCharts.length) {
 					return;
 				}
-				const { newMax, newMin } = this.getMinAndMax(visibleCharts);
+				let { newMax, newMin } = this.getMinAndMax(visibleCharts);
+				if (this.y_scaled && this.graphs[0].display && this.graphs[1].display) {
+					const newBigVals = this.getLinesMinAndMax([this.graphs[0]]);
+					newMax = newBigVals.newMax;
+					newMin = newBigVals.newMin;
+					const newSmallVals = this.getLinesMinAndMax([this.graphs[1]].map((gr) => { return { y_vals: gr.y_vals_orig }; }));
+					const dBig = newBigVals.newMax - newBigVals.newMin;
+					const dSmall = newSmallVals.newMax - newSmallVals.newMin;
+					const newScale = dBig / dSmall;
+					const newScalePad = newBigVals.newMin - (newSmallVals.newMin * newScale);
+					console.log(newScalePad);
+					if (newScale !== this.scale) {
+						if (this.scale) {
+							this.startChangeKey('scale', newScale);
+						} else {
+							this.scale = newScale;
+						}
+					}
+					if (newScalePad !== this.scale_pad) {
+						if (this.scale_pad) {
+							this.startChangeKey('scale_pad', newScalePad);
+						} else {
+							this.scale_pad = newScalePad;
+						}
+					}
+				}
 				if ((newMax !== 0 && newMax !== this[my]) ||
 					(newMin !== this[zy])) {
 					if (this.isDrawAxis) {
@@ -748,7 +775,7 @@
 								startTimestamp: Date.now(),
 							};
 							if (this.y_scaled) {
-								item.scaled_y = prettifyNumber(Math.round(val / this.graphs[1].scale));
+								item.scaled_y = prettifyNumber(Math.round((val - this.scale_pad) / this.scale));
 								if (!this.graphs[0].display) {
 									item.hideLeft = true;
 								}
