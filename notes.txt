@@ -5,3 +5,11 @@
 8. Colors
 9. Handle long click
 12. Animate legend
+
+Details:
+// ToDo: load correct date.
+// ToDo: set map box position for details
+// ToDo: set map box position for overview
+// ToDo: change legend for details
+// ToDo: x-legend for details
+// ToDo: zoom out btn

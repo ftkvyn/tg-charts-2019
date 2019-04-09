@@ -698,7 +698,6 @@
 
 		// eslint-disable-next-line class-methods-use-this
 		getAreaMinAndMax() {
-			// ToDo: smaller value for newMax with the same lines.
 			if (this.isDrawAxis) {
 				return { newMin: 0, newMax: 108 };
 			}
@@ -1067,7 +1066,6 @@
 					justTurnedOff = true;
 				};
 				el.addEventListener('touchstart', (event) => {
-					// ToDo: only off others, not click.
 					event.preventDefault();
 					clearTimeout(swichOtherOffId);
 					swichOtherOffId = setTimeout(turnOffFn, 750);
@@ -1091,7 +1089,8 @@
 	}
 
 	class ChartContainer {
-		constructor(appContainerEl) {
+		constructor(appContainerEl, num) {
+			this.num = num;
 			this.appContainerEl = appContainerEl;
 			this.appEl = this.appContainerEl.firstElementChild;
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
@@ -1347,9 +1346,11 @@
 
 			this.mainChart.detailsCanv.onclick = () => {
 				this.disappear();
-				setTimeout(() => {
-					this.run(this.collection, this.type, { isAppear: true });
-				}, 500);
+				if (this.isOverview) {
+					this.showDetails();
+				} else {
+					this.showOverview();
+				}
 			};
 		}
 
@@ -1429,9 +1430,9 @@
 			this.appearChart(this.mapChart);
 		}
 
-		run(collection, type, optionsOrig) {
+		run(collection, optionsOrig) {
 			this.collection = collection;
-			this.type = type;
+			this.type = this.collection.types.y0;
 			this.optionsOrig = this.optionsOrig;
 			this.setColors(true);
 			const mainOptions = {};
@@ -1441,9 +1442,9 @@
 				mainOptions.y_scaled = true;
 				mapOptions.y_scaled = true;
 			}
-			this.mainChart.setData(collection, type, mainOptions);
+			this.mainChart.setData(collection, this.type, mainOptions);
 			this.mapChart.entangledChart = this.mainChart;
-			this.mapChart.setData(collection, type, mapOptions);
+			this.mapChart.setData(collection, this.type, mapOptions);
 
 			const btns = this.mapChart.generateControlButtons();
 			const oldBtns = this.appEl.getElementsByClassName('btn');
@@ -1486,6 +1487,38 @@
 				this.setMapBox();
 			});
 		}
+
+		loadDetails() {
+			return fetch(`/data_1/${this.num}/2018-10/09.json`)
+				.then((response) => {
+					const jsonData = response.json();
+					return jsonData;
+				});
+		}
+
+		loadMainData() {
+			return fetch(`/data_1/${this.num}/overview.json`)
+				.then((response) => {
+					const jsonData = response.json();
+					return jsonData;
+				});
+		}
+
+		showDetails() {
+			this.loadDetails()
+				.then((detailsData) => {
+					this.isOverview = false;
+					this.run(detailsData, { isAppear: true });
+				});
+		}
+
+		showOverview(isInitial) {
+			this.loadMainData()
+				.then((jsonData) => {
+					this.isOverview = true;
+					this.run(jsonData, { isAppear: !isInitial });
+				});
+		}
 	}
 
 	const charts = [];
@@ -1514,20 +1547,10 @@
 		document.body.classList.remove('isDark');
 	};
 
-	function loadData(num) {
-		return fetch(`/data_1/${num}/overview.json`)
-			.then((response) => {
-				const jsonData = response.json();
-				return jsonData;
-			});
-	}
-
 	for (let i = 0; i < 5; i += 1) {
-		loadData(i + 1).then((jsonData) => {
-			const chart = new ChartContainer(chartsEls[i]);
-			charts.push(chart);
-			chart.initMapBox();
-			chart.run(jsonData, jsonData.types.y0);
-		});
+		const chart = new ChartContainer(chartsEls[i], i + 1);
+		charts.push(chart);
+		chart.initMapBox();
+		chart.showOverview(true);
 	}
 }(window));
