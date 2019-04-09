@@ -178,8 +178,11 @@
 			}
 
 			if (this.y_scaled) {
-				this.graphs[1].scale = 15;
-				this.graphs[1].y_vals = this.graphs[1].y_vals.map((val) => { return val * this.graphs[1].scale; });
+				this.graphs[1].y_scaled = true;
+				this.changingFields.push('scale');
+				this.scale = 15;
+				this.graphs[1].y_vals_orig = this.graphs[1].y_vals.map((val) => { return val; });
+				this.setupScaledY();
 			}
 
 			this[zx] = Math.min(...this.x_vals);
@@ -187,6 +190,10 @@
 			this[mx] += Math.round((this[mx] - this[zx]) * padding_x);
 
 			this[zy] = 0;
+		}
+
+		setupScaledY() {
+			this.graphs[1].y_vals = this.graphs[1].y_vals_orig.map((val) => { return val * this.scale; });
 		}
 
 		setChartWidths() {
@@ -471,8 +478,8 @@
 						const template = document.createElement('template');
 						template.innerHTML = infoHtml;
 						const infoEl = template.content.firstChild;
-						if (gr.scale) {
-							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num] / gr.scale);
+						if (gr.y_scaled) {
+							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num] / this.scale);
 						} else {
 							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num]);
 						}
