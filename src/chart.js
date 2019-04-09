@@ -1003,18 +1003,22 @@
 					justTurnedOff = true;
 				};
 				el.addEventListener('touchstart', (event) => {
-					// ToDo: handle force touch as well.
 					// ToDo: only off others, not click.
 					event.preventDefault();
 					clearTimeout(swichOtherOffId);
-					if (event.changedTouches[0].force > 1) {
-						turnOffFn();
-						return;
-					}
-					swichOtherOffId = setTimeout(turnOffFn, 1000);
+					swichOtherOffId = setTimeout(turnOffFn, 750);
 				});
 
-				el.addEventListener('touchend', () => { clearTimeout(swichOtherOffId); el.click(); });
+				el.addEventListener('touchend', (e) => {
+					clearTimeout(swichOtherOffId);
+					let target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+					while (target && target !== el) {
+						target = target.parentElement;
+					}
+					if (target === el) {
+						el.click();
+					}
+				});
 				el.addEventListener('touchcancel', () => { clearTimeout(swichOtherOffId); });
 				return el;
 			});
