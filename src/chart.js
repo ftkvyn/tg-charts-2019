@@ -45,6 +45,10 @@
 		};
 	}
 
+	function prettifyMillionNumber(val) {
+		return `${Math.round(val / 1000000)}M`;
+	}
+
 	function prettifyNumber(val) {
 		let displayVal = val;
 		let pow = 0;
@@ -75,6 +79,9 @@
 	}
 
 	function formatNumber(val) {
+		if (val >= 1000000) {
+			return `${Math.round(val / 1000000)}M`;
+		}
 		let str = Math.round(val).toString();
 		const parts = [];
 		while (str.length > 3) {
