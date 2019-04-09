@@ -130,6 +130,7 @@
 			this.prev_start_i = undefined;
 			this.x_vals = [];
 			this.x_legend = [];
+			this.isDisappearing = false;
 
 			this.details_x = undefined;
 
@@ -613,6 +614,9 @@
 		endDrawArea(color) {
 			this.ctx.closePath();
 			this.ctx.fillStyle = `${color}aa`;
+			if (this.isDisappearing) {
+				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey] * (0xaa / 0xff))}`;
+			}
 			this.ctx.fill();
 		}
 
@@ -638,7 +642,10 @@
 				if (this[gr.opacityKey]) {
 					this.startDrawArea(prevLine);
 					// Areas shrink, not disappear.
-					const multiplier = this[gr.opacityKey] / 255;
+					let multiplier = this[gr.opacityKey] / 255;
+					if (this.isDisappearing) {
+						multiplier = 1;
+					}
 					const line = [];
 					for (let i = this.start_i; i < this.end_i; i += 1) {
 						const y = prevLine[i - this.start_i].y + 100 * (gr.y_vals[i] * multiplier) / this.calcAreaTotal(i);
@@ -664,6 +671,9 @@
 			} else {
 				this.ctx.fillStyle = `${color}50`;
 			}
+			if (this.isDisappearing) {
+				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey] * (0xaa / 0xff))}`;
+			}
 			this.bar_width = x2 - x1;
 			this.ctx.fillRect(x1, y1, this.bar_width, y2 - y1);
 		}
@@ -677,7 +687,10 @@
 					const gr = this.graphs[k];
 					if (this[gr.opacityKey]) {
 						// bar charts won't disappear, they will shrink
-						const multiplier = this[gr.opacityKey] / 255;
+						let multiplier = this[gr.opacityKey] / 255;
+						if (this.isDisappearing) {
+							multiplier = 1;
+						}
 						const dy = multiplier * gr.y_vals[i];
 						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, gr.color);
 						currentHeight += dy;
@@ -800,7 +813,9 @@
 								item.opacity = 255;
 							}
 							val += step;
-							this.y_legend.push(item);
+							if (!this.isDisappearing) {
+								this.y_legend.push(item);
+							}
 						}
 					}
 					if (this[my]) {
@@ -919,6 +934,9 @@
 		}
 
 		showDetails(offsetX) {
+			if (this.isDisappearing) {
+				return;
+			}
 			const data_x = this.translateBackX(offsetX);
 			this.details_num = -1;
 			let prevDelta = Infinity;
@@ -1326,6 +1344,10 @@
 				dragRightStart = false;
 				prevMouseX = 0;
 			});
+
+			this.mainChart.detailsCanv.onclick = () => {
+				this.disappear();
+			};
 		}
 
 		setColors(isInitial) {
@@ -1343,6 +1365,43 @@
 			if (!isInitial) {
 				this.mainChart.drawAll();
 				this.mapChart.drawAll();
+			}
+		}
+
+		disappear() {
+			const deltaMain = this.mainChart[zx] - this.mainChart[mx];
+			this.mainChart.isDisappearing = true;
+			this.mainChart.hideDetails();
+			this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
+			this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
+
+			this.mainChart.graphs.forEach((gr) => {
+				this.mainChart.startChangeKey(gr.opacityKey, 0);
+			});
+
+			const deltaMap = this.mapChart[zx] - this.mapChart[mx];
+			this.mapChart.isDisappearing = true;
+			this.mapChart.startChangeKey(zx, this.mapChart[zx] - deltaMap / 2);
+			this.mapChart.startChangeKey(mx, this.mapChart[mx] + deltaMap / 2);
+
+			this.mapChart.graphs.forEach((gr) => {
+				this.mapChart.startChangeKey(gr.opacityKey, 0);
+			});
+
+			for (let i = 0; i < this.mainChart.y_legend.length; i += 1) {
+				const item = this.mainChart.y_legend[i];
+				if (item.display) {
+					item.display = false;
+					item.startTimestamp = Date.now();
+				}
+			}
+
+			for (let i = 0; i < this.mainChart.x_legend.length; i += 1) {
+				const item = this.mainChart.x_legend[i];
+				if (item.display) {
+					item.display = false;
+					item.startTimestamp = Date.now();
+				}
 			}
 		}
 
