@@ -1197,10 +1197,11 @@
 	}
 
 	class ChartContainer {
-		constructor(appContainerEl, num, saveBtnState, pieChartDetails) {
+		constructor(appContainerEl, num, singleBar, pieChartDetails) {
 			this.num = num;
 			this.isPieChartDetails = pieChartDetails;
-			this.isSaveBtnState = saveBtnState;
+			this.isSaveBtnState = !singleBar;
+			this.isSingleBar = singleBar;
 			this.appContainerEl = appContainerEl;
 			this.appEl = this.appContainerEl.firstElementChild;
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
@@ -1356,6 +1357,11 @@
 				from: this.mainChart[zx],
 				to: this.mainChart[mx],
 			};
+			if (this.isSingleBar) {
+				this.mainChart[zx] = this.mainChart.x_vals[0];
+				this.mainChart[mx] = this.mainChart.x_vals[this.mainChart.x_vals.length - 1];
+				return;
+			}
 			this.map_container.classList.add('animating');
 			setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
 			this.detailsFrom -= 3600000;
@@ -1645,6 +1651,12 @@
 			this.mainChart.setData(collection, this.type, mainOptions);
 			this.mapChart.entangledChart = this.mainChart;
 			this.mapChart.setData(collection, this.type, mapOptions);
+			if (!(this.isSingleBar && !this.isOverview)) {
+				this.map_container.style.display = 'block';
+			} else {
+				// ToDo: animate container.
+				this.map_container.style.display = 'none';
+			}
 
 			while (this.btns && this.btns.length > 0) {
 				this.appEl.removeChild(this.btns.shift());
@@ -1799,8 +1811,9 @@
 	};
 
 	for (let i = 0; i < 5; i += 1) {
-		const saveBtnState = i !== 3;
-		const chart = new ChartContainer(chartsEls[i], i + 1, saveBtnState);
+		const isSingleBar = i === 3;
+		const isPieDetails = i === 4;
+		const chart = new ChartContainer(chartsEls[i], i + 1, isSingleBar, isPieDetails);
 		charts.push(chart);
 		chart.initMapBox();
 		chart.showOverview(true);
