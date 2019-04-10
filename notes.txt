@@ -13,3 +13,4 @@ Details:
 // ToDo: change legend for details
 // ToDo: x-legend for details
 // ToDo: zoom out btn
+// ToDo: If details have same buttons - preserve state
