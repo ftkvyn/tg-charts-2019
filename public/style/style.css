@@ -293,8 +293,8 @@ a {
 	padding: 10px 15px 5px 15px;
 	z-index: 2;
 	box-shadow: 0px 0px 1px 1px rgba(227,227,227,0.5);
-	pointer-events: none;
 	min-width: 140px;
+	max-width: 190px;
 }
 
 .info .show-more {

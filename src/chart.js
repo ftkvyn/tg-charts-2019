@@ -984,8 +984,8 @@
 				if (this.type === 'area') {
 					left = x - this.infoBox.clientWidth - 10;
 				}
-				if (this.width - left < 140) {
-					left = this.width - 140;
+				if (this.width - left < 190) {
+					left = this.width - 190;
 				}
 				if (left < 0) {
 					left = 0;
@@ -1020,6 +1020,8 @@
 
 			this.detailsCanv.onmousemove = (event) => {
 				this.showDetails(event.offsetX);
+				clearTimeout(endId);
+				clearTimeout(cancelId);
 			};
 			this.detailsCanv.addEventListener('touchmove', (event) => {
 				const touch = event.changedTouches[0];
@@ -1062,6 +1064,30 @@
 					this.changeChart();
 				}
 			};
+
+			this.infoBox.onmousemove = () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			};
+			this.infoBox.addEventListener('touchmove', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			});
+			this.infoBox.onmouseleave = () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			};
+			this.infoBox.addEventListener('touchend', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
+			this.infoBox.addEventListener('touchcancel', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
 
 			this.infoBox.onclick = () => {
 				if (!this.isDetails) {
