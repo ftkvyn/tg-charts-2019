@@ -200,6 +200,14 @@
 				}
 			}
 
+			if (this.showMore) {
+				if (options.isDetails) {
+					this.showMore.style.display = 'none';
+				} else {
+					this.showMore.style.display = 'block';
+				}
+			}
+
 			if (this.y_scaled) {
 				this.graphs[1].y_scaled = true;
 				this.changingFields.push('scale');
@@ -1039,6 +1047,7 @@
 			const template = document.createElement('template');
 			template.innerHTML = infoBoxHtml;
 			this.infoBox = template.content.firstChild;
+			this.showMore = this.infoBox.getElementsByClassName('show-more')[0];
 
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
 		}
@@ -1481,8 +1490,8 @@
 			this.type = this.collection.types.y0;
 			this.optionsOrig = this.optionsOrig;
 			this.setColors(true);
-			const mainOptions = {};
-			const mapOptions = {};
+			const mainOptions = { isDetails: !this.isOverview };
+			const mapOptions = { isDetails: !this.isOverview };
 			const options = optionsOrig || {};
 			if (collection.y_scaled) {
 				mainOptions.y_scaled = true;
