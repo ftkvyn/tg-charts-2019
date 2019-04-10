@@ -12,7 +12,7 @@
 
 	const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		months = monthsFull.map((m) => { return m.substr(0, 3); }),
-		days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+		days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 		dark_background_color = '#1d2837',
 		dark_color = '#242f3e',
 		white_color = '#ffffff',
@@ -1176,8 +1176,9 @@
 	}
 
 	class ChartContainer {
-		constructor(appContainerEl, num, saveBtnState) {
+		constructor(appContainerEl, num, saveBtnState, pieChartDetails) {
 			this.num = num;
+			this.isPieChartDetails = pieChartDetails;
 			this.isSaveBtnState = saveBtnState;
 			this.appContainerEl = appContainerEl;
 			this.appEl = this.appContainerEl.firstElementChild;
@@ -1436,6 +1437,9 @@
 			});
 
 			this.mainChart.changeChart = () => {
+				if (this.isPieChartDetails) {
+					this.generatePieDetailsData();
+				}
 				this.disappear();
 				setTimeout(() => {
 					if (this.isOverview) {
@@ -1622,6 +1626,7 @@
 		}
 
 		loadMainData() {
+			// ToDo: save and reuse main collection.
 			return fetch(`/data_1/${this.num}/overview.json`)
 				.then((response) => {
 					const jsonData = response.json();
@@ -1629,7 +1634,39 @@
 				});
 		}
 
+		generatePieDetailsData() {
+			this.pieDetailsData = {
+				types: this.collection.types,
+				names: this.collection.names,
+				colors: this.collection.colors,
+				percentage: this.collection.percentage,
+				stacked: this.collection.stacked,
+				pieChart: true,
+				columns: [],
+			};
+
+			this.pieDetailsData.selectedX = this.mainChart.x_vals[this.mainChart.details_num];
+
+			const from = this.mainChart.start_i;
+			const to = this.mainChart.end_i;
+			this.collection.columns.forEach((col) => {
+				const newCol = [col[0], ...col.slice(from, to)];
+				this.pieDetailsData.columns.push(newCol);
+			});
+			console.log(this.pieDetailsData);
+		}
+
+		showPieDetails() {
+			this.isOverview = false;
+			this.mainChart.isDetails = true;
+			this.run(this.pieDetailsData, { isAppear: false });
+		}
+
 		showDetails() {
+			if (this.isPieChartDetails) {
+				this.showPieDetails();
+				return;
+			}
 			this.loadDetails()
 				.then((detailsData) => {
 					this.isOverview = false;
@@ -1674,11 +1711,17 @@
 		document.body.classList.remove('isDark');
 	};
 
-	for (let i = 0; i < 5; i += 1) {
-		const saveBtnState = i !== 3;
-		const chart = new ChartContainer(chartsEls[i], i + 1, saveBtnState);
-		charts.push(chart);
-		chart.initMapBox();
-		chart.showOverview(true);
-	}
+	// for (let i = 0; i < 5; i += 1) {
+	// 	const saveBtnState = i !== 3;
+	// 	const chart = new ChartContainer(chartsEls[i], i + 1, saveBtnState);
+	// 	charts.push(chart);
+	// 	chart.initMapBox();
+	// 	chart.showOverview(true);
+	// }
+
+	const chart = new ChartContainer(chartsEls[0], 5, true, true);
+	charts.push(chart);
+	chart.initMapBox();
+	chart.showOverview(true);
 }(window));
+
