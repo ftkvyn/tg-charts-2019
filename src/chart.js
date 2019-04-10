@@ -1031,9 +1031,9 @@
 			});
 
 			const infoBoxHtml = `<div class="info" style="display:none;">
-				<div style="display:block;clear:both;overflow:hidden;">
+				<div style="display:block;clear:both;overflow:hidden;margin-bottom:2px;">
 					<div class="date"></div>
-					<div class="show-more">&gt;</div>
+					<div class="show-more"></div>
 				</div>
 			</div>`;
 			const template = document.createElement('template');

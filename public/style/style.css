@@ -288,15 +288,24 @@ a {
 
 .info .show-more {
 	float: right;
-	color: lightgray;
 	font-weight: bold;
-	font-size: 16px;
+	width: 7px;
+	height: 13px;
+	background-image: url('/img/more_l.png');
+	background-size: 100%;
+	background-repeat: no-repeat;
+	cursor: pointer;
+	margin-top: 1px;
+}
+
+.dark-theme .info .show-more{
+	background-image: url('/img/more_d.png');
 }
 
 .dark-theme .info {
-	background: #253241;
+	background: #1c2533;
 	box-shadow: 0px 0px 2px 2px #1c242f96;
-	border-color: #253241;
+	border-color: #1c2533;
 }
 
 .info .date {
