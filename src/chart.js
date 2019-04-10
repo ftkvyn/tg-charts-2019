@@ -897,10 +897,14 @@
 					}
 				}
 			}
+			this.last_details_num = this.details_num;
 			this.drawDetails();
 		}
 
 		hideDetails() {
+			if (this.details_num !== -1) {
+				this.last_details_num = this.details_num;
+			}
 			this.details_num = -1;
 			this.clearDetails();
 			this.infoBox.style.display = 'none';
@@ -1640,8 +1644,8 @@
 			});
 		}
 
-		loadDetails() {
-			return fetch(`/data_1/${this.num}/2018-10/09.json`)
+		loadDetails(folder, file) {
+			return fetch(`/data_1/${this.num}/${folder}/${file}.json`)
 				.then((response) => {
 					const jsonData = response.json();
 					return jsonData;
@@ -1690,7 +1694,11 @@
 				this.showPieDetails();
 				return;
 			}
-			this.loadDetails()
+			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num];
+			const selectedDate = new Date(selectedX);
+			const folder = `${selectedDate.getFullYear()}-${padZeros(selectedDate.getMonth() + 1)}`;
+			const file = padZeros(selectedDate.getDate());
+			this.loadDetails(folder, file)
 				.then((detailsData) => {
 					this.isOverview = false;
 					this.mainChart.isDetails = true;
@@ -1734,17 +1742,17 @@
 		document.body.classList.remove('isDark');
 	};
 
-	// for (let i = 0; i < 5; i += 1) {
-	// 	const saveBtnState = i !== 3;
-	// 	const chart = new ChartContainer(chartsEls[i], i + 1, saveBtnState);
-	// 	charts.push(chart);
-	// 	chart.initMapBox();
-	// 	chart.showOverview(true);
-	// }
+	for (let i = 0; i < 5; i += 1) {
+		const saveBtnState = i !== 3;
+		const chart = new ChartContainer(chartsEls[i], i + 1, saveBtnState);
+		charts.push(chart);
+		chart.initMapBox();
+		chart.showOverview(true);
+	}
 
-	const chart = new ChartContainer(chartsEls[0], 5, true, true);
-	charts.push(chart);
-	chart.initMapBox();
-	chart.showOverview(true);
+	// const chart = new ChartContainer(chartsEls[0], 5, true, true);
+	// charts.push(chart);
+	// chart.initMapBox();
+	// chart.showOverview(true);
 }(window));
 
