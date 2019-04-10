@@ -210,6 +210,8 @@
 
 			if (this.y_scaled) {
 				this.graphs[1].y_scaled = true;
+				this.scale = 0;
+				this.scale_pad = 0;
 				this.changingFields.push('scale');
 				this.changingFields.push('scale_pad');
 				this.graphs[1].y_vals_orig = this.graphs[1].y_vals.map((val) => { return val; });
@@ -669,18 +671,18 @@
 					newMax = newBigVals.newMax;
 					newMin = newBigVals.newMin;
 					const newSmallVals = this.getLinesMinAndMax([this.graphs[1]].map((gr) => { return { y_vals: gr.y_vals_orig }; }));
-					const dBig = newBigVals.newMax - newBigVals.newMin;
-					const dSmall = newSmallVals.newMax - newSmallVals.newMin;
+					const dBig = (newBigVals.newMax - newBigVals.newMin) || 3600000;
+					const dSmall = (newSmallVals.newMax - newSmallVals.newMin) || dBig;
 					const newScale = dBig / dSmall;
 					const newScalePad = newBigVals.newMin - (newSmallVals.newMin * newScale);
-					if (newScale !== this.scale) {
+					if (Math.abs(newScale - this.scale) > 0.0001) {
 						if (this.scale && !noDraw) {
 							this.startChangeKey('scale', newScale);
 						} else {
 							this.scale = newScale;
 						}
 					}
-					if (newScalePad !== this.scale_pad) {
+					if (Math.abs(newScalePad - this.scale_pad) > 0.0001) {
 						if (this.scale_pad && !noDraw) {
 							this.startChangeKey('scale_pad', newScalePad);
 						} else {
@@ -1516,8 +1518,8 @@
 			const origZx = chart[zx];
 			const delta = origMx - origZx;
 			if (this.isOverview) {
-				chart[mx] -= delta * 0.75;
-				chart[zx] += delta * 0.75;
+				chart[mx] -= delta * 0.55;
+				chart[zx] += delta * 0.55;
 			} else {
 				chart[mx] += delta * 0.65;
 				chart[zx] -= delta * 0.65;
