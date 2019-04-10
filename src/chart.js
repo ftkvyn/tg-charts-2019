@@ -1335,17 +1335,16 @@
 		}
 
 		moveSelectBox() {
-			this.thumb.classList.add('animating');
-			setTimeout(() => { this.thumb.classList.remove('animating'); }, duration * 1.2);
-			this.detailsFrom -= 86400000 - 3600000; // Adding 1day - 1 hour in ms
+			this.map_container.classList.add('animating');
+			setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
+			this.detailsFrom -= 3600000;
 			const toX = this.detailsFrom + 86400000; // Adding 1day in ms
 			const totalX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1] - this.mapChart.x_vals[0];
 			const scale = totalX / this.container_width;
 			const pad = this.mapChart.x_vals[0];
-			const rightVal = (toX - pad) / scale;
+			const rightVal = this.container_width - ((toX - pad) / scale);
 			const leftVal = (this.detailsFrom - pad) / scale;
-			const widthVal = rightVal - leftVal;
-			// this.container_width
+			const widthVal = this.container_width - rightVal - leftVal;
 
 			this.thumb_width = widthVal;
 			this.thumb.style.width = `${this.thumb_width}px`;
@@ -1353,6 +1352,9 @@
 
 			this.overlay_right.style.width = `${rightVal}px`;
 			this.overlay_left.style.width = `${leftVal}px`;
+
+			this.mainChart[zx] = this.detailsFrom;
+			this.mainChart[mx] = toX;
 		}
 
 		setupTouchEvents() {
@@ -1582,8 +1584,10 @@
 		}
 
 		appear() {
-			this.appearChart(this.mainChart);
 			this.appearChart(this.mapChart);
+			this.moveSelectBox();
+			this.mainChart.calculateMaxY(true, true);
+			this.appearChart(this.mainChart);
 			if (this.isOverview) {
 				this.titleEl.style.display = 'inline-block';
 			} else {
@@ -1630,8 +1634,10 @@
 			this.mainChart.init();
 			this.mapChart.init();
 			this.mapChart.calculateMaxY(true, options.isAppear);
-			this.setMapBox(true);
-			this.mainChart.calculateMaxY(true, options.isAppear);
+			if (!options.isAppear) {
+				this.setMapBox(true);
+				this.mainChart.calculateMaxY(true, options.isAppear);
+			}
 			if (this.isSaveBtnState && this.btnState) {
 				this.mainChart.graphs.forEach((gr, num) => {
 					if (!this.btnState[num]) {
@@ -1724,7 +1730,6 @@
 					this.isOverview = false;
 					this.mainChart.isDetails = true;
 					this.run(detailsData, { isAppear: true });
-					this.moveSelectBox();
 				});
 		}
 

@@ -126,8 +126,12 @@ a {
   z-index: 1;
 }
 
-.selected.animating {
+.animating .selected {
 	transition: width .2s, right .2s;
+}
+
+.animating .thumb {
+	transition: width .2s;
 }
 
 .dark-theme .selected{
