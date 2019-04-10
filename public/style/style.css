@@ -41,7 +41,7 @@ body.isDark {
 }
 
 .legend {
-	font-size: 16px;
+	font-size: 15px;
 	font-weight: bolder;
 	float: right;
 	margin-top: 1.25em;
@@ -279,11 +279,18 @@ a {
 	border-color: #e3e3e3;
 	border-radius: 10px;
 	background: white;
-	padding: 10px;
+	padding: 10px 15px 5px 15px;
 	z-index: 2;
 	box-shadow: 0px 0px 1px 1px rgba(227,227,227,0.5);
 	pointer-events: none;
-	max-width: 140px;
+	min-width: 140px;
+}
+
+.info .show-more {
+	float: right;
+	color: lightgray;
+	font-weight: bold;
+	font-size: 16px;
 }
 
 .dark-theme .info {
@@ -293,18 +300,27 @@ a {
 }
 
 .info .date {
-	font-size: 16px;
-	margin-bottom: 10px;
+	font-size: 15px;
+	margin-bottom: 5px;
 	font-weight: bolder;
+	float: left;
+	display: inline-block;
 }
 
 .info .item {
-	display:inline-block;
-	float: left;
-	margin-right: 10px;
+	display:block;
+	overflow: hidden;
+	clear: both;
+	width: 100%;
+	font-size: 15px;
+	margin-bottom: 5px;
 }
 
 .info .item .value {
-	font-size: 17px;
 	font-weight: bold;
+	float: right;
+}
+
+.info .item .name {
+	float: left;
 }

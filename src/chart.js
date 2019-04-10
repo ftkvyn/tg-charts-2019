@@ -83,8 +83,8 @@
 		return padZeros(Math.round(val).toString(16));
 	}
 
-	function formatNumber(val) {
-		if (val >= 1000000) {
+	function formatNumber(val, noShortenMillions) {
+		if (!noShortenMillions && val >= 1000000) {
 			return `${Math.round(val / 1000000)}M`;
 		}
 		let str = Math.round(val).toString();
@@ -430,114 +430,6 @@
 						const x = this.translateX(val.x) - Math.round(x_legend_val_width / 2);
 						this.ctx.fillText(val.name, x, -3);
 					}
-				}
-			}
-		}
-
-		drawDetails() {
-			// details
-			if (this.isDrawAxis && this.details_num > -1) {
-				if (this.details_num === this.prev_details_num) {
-					return;
-				}
-				if (this.type === 'bar') {
-					this.clearChart();
-					this.drawAxis();
-					this.drawChart();
-				}
-				this.prev_details_num = this.details_num;
-				this.clearDetails();
-				const x = this.translateX(this.x_vals[this.details_num]);
-				let moreThanHalf = 0;
-				let lessThanHalf = 0;
-				const half = ((this[my] - this[zy]) / 2) + this[zy];
-				// Configuration
-				if (this.type === 'line' || this.type === 'area') {
-					let strokeColor = null;
-					if (this.isLight) {
-						strokeColor = axis_color_zero;
-					} else {
-						strokeColor = axis_color_dark_zero;
-					}
-					this.detailsCtx.lineWidth = this.axisThickness;
-					this.detailsCtx.strokeStyle = strokeColor;
-					this.detailsCtx.beginPath();
-					this.detailsCtx.moveTo(x, this.translateY(0));
-					if (this.type === 'line') {
-						this.detailsCtx.lineTo(x, -this.height);
-					} else {
-						this.detailsCtx.lineTo(x, this.translateY(100));
-					}
-					this.detailsCtx.stroke();
-				}
-
-				const oldInfo = this.infoBox.getElementsByClassName('item');
-				while (oldInfo.length > 0) {
-					this.infoBox.removeChild(oldInfo[0]);
-				}
-
-				this.graphs.forEach((gr) => {
-					if (gr.display) {
-						if (this.type === 'line') {
-							this.detailsCtx.lineWidth = this.thickness;
-							this.detailsCtx.strokeStyle = gr.color;
-							this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
-							this.detailsCtx.beginPath();
-							this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
-							this.detailsCtx.fill();
-							this.detailsCtx.stroke();
-							if (gr.y_vals[this.details_num] > half) {
-								moreThanHalf += 1;
-							} else {
-								lessThanHalf += 1;
-							}
-						}
-
-						const infoHtml = `<div class="item">
-							<div class="value"></div>
-							<div class="name"></div>
-						</div>`;
-						const template = document.createElement('template');
-						template.innerHTML = infoHtml;
-						const infoEl = template.content.firstChild;
-						if (gr.y_scaled) {
-							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals_orig[this.details_num]);
-						} else {
-							infoEl.getElementsByClassName('value')[0].innerText = formatNumber(gr.y_vals[this.details_num]);
-						}
-						infoEl.getElementsByClassName('name')[0].innerText = gr.name;
-						infoEl.style.color = gr.color;
-						this.infoBox.appendChild(infoEl);
-					}
-				});
-
-				let text = this.x_legend[this.details_num].name;
-				if (!this.isDetails) {
-					text = `${this.x_legend[this.details_num].day}, ${text}`;
-				}
-				this.infoBox.getElementsByClassName('date')[0].innerText = text;
-
-				this.infoBox.style.display = 'block';
-				let left = x - 50;
-				if (this.type === 'bar') {
-					left = x - this.infoBox.clientWidth + this.bar_width - 10;
-				}
-				if (this.type === 'area') {
-					left = x - this.infoBox.clientWidth - 10;
-				}
-				if (this.width - left < 140) {
-					left = this.width - 140;
-				}
-				if (left < 0) {
-					left = 0;
-				}
-				this.infoBox.style.left = `${left}px`;
-				if (moreThanHalf > lessThanHalf) {
-					this.infoBox.style.top = '';
-					this.infoBox.style.bottom = `${x_legend_padding}px`;
-				} else {
-					this.infoBox.style.bottom = '';
-					this.infoBox.style.top = '0px';
 				}
 			}
 		}
@@ -992,6 +884,115 @@
 			}
 		}
 
+		drawDetails() {
+			// details
+			if (this.isDrawAxis && this.details_num > -1) {
+				if (this.details_num === this.prev_details_num) {
+					return;
+				}
+				if (this.type === 'bar') {
+					this.clearChart();
+					this.drawAxis();
+					this.drawChart();
+				}
+				this.prev_details_num = this.details_num;
+				this.clearDetails();
+				const x = this.translateX(this.x_vals[this.details_num]);
+				let moreThanHalf = 0;
+				let lessThanHalf = 0;
+				const half = ((this[my] - this[zy]) / 2) + this[zy];
+				// Configuration
+				if (this.type === 'line' || this.type === 'area') {
+					let strokeColor = null;
+					if (this.isLight) {
+						strokeColor = axis_color_zero;
+					} else {
+						strokeColor = axis_color_dark_zero;
+					}
+					this.detailsCtx.lineWidth = this.axisThickness;
+					this.detailsCtx.strokeStyle = strokeColor;
+					this.detailsCtx.beginPath();
+					this.detailsCtx.moveTo(x, this.translateY(0));
+					if (this.type === 'line') {
+						this.detailsCtx.lineTo(x, -this.height);
+					} else {
+						this.detailsCtx.lineTo(x, this.translateY(100));
+					}
+					this.detailsCtx.stroke();
+				}
+
+				const oldInfo = this.infoBox.getElementsByClassName('item');
+				while (oldInfo.length > 0) {
+					this.infoBox.removeChild(oldInfo[0]);
+				}
+
+				this.graphs.forEach((gr) => {
+					if (gr.display) {
+						if (this.type === 'line') {
+							this.detailsCtx.lineWidth = this.thickness;
+							this.detailsCtx.strokeStyle = gr.color;
+							this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
+							this.detailsCtx.beginPath();
+							this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
+							this.detailsCtx.fill();
+							this.detailsCtx.stroke();
+							if (gr.y_vals[this.details_num] > half) {
+								moreThanHalf += 1;
+							} else {
+								lessThanHalf += 1;
+							}
+						}
+
+						const infoHtml = `<div class="item">
+							<div class="value"></div>
+							<div class="name"></div>
+						</div>`;
+						const template = document.createElement('template');
+						template.innerHTML = infoHtml;
+						const infoEl = template.content.firstChild;
+						const valueEl = infoEl.getElementsByClassName('value')[0];
+						if (gr.y_scaled) {
+							valueEl.innerText = formatNumber(gr.y_vals_orig[this.details_num], true);
+						} else {
+							valueEl.innerText = formatNumber(gr.y_vals[this.details_num], true);
+						}
+						infoEl.getElementsByClassName('name')[0].innerText = gr.name;
+						valueEl.style.color = gr.color;
+						this.infoBox.appendChild(infoEl);
+					}
+				});
+
+				let text = this.x_legend[this.details_num].name;
+				if (!this.isDetails) {
+					text = `${this.x_legend[this.details_num].day}, ${text}`;
+				}
+				this.infoBox.getElementsByClassName('date')[0].innerText = text;
+
+				this.infoBox.style.display = 'block';
+				let left = x - 50;
+				if (this.type === 'bar') {
+					left = x - this.infoBox.clientWidth + this.bar_width - 10;
+				}
+				if (this.type === 'area') {
+					left = x - this.infoBox.clientWidth - 10;
+				}
+				if (this.width - left < 140) {
+					left = this.width - 140;
+				}
+				if (left < 0) {
+					left = 0;
+				}
+				this.infoBox.style.left = `${left}px`;
+				if (moreThanHalf > lessThanHalf) {
+					this.infoBox.style.top = '';
+					this.infoBox.style.bottom = `${x_legend_padding}px`;
+				} else {
+					this.infoBox.style.bottom = '';
+					this.infoBox.style.top = '0px';
+				}
+			}
+		}
+
 		calculateDetailsOffset() {
 			let parent = this.detailsCanv;
 			let offsetX = 0;
@@ -1030,7 +1031,10 @@
 			});
 
 			const infoBoxHtml = `<div class="info" style="display:none;">
-				<div class="date"></div>
+				<div style="display:block;clear:both;overflow:hidden;">
+					<div class="date"></div>
+					<div class="show-more">&gt;</div>
+				</div>
 			</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = infoBoxHtml;
