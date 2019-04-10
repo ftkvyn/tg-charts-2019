@@ -126,6 +126,10 @@ a {
   z-index: 1;
 }
 
+.selected.animating {
+	transition: width .2s, right .2s;
+}
+
 .dark-theme .selected{
 	border-color: #548db570;
 }

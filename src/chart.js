@@ -1334,6 +1334,27 @@
 			this.setMapBox();
 		}
 
+		moveSelectBox() {
+			this.thumb.classList.add('animating');
+			setTimeout(() => { this.thumb.classList.remove('animating'); }, duration * 1.2);
+			this.detailsFrom -= 86400000 - 3600000; // Adding 1day - 1 hour in ms
+			const toX = this.detailsFrom + 86400000; // Adding 1day in ms
+			const totalX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1] - this.mapChart.x_vals[0];
+			const scale = totalX / this.container_width;
+			const pad = this.mapChart.x_vals[0];
+			const rightVal = (toX - pad) / scale;
+			const leftVal = (this.detailsFrom - pad) / scale;
+			const widthVal = rightVal - leftVal;
+			// this.container_width
+
+			this.thumb_width = widthVal;
+			this.thumb.style.width = `${this.thumb_width}px`;
+			this.thumb.style.right = `${rightVal}px`;
+
+			this.overlay_right.style.width = `${rightVal}px`;
+			this.overlay_left.style.width = `${leftVal}px`;
+		}
+
 		setupTouchEvents() {
 			let prevTouch = null;
 			let dragThumbStart = false;
@@ -1680,7 +1701,6 @@
 				const newCol = [col[0], ...col.slice(from, to)];
 				this.pieDetailsData.columns.push(newCol);
 			});
-			console.log(this.pieDetailsData);
 		}
 
 		showPieDetails() {
@@ -1695,6 +1715,7 @@
 				return;
 			}
 			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num];
+			this.detailsFrom = selectedX;
 			const selectedDate = new Date(selectedX);
 			const folder = `${selectedDate.getFullYear()}-${padZeros(selectedDate.getMonth() + 1)}`;
 			const file = padZeros(selectedDate.getDate());
@@ -1703,6 +1724,7 @@
 					this.isOverview = false;
 					this.mainChart.isDetails = true;
 					this.run(detailsData, { isAppear: true });
+					this.moveSelectBox();
 				});
 		}
 
