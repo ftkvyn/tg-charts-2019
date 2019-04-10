@@ -1334,7 +1334,28 @@
 			this.setMapBox();
 		}
 
-		moveSelectBox() {
+		moveSelectBoxForOverview() {
+			this.map_container.classList.add('animating');
+			setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
+			this.thumb_width = this.mapBoxParams.thumb_width * this.container_width;
+			this.thumb.style.width = `${this.thumb_width}px`;
+			this.thumb.style.right = `${this.mapBoxParams.right * this.container_width}px`;
+
+			this.overlay_right.style.width = `${this.mapBoxParams.right * this.container_width}px`;
+			this.overlay_left.style.width = `${this.mapBoxParams.left * this.container_width}px`;
+
+			this.mainChart[zx] = this.overviewFrom;
+			this.mainChart[mx] = this.overviewTo;
+		}
+
+		moveSelectBoxForDetails() {
+			this.mapBoxParams = {
+				thumb_width: this.thumb_width / this.container_width,
+				left: this.overlay_left.offsetWidth / this.container_width,
+				right: (+this.thumb.style.right.slice(0, -2)) / this.container_width,
+				from: this.mainChart[zx],
+				to: this.mainChart[mx],
+			};
 			this.map_container.classList.add('animating');
 			setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
 			this.detailsFrom -= 3600000;
@@ -1518,6 +1539,10 @@
 				this.btnState = this.btns.map((btn) => { return btn.classList.contains('btn-on'); });
 			}
 			const deltaMain = this.mainChart[zx] - this.mainChart[mx];
+			if (this.isOverview) {
+				this.overviewFrom = this.mainChart[zx];
+				this.overviewTo = this.mainChart[mx];
+			}
 			this.mainChart.isDisappearing = true;
 			this.mainChart.hideDetails();
 			if (this.isOverview) {
@@ -1585,7 +1610,11 @@
 
 		appear() {
 			this.appearChart(this.mapChart);
-			this.moveSelectBox();
+			if (this.isOverview) {
+				this.moveSelectBoxForOverview();
+			} else {
+				this.moveSelectBoxForDetails();
+			}
 			this.mainChart.calculateMaxY(true, true);
 			this.appearChart(this.mainChart);
 			if (this.isOverview) {

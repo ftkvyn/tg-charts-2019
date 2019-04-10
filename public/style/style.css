@@ -130,7 +130,7 @@ a {
 	transition: width .2s, right .2s;
 }
 
-.animating .thumb {
+.animating .overlay {
 	transition: width .2s;
 }
 
