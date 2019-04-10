@@ -151,17 +151,22 @@
 			this.details_num = -1;
 			this.type = type;
 			this.y_scaled = options.y_scaled;
+			this.percentBars = options.percentBars;
 
 			if (type === 'line') {
 				this.drawChart = this.drawLineChart;
 				this.getMinAndMax = this.getLinesMinAndMax;
-			} else if (type === 'area') {
-				this.drawChart = this.drawAreaChart;
+			} else if (this.percentBars) {
+				this.drawChart = this.drawBarChart;
 				this.getMinAndMax = this.getAreaMinAndMax;
 				this.yLegendItemsCount = 5;
 			} else if (type === 'bar') {
 				this.drawChart = this.drawBarChart;
 				this.getMinAndMax = this.getBarsMinAndMax;
+			} else if (type === 'area') {
+				this.drawChart = this.drawAreaChart;
+				this.getMinAndMax = this.getAreaMinAndMax;
+				this.yLegendItemsCount = 5;
 			}
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
@@ -598,6 +603,15 @@
 			const x_step = this.x_vals[this.end_i - 1] - this.x_vals[this.end_i - 2];
 			for (let i = this.start_i + 1; i < this.end_i; i += 1) {
 				let currentHeight = 0;
+				let sum = 0;
+				for (let k = 0; k < this.graphs.length; k += 1) {
+					const gr = this.graphs[k];
+					let multiplier = this[gr.opacityKey] / 255;
+					if (this.isDisappearing) {
+						multiplier = 1;
+					}
+					sum += multiplier * gr.y_vals[i];
+				}
 				for (let k = 0; k < this.graphs.length; k += 1) {
 					const gr = this.graphs[k];
 					if (this[gr.opacityKey]) {
@@ -606,7 +620,10 @@
 						if (this.isDisappearing) {
 							multiplier = 1;
 						}
-						const dy = multiplier * gr.y_vals[i];
+						let dy = multiplier * gr.y_vals[i];
+						if (this.percentBars) {
+							dy = 100 * dy / sum;
+						}
 						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, gr.color);
 						currentHeight += dy;
 					}
@@ -1561,6 +1578,12 @@
 				mainOptions.y_scaled = true;
 				mapOptions.y_scaled = true;
 			}
+			if (optionsOrig.pieChart) {
+				mapOptions.percentBars = true;
+
+				// ToDo: remove
+				mainOptions.percentBars = true;
+			}
 			this.mainChart.setData(collection, this.type, mainOptions);
 			this.mapChart.entangledChart = this.mainChart;
 			this.mapChart.setData(collection, this.type, mapOptions);
@@ -1659,7 +1682,7 @@
 		showPieDetails() {
 			this.isOverview = false;
 			this.mainChart.isDetails = true;
-			this.run(this.pieDetailsData, { isAppear: false });
+			this.run(this.pieDetailsData, { isAppear: true, pieChart: true });
 		}
 
 		showDetails() {
