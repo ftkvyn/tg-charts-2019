@@ -1113,8 +1113,9 @@
 	}
 
 	class ChartContainer {
-		constructor(appContainerEl, num) {
+		constructor(appContainerEl, num, saveBtnState) {
 			this.num = num;
+			this.isSaveBtnState = saveBtnState;
 			this.appContainerEl = appContainerEl;
 			this.appEl = this.appContainerEl.firstElementChild;
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
@@ -1397,6 +1398,9 @@
 		}
 
 		disappear() {
+			if (this.isSaveBtnState) {
+				this.btnState = this.btns.map((btn) => { return btn.classList.contains('btn-on'); });
+			}
 			const deltaMain = this.mainChart[zx] - this.mainChart[mx];
 			this.mainChart.isDisappearing = true;
 			this.mainChart.hideDetails();
@@ -1445,7 +1449,9 @@
 
 			chart.graphs.forEach((gr) => {
 				chart[gr.opacityKey] = 0;
-				chart.startChangeKey(gr.opacityKey, 255);
+				if (gr.display) {
+					chart.startChangeKey(gr.opacityKey, 255);
+				}
 			});
 		}
 
@@ -1470,13 +1476,16 @@
 			this.mapChart.entangledChart = this.mainChart;
 			this.mapChart.setData(collection, this.type, mapOptions);
 
-			const btns = this.mapChart.generateControlButtons();
-			const oldBtns = this.appEl.getElementsByClassName('btn');
-			while (oldBtns.length > 0) {
-				this.appEl.removeChild(oldBtns[0]);
+			while (this.btns && this.btns.length > 0) {
+				this.appEl.removeChild(this.btns.shift());
 			}
-			if (btns) {
-				btns.forEach((btn) => {
+			this.btns = this.mapChart.generateControlButtons();
+			if (this.btns) {
+				this.btns.forEach((btn, num) => {
+					if (this.isSaveBtnState && this.btnState && !this.btnState[num]) {
+						btn.classList.remove('btn-on');
+						btn.classList.add('btn-off');
+					}
 					this.appEl.appendChild(btn);
 				});
 			}
@@ -1486,9 +1495,16 @@
 			this.mapChart.calculateMaxY(true, options.isAppear);
 			this.setMapBox(true);
 			this.mainChart.calculateMaxY(true, options.isAppear);
+			if (this.isSaveBtnState && this.btnState) {
+				this.mainChart.graphs.forEach((gr, num) => {
+					if (!this.btnState[num]) {
+						gr.display = false;
+						this.mapChart.graphs[num].display = false;
+					}
+				});
+			}
 			this.updateLegend();
 			if (options.isAppear) {
-				// this.mainChart.calculateXLabels(true);
 				this.appear();
 			}
 		}
@@ -1574,7 +1590,8 @@
 	};
 
 	for (let i = 0; i < 5; i += 1) {
-		const chart = new ChartContainer(chartsEls[i], i + 1);
+		const saveBtnState = i !== 3;
+		const chart = new ChartContainer(chartsEls[i], i + 1, saveBtnState);
 		charts.push(chart);
 		chart.initMapBox();
 		chart.showOverview(true);
