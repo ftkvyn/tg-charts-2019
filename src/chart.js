@@ -1371,11 +1371,13 @@
 
 			this.mainChart.detailsCanv.onclick = () => {
 				this.disappear();
-				if (this.isOverview) {
-					this.showDetails();
-				} else {
-					this.showOverview();
-				}
+				setTimeout(() => {
+					if (this.isOverview) {
+						this.showDetails();
+					} else {
+						this.showOverview();
+					}
+				}, duration);
 			};
 		}
 
@@ -1404,8 +1406,13 @@
 			const deltaMain = this.mainChart[zx] - this.mainChart[mx];
 			this.mainChart.isDisappearing = true;
 			this.mainChart.hideDetails();
-			this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
-			this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
+			if (this.isOverview) {
+				this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
+				this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
+			} else {
+				this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
+				this.mainChart.startChangeKey(mx, this.mainChart[mx] - deltaMain / 2);
+			}
 
 			this.mainChart.graphs.forEach((gr) => {
 				this.mainChart.startChangeKey(gr.opacityKey, 0);
@@ -1442,8 +1449,13 @@
 			const origMx = chart[mx];
 			const origZx = chart[zx];
 			const delta = origMx - origZx;
-			chart[mx] -= delta * 0.45;
-			chart[zx] += delta * 0.45;
+			if (this.isOverview) {
+				chart[mx] -= delta * 0.75;
+				chart[zx] += delta * 0.75;
+			} else {
+				chart[mx] += delta * 0.65;
+				chart[zx] -= delta * 0.65;
+			}
 			chart.startChangeKey(zx, origZx);
 			chart.startChangeKey(mx, origMx);
 
