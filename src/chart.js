@@ -1018,7 +1018,9 @@
 			let endId,
 				cancelId;
 
-			this.detailsCanv.onmousemove = (event) => { this.showDetails(event.offsetX); };
+			this.detailsCanv.onmousemove = (event) => {
+				this.showDetails(event.offsetX);
+			};
 			this.detailsCanv.addEventListener('touchmove', (event) => {
 				const touch = event.changedTouches[0];
 				this.showDetails(touch.clientX - this.detailsCanvOffset);
@@ -1026,7 +1028,11 @@
 				clearTimeout(cancelId);
 			});
 
-			this.detailsCanv.onmouseleave = this.hideDetails.bind(this);
+			this.detailsCanv.onmouseleave = () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			};
 			this.detailsCanv.addEventListener('touchend', () => {
 				clearTimeout(endId);
 				clearTimeout(cancelId);
@@ -1050,6 +1056,22 @@
 			this.showMore = this.infoBox.getElementsByClassName('show-more')[0];
 
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
+
+			this.detailsCanv.onclick = () => {
+				if (!this.isDetails) {
+					this.changeChart();
+				}
+			};
+
+			this.infoBox.onclick = () => {
+				if (!this.isDetails) {
+					this.changeChart();
+				}
+			};
+
+			this.zoomOutEl.onclick = () => {
+				this.changeChart();
+			};
 		}
 
 		generateControlButtons() {
@@ -1135,10 +1157,13 @@
 			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
 			this.chart_map = this.appEl.getElementsByClassName('chart_map')[0];
 			this.legend_el = this.appEl.getElementsByClassName('legend')[0];
+			this.zoomOutEl = this.appEl.getElementsByClassName('zoom-out')[0];
+			this.titleEl = this.appEl.getElementsByClassName('title')[0];
 			this.height = 300;
 			this.map_height = 40;
 
 			this.mainChart = new Chart(this.main_chart, this.height);
+			this.mainChart.zoomOutEl = this.zoomOutEl;
 			this.mapChart = new Chart(this.chart_map, this.map_height);
 			this.mapChart.isDrawAxis = false;
 			this.mapChart.thickness = 1.2;
@@ -1382,7 +1407,7 @@
 				prevMouseX = 0;
 			});
 
-			this.mainChart.detailsCanv.onclick = () => {
+			this.mainChart.changeChart = () => {
 				this.disappear();
 				setTimeout(() => {
 					if (this.isOverview) {
@@ -1422,9 +1447,11 @@
 			if (this.isOverview) {
 				this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
 				this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
+				this.titleEl.style.display = 'none';
 			} else {
 				this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
 				this.mainChart.startChangeKey(mx, this.mainChart[mx] - deltaMain / 2);
+				this.zoomOutEl.style.display = 'none';
 			}
 
 			this.mainChart.graphs.forEach((gr) => {
@@ -1483,6 +1510,11 @@
 		appear() {
 			this.appearChart(this.mainChart);
 			this.appearChart(this.mapChart);
+			if (this.isOverview) {
+				this.titleEl.style.display = 'inline-block';
+			} else {
+				this.zoomOutEl.style.display = 'inline-block';
+			}
 		}
 
 		run(collection, optionsOrig) {

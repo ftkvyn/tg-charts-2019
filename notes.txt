@@ -5,6 +5,7 @@
 8. Colors
 9. Handle long click
 12. Animate legend
+13. Animate title-zoom change
 
 Details:
 // ToDo: load correct date.
