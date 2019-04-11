@@ -1614,6 +1614,11 @@
 			if (this.isSingleBar && this.isOverview) {
 				this.map_container.style.marginTop = '-80px';
 			}
+			if (this.btns && !this.isSaveBtnState) {
+				this.btns.forEach((btn) => {
+					btn.style.transform = 'scale(0)';
+				});
+			}
 		}
 
 		// eslint-disable-next-line class-methods-use-this
@@ -1693,8 +1698,11 @@
 					if (this.isSaveBtnState && this.btnState && !this.btnState[num]) {
 						btn.classList.remove('btn-on');
 						btn.classList.add('btn-off');
+					} else if (!this.isSaveBtnState) {
+						btn.style.transform = 'scale(0)';
 					}
 					this.appEl.appendChild(btn);
+					setTimeout(() => { btn.style.transform = 'scale(1)'; });
 				});
 			}
 
