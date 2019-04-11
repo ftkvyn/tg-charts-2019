@@ -388,6 +388,7 @@
 			if (start >= this.x_legend.length) {
 				start = this.x_legend.length - 1;
 			}
+			// ToDo: hide on appearence.
 			this.processXLabels(start, -1, skipItemsEachStep, isInitial);
 			this.processXLabels(start, this.x_legend.length, skipItemsEachStep, isInitial);
 		}
@@ -1609,6 +1610,10 @@
 					item.startTimestamp = Date.now();
 				}
 			}
+
+			if (this.isSingleBar && this.isOverview) {
+				this.map_container.style.marginTop = '-80px';
+			}
 		}
 
 		// eslint-disable-next-line class-methods-use-this
@@ -1675,11 +1680,8 @@
 			this.mainChart.setData(collection, this.type, mainOptions);
 			this.mapChart.entangledChart = this.mainChart;
 			this.mapChart.setData(collection, this.type, mapOptions);
-			if (!(this.isSingleBar && !this.isOverview)) {
-				this.map_container.style.display = 'block';
-			} else {
-				// ToDo: animate container.
-				this.map_container.style.display = 'none';
+			if (this.isSingleBar && this.isOverview) {
+				this.map_container.style.marginTop = '0px';
 			}
 
 			while (this.btns && this.btns.length > 0) {
