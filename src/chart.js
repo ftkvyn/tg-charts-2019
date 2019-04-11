@@ -125,6 +125,7 @@
 
 		setData(data) {
 			this.isDisappearing = false;
+			this[op] = 0;
 
 			this.graphs = [];
 			this.data = data;
@@ -180,6 +181,7 @@
 					this[gr.scaleKey] = 0;
 				}
 			});
+			this.startChangeKey(op, 0xaa);
 			this.drawAll();
 		}
 
@@ -228,7 +230,7 @@
 					const currentAngle = 2 * Math.PI * gr.totalVal / sum;
 					this.ctx.beginPath();
 					this.ctx.moveTo(this.width, this.height);
-					this.ctx.fillStyle = `${gr.color}aa`;
+					this.ctx.fillStyle = `${gr.color}${getOpacity(this[op])}`;
 					// eslint-disable-next-line space-unary-ops
 					this.ctx.arc(this.width, this.height, this.radius, angle, currentAngle + angle);
 					this.ctx.lineTo(this.width, this.height);
@@ -1778,21 +1780,41 @@
 				this.overviewFrom = this.mainChart[zx];
 				this.overviewTo = this.mainChart[mx];
 			}
-			this.mainChart.isDisappearing = true;
-			this.mainChart.hideDetails();
-			if (this.isOverview) {
-				this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
-				this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
-				this.titleEl.style.display = 'none';
+			if (this.isPieDetails && !this.isOverview) {
+				this.pieChart.startChangeKey(op, 0);
 			} else {
-				this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
-				this.mainChart.startChangeKey(mx, this.mainChart[mx] - deltaMain / 2);
-				this.zoomOutEl.style.display = 'none';
-			}
+				this.mainChart.isDisappearing = true;
+				this.mainChart.hideDetails();
+				if (this.isOverview) {
+					this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
+					this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
+					this.titleEl.style.display = 'none';
+				} else {
+					this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
+					this.mainChart.startChangeKey(mx, this.mainChart[mx] - deltaMain / 2);
+					this.zoomOutEl.style.display = 'none';
+				}
 
-			this.mainChart.graphs.forEach((gr) => {
-				this.mainChart.startChangeKey(gr.opacityKey, 0);
-			});
+				this.mainChart.graphs.forEach((gr) => {
+					this.mainChart.startChangeKey(gr.opacityKey, 0);
+				});
+
+				for (let i = 0; i < this.mainChart.y_legend.length; i += 1) {
+					const item = this.mainChart.y_legend[i];
+					if (item.display) {
+						item.display = false;
+						item.startTimestamp = Date.now();
+					}
+				}
+
+				for (let i = 0; i < this.mainChart.x_legend.length; i += 1) {
+					const item = this.mainChart.x_legend[i];
+					if (item.display) {
+						item.display = false;
+						item.startTimestamp = Date.now();
+					}
+				}
+			}
 
 			const deltaMap = this.mapChart[zx] - this.mapChart[mx];
 			this.mapChart.isDisappearing = true;
@@ -1802,22 +1824,6 @@
 			this.mapChart.graphs.forEach((gr) => {
 				this.mapChart.startChangeKey(gr.opacityKey, 0);
 			});
-
-			for (let i = 0; i < this.mainChart.y_legend.length; i += 1) {
-				const item = this.mainChart.y_legend[i];
-				if (item.display) {
-					item.display = false;
-					item.startTimestamp = Date.now();
-				}
-			}
-
-			for (let i = 0; i < this.mainChart.x_legend.length; i += 1) {
-				const item = this.mainChart.x_legend[i];
-				if (item.display) {
-					item.display = false;
-					item.startTimestamp = Date.now();
-				}
-			}
 
 			if (this.isSingleBar && this.isOverview) {
 				this.map_container.style.marginTop = '-80px';
@@ -2002,6 +2008,7 @@
 
 		showPieDetails() {
 			this.isOverview = false;
+			this.isPieDetails = true;
 			this.run(this.pieDetailsData, { isAppear: true, pieChart: true });
 		}
 
