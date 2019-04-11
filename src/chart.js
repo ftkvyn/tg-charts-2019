@@ -110,6 +110,7 @@
 
 	class PieChart {
 		constructor(canv, height) {
+			this.isPieChart = true;
 			this.width = canv.clientWidth;
 			this.height = height;
 			this.animateFrameId = null;
@@ -170,7 +171,7 @@
 		}
 
 		clearChart() {
-			this.ctx.clearRect(0, 0, this.canv.width, -this.canv.height);
+			this.ctx.clearRect(0, 0, this.canv.width * 2, this.canv.height * 2);
 		}
 
 		appear() {
@@ -212,15 +213,15 @@
 				gr.totalVal = 0;
 				for (let i = this.start_i + 1; i < this.end_i; i += 1) {
 					sum += multiplier * gr.y_vals[i];
-					gr.totalVal += gr.y_vals[i];
+					gr.totalVal += multiplier * gr.y_vals[i];
 				}
 			}
 
 			for (let k = 0; k < this.graphs.length; k += 1) {
 				const gr = this.graphs[k];
 				if (this[gr.scaleKey]) {
-					const multiplier = this[gr.scaleKey] / 100;
-					const currentAngle = 2 * Math.PI * multiplier * gr.totalVal / sum;
+					// const multiplier = this[gr.scaleKey] / 100;
+					const currentAngle = 2 * Math.PI * gr.totalVal / sum;
 					this.ctx.beginPath();
 					this.ctx.moveTo(this.width, this.height);
 					this.ctx.fillStyle = `${gr.color}aa`;
@@ -291,7 +292,7 @@
 		toggleChart(key) {
 			const chart = this.graphs.find((ch) => { return ch.scaleKey === key; });
 			chart.display = !chart.display;
-			this.startChangeKey(chart.scaleKey, 0);
+			this.startChangeKey(chart.scaleKey, chart.display ? 100 : 0);
 		}
 	}
 
@@ -1361,7 +1362,9 @@
 					this.toggleChart(gr.opacityKey);
 
 					if (this.entangledChart) {
-						this.entangledChart.startChangeKey(gr.opacityKey, targetOpacity);
+						if (!this.entangledChart.isPieChart) {
+							this.entangledChart.startChangeKey(gr.opacityKey, targetOpacity);
+						}
 						this.entangledChart.toggleChart(gr.opacityKey);
 					}
 
