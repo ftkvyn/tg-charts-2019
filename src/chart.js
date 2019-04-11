@@ -34,6 +34,7 @@
 		y_legend_row_height = 50,
 		y_legend_text_height = 10,
 		op = Symbol('Opacity'),
+		det_x = Symbol('Details X'),
 		mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
 		zx = Symbol('Shift X'),
@@ -325,7 +326,7 @@
 			this.thickness = 2;
 			this.axisThickness = 1;
 
-			this.changingFields = [mx, my, zx, zy];
+			this.changingFields = [mx, my, zx, zy, det_x];
 
 			this.entangledChart = null;
 			this.isDrawAxis = true;
@@ -345,6 +346,7 @@
 			this[zx] = undefined;
 			this[my] = undefined;
 			this[zy] = undefined;
+			this[det_x] = undefined;
 			this.prev_end_i = undefined;
 			this.prev_start_i = undefined;
 			this.x_vals = [];
@@ -1009,13 +1011,15 @@
 			}
 		}
 
-		startChangeKey(key, targetVal) {
+		startChangeKey(key, targetVal, omitComparison) {
 			const val = this.changes[key];
-			if (eq(val.targetVal, targetVal)) {
+			if (!omitComparison && eq(val.targetVal, targetVal)) {
 				return;
 			}
+			if (!eq(val.targetVal, targetVal)) {
+				val.startTimestamp = Date.now();
+			}
 			val.targetVal = targetVal;
-			val.startTimestamp = Date.now();
 			val.deltaValue = targetVal - this[key];
 			val.originalValue = this[key];
 			if (!this.animateFrameId) {
@@ -1075,7 +1079,6 @@
 			}
 			const additionalVal = val.deltaValue * deltaScale;
 			this[key] = val.originalValue + additionalVal;
-
 			if (deltaScale >= 1) {
 				initChangesObject.call(this.changes, key);
 			}
@@ -1127,7 +1130,11 @@
 				}
 			}
 			this.last_details_num = this.details_num;
-			this.drawDetails();
+			if (this[det_x]) {
+				this.startChangeKey(det_x, this.x_vals[this.details_num], true);
+			} else {
+				this[det_x] = this.x_vals[this.details_num];
+			}
 		}
 
 		hideDetails() {
@@ -1135,6 +1142,7 @@
 				this.last_details_num = this.details_num;
 			}
 			this.details_num = -1;
+			this[det_x] = undefined;
 			this.clearDetails();
 			this.infoBox.style.display = 'none';
 			if (this.type === 'bar') {
@@ -1147,9 +1155,9 @@
 		drawDetails() {
 			// details
 			if (this.isDrawAxis && this.details_num > -1) {
-				if (this.details_num === this.prev_details_num) {
-					return;
-				}
+				// if (this.details_num === this.prev_details_num) {
+				// 	return;
+				// }
 				if (this.type === 'bar') {
 					this.clearChart();
 					this.drawAxis();
@@ -1158,6 +1166,7 @@
 				this.prev_details_num = this.details_num;
 				this.clearDetails();
 				const x = this.translateX(this.x_vals[this.details_num]);
+				const realX = this.translateX(this[det_x]);
 				let moreThanHalf = 0;
 				let lessThanHalf = 0;
 				const half = ((this[my] - this[zy]) / 2) + this[zy];
@@ -1172,11 +1181,11 @@
 					this.detailsCtx.lineWidth = this.axisThickness;
 					this.detailsCtx.strokeStyle = strokeColor;
 					this.detailsCtx.beginPath();
-					this.detailsCtx.moveTo(x, this.translateY(0));
+					this.detailsCtx.moveTo(realX, this.translateY(0));
 					if (this.type === 'line') {
-						this.detailsCtx.lineTo(x, -this.height);
+						this.detailsCtx.lineTo(realX, -this.height);
 					} else {
-						this.detailsCtx.lineTo(x, this.translateY(100));
+						this.detailsCtx.lineTo(realX, this.translateY(100));
 					}
 					this.detailsCtx.stroke();
 				}
