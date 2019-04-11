@@ -1152,12 +1152,24 @@
 			}
 		}
 
+		findIntersection(chart, x) {
+			const num = this.details_num;
+			const x0 = this.x_vals[num];
+			const x1 = this.x_vals[num + 1];
+			const y0 = chart.y_vals[num];
+			const y1 = chart.y_vals[num + 1];
+
+			const dx = x1 - x0;
+			const dy = y1 - y0;
+			const dx_int = x - x0;
+
+			const dy_int = y0 + dx_int * (dy / dx);
+			return dy_int;
+		}
+
 		drawDetails() {
 			// details
 			if (this.isDrawAxis && this.details_num > -1) {
-				// if (this.details_num === this.prev_details_num) {
-				// 	return;
-				// }
 				if (this.type === 'bar') {
 					this.clearChart();
 					this.drawAxis();
@@ -1201,8 +1213,9 @@
 							this.detailsCtx.lineWidth = this.thickness;
 							this.detailsCtx.strokeStyle = gr.color;
 							this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
+							const y = this.findIntersection(gr, this[det_x]);
 							this.detailsCtx.beginPath();
-							this.detailsCtx.arc(x, this.translateY(gr.y_vals[this.details_num]), this.thickness * 2, 0, 2 * Math.PI);
+							this.detailsCtx.arc(realX, this.translateY(y), this.thickness * 2, 0, 2 * Math.PI);
 							this.detailsCtx.fill();
 							this.detailsCtx.stroke();
 							if (gr.y_vals[this.details_num] > half) {
@@ -2109,4 +2122,3 @@
 	// chart.initMapBox();
 	// chart.showOverview(true);
 }(window));
-
