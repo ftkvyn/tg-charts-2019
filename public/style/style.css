@@ -192,6 +192,8 @@ a {
 }
 
 .selected .thumb .invisible-addition {
+	display: none;
+
 	position: absolute;
 	cursor: w-resize;
 	width: 20px;

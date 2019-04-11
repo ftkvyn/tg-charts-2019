@@ -28,7 +28,7 @@
 		padding_x = 0.003,
 		pie_pad = 0.1,
 		main_chart_padding = 16,
-		min_thumb_width = 50,
+		min_thumb_width = 20,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,
 		y_legend_row_height = 50,
@@ -149,7 +149,7 @@
 						y_vals: col,
 					};
 					this[graph.scaleKey] = 100;
-					this[graph.paddingKey] = 0;
+					this[graph.paddingKey] = this.radius * 2;
 					this.graphs.push(graph);
 					if (this.changingFields.findIndex((val) => { return val === graph.scaleKey; }) === -1) {
 						this.changingFields.push(graph.scaleKey);
@@ -179,6 +179,9 @@
 			this.graphs.forEach((gr) => {
 				if (!gr.display) {
 					this[gr.scaleKey] = 0;
+					this[gr.paddingKey] = 0;
+				} else {
+					this.startChangeKey(gr.paddingKey, 0);
 				}
 			});
 			this.startChangeKey(op, 0xaa);
@@ -228,12 +231,19 @@
 				const gr = this.graphs[k];
 				if (this[gr.scaleKey]) {
 					const currentAngle = 2 * Math.PI * gr.totalVal / sum;
+					let x0 = this.width;
+					let y0 = this.height;
+					if (this[gr.paddingKey]) {
+						x0 += this[gr.paddingKey] * Math.cos(angle + currentAngle / 2);
+						y0 += this[gr.paddingKey] * Math.sin(angle + currentAngle / 2);
+					}
+
 					this.ctx.beginPath();
-					this.ctx.moveTo(this.width, this.height);
+					this.ctx.moveTo(x0, y0);
 					this.ctx.fillStyle = `${gr.color}${getOpacity(this[op])}`;
 					// eslint-disable-next-line space-unary-ops
-					this.ctx.arc(this.width, this.height, this.radius, angle, currentAngle + angle);
-					this.ctx.lineTo(this.width, this.height);
+					this.ctx.arc(x0, y0, this.radius, angle, currentAngle + angle);
+					this.ctx.lineTo(x0, y0);
 					this.ctx.closePath();
 					this.ctx.fill();
 					angle += currentAngle;
@@ -1782,6 +1792,10 @@
 			}
 			if (this.isPieDetails && !this.isOverview) {
 				this.pieChart.startChangeKey(op, 0);
+				this.pieChart.graphs.forEach((gr) => {
+					this.pieChart.startChangeKey(gr.paddingKey, this.pieChart.radius * 2);
+				});
+				this.zoomOutEl.style.display = 'none';
 			} else {
 				this.mainChart.isDisappearing = true;
 				this.mainChart.hideDetails();
@@ -1897,6 +1911,7 @@
 				mapOptions.percentBars = true;
 
 				this.mapChart.entangledChart = this.pieChart;
+				this.pieChart.init();
 				this.pieChart.setData(this.pieDetailsData);
 				main = this.pieChart;
 			} else {
@@ -1958,8 +1973,13 @@
 					return;
 				}
 				this.windowWidth = global.outerWidth;
-				this.mainChart.init();
-				this.mainChart.calculateDetailsOffset();
+				if (!this.isOverview && this.isPieChartDetails) {
+					this.pieChart.init();
+					this.pieChart.drawAll();
+				} else {
+					this.mainChart.init();
+					this.mainChart.calculateDetailsOffset();
+				}
 				this.mapChart.init();
 				this.mapChart.drawAll();
 				this.container_width = this.map_container.clientWidth;
