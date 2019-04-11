@@ -26,12 +26,14 @@
 		duration = 180, // ms
 		padding_y = 0.03,
 		padding_x = 0.003,
+		pie_pad = 0.1,
 		main_chart_padding = 16,
 		min_thumb_width = 50,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,
 		y_legend_row_height = 50,
 		y_legend_text_height = 10,
+		op = Symbol('Opacity'),
 		mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
 		zx = Symbol('Shift X'),
@@ -104,6 +106,193 @@
 		parts.push(str);
 
 		return parts.reverse().join(' ');
+	}
+
+	class PieChart {
+		constructor(canv, height) {
+			this.width = canv.clientWidth;
+			this.height = height;
+			this.animateFrameId = null;
+			this.canv = canv;
+			this.ctx = canv.getContext('2d');
+			this.changes = {};
+
+			this.changingFields = [op];
+
+			this.graphs = [];
+		}
+
+		setData(data) {
+			this.isDisappearing = false;
+
+			this.graphs = [];
+			this.data = data;
+			this.prev_details_num = undefined;
+			this.details_num = -1;
+
+			this.sum = 0;
+
+			for (let i = 0; i < this.data.columns.length; i += 1) {
+				const col = [...this.data.columns[i]];
+				const key = col.shift();
+				if (key === 'x') {
+					this.x_vals = col;
+				} else {
+					const graph = {
+						name: this.data.names[key],
+						color: this.data.colors[key],
+						scaleKey: key,
+						paddingKey: `${key}_pad`,
+						display: true,
+						y_vals: col,
+					};
+					this[graph.scaleKey] = 100;
+					this[graph.paddingKey] = 0;
+					this.graphs.push(graph);
+					if (this.changingFields.findIndex((val) => { return val === graph.scaleKey; }) === -1) {
+						this.changingFields.push(graph.scaleKey);
+					}
+					if (this.changingFields.findIndex((val) => { return val === graph.paddingKey; }) === -1) {
+						this.changingFields.push(graph.paddingKey);
+					}
+				}
+			}
+
+			this[zx] = Math.min(...this.x_vals);
+			this[mx] = Math.max(...this.x_vals);
+		}
+
+		setChartWidths() {
+			this.width = this.canv.clientWidth;
+			this.canv.width = this.width * 2;
+
+			this.radius = (Math.min(this.width, this.height)) * (1 - pie_pad);
+		}
+
+		clearChart() {
+			this.ctx.clearRect(0, 0, this.canv.width, -this.canv.height);
+		}
+
+		appear() {
+			this.drawAll();
+		}
+
+		setStartEnd() {
+			let start_i = this.x_vals.findIndex((val) => { return val >= this[zx]; });
+			if (start_i > 0) {
+				start_i -= 1; // Starting from the first point beyond the chart to the left;
+			}
+			let end_i = start_i;
+			for (; end_i < this.x_vals.length; end_i += 1) {
+				if (this.x_vals[end_i] >= this[mx]) {
+					break;
+				}
+			}
+			if (end_i < this.x_vals.length) {
+				end_i += 1; // Going till the first one beyond the chart to the right;
+			}
+			this.start_i = start_i;
+			this.end_i = end_i;
+		}
+
+		drawAll() {
+			this.clearChart();
+			this.drawChart();
+		}
+
+		drawChart() {
+			let angle = 0;
+
+			this.setStartEnd();
+			let sum = 0;
+
+			for (let k = 0; k < this.graphs.length; k += 1) {
+				const gr = this.graphs[k];
+				const multiplier = this[gr.scaleKey] / 100;
+				gr.totalVal = 0;
+				for (let i = this.start_i + 1; i < this.end_i; i += 1) {
+					sum += multiplier * gr.y_vals[i];
+					gr.totalVal += gr.y_vals[i];
+				}
+			}
+
+			for (let k = 0; k < this.graphs.length; k += 1) {
+				const gr = this.graphs[k];
+				if (this[gr.scaleKey]) {
+					const multiplier = this[gr.scaleKey] / 100;
+					const currentAngle = 2 * Math.PI * multiplier * gr.totalVal / sum;
+					this.ctx.beginPath();
+					this.ctx.moveTo(this.width, this.height);
+					this.ctx.fillStyle = `${gr.color}aa`;
+					// eslint-disable-next-line space-unary-ops
+					this.ctx.arc(this.width, this.height, this.radius, angle, currentAngle + angle);
+					this.ctx.lineTo(this.width, this.height);
+					this.ctx.closePath();
+					this.ctx.fill();
+					angle += currentAngle;
+				}
+			}
+		}
+
+		init() {
+			this.changingFields.forEach(initChangesObject.bind(this.changes));
+			this.setChartWidths();
+		}
+
+		startChangeKey(key, targetVal) {
+			const val = this.changes[key];
+			if (eq(val.targetVal, targetVal)) {
+				return;
+			}
+			val.targetVal = targetVal;
+			val.startTimestamp = Date.now();
+			val.deltaValue = targetVal - this[key];
+			val.originalValue = this[key];
+			if (!this.animateFrameId) {
+				this.animateFrameId = requestAnimationFrame(this.changeAllStep.bind(this));
+			}
+		}
+
+		changeKeyStep(key) {
+			const val = this.changes[key];
+			if (val.startTimestamp === -1) {
+				return false;
+			}
+			const delta = Date.now() - val.startTimestamp;
+			let deltaScale = delta / duration;
+			if (deltaScale > 1) {
+				deltaScale = 1;
+			}
+			const additionalVal = val.deltaValue * deltaScale;
+			this[key] = val.originalValue + additionalVal;
+
+			if (deltaScale >= 1) {
+				initChangesObject.call(this.changes, key);
+			}
+			return true;
+		}
+
+		changeAllStep() {
+			let somethingChanged = this.changingFields.reduce((keyChanged, key) => { return this.changeKeyStep(key) || keyChanged; }, false);
+
+			if (this.isDrawAxis) {
+				somethingChanged = this.changeAxisStep() || somethingChanged;
+			}
+
+			this.animateFrameId = null;
+			if (somethingChanged) {
+				this.drawAll();
+				if (!this.animateFrameId) {
+					this.animateFrameId = requestAnimationFrame(this.changeAllStep.bind(this));
+				}
+			}
+		}
+
+		toggleChart(key) {
+			const chart = this.graphs.find((ch) => { return ch.scaleKey === key; });
+			chart.display = !chart.display;
+			this.startChangeKey(chart.scaleKey, 0);
+		}
 	}
 
 	class Chart {
@@ -1244,6 +1433,10 @@
 			this.mapChart.entangledChart = this.mainChart;
 			this.mainChart.setUpHoverDetails(this.details_chart);
 
+			if (pieChartDetails) {
+				this.pieChart = new PieChart(this.main_chart, this.height);
+			}
+
 			this.map_container = this.appEl.getElementsByClassName('map_container')[0];
 			this.thumb = this.appEl.getElementsByClassName('selected')[0];
 			this.thumb_left = this.appEl.getElementsByClassName('thumb_left')[0];
@@ -1652,19 +1845,20 @@
 			});
 		}
 
-		appear() {
+		appear(optionsOrig) {
 			this.appearChart(this.mapChart);
 			if (this.isOverview) {
 				this.moveSelectBoxForOverview();
 			} else {
 				this.moveSelectBoxForDetails();
 			}
-			this.mainChart.isAppear = true;
-			setTimeout(() => {
-				// this.mainChart.isAppear = false;
-			});
-			this.mainChart.calculateMaxY(true, true);
-			this.appearChart(this.mainChart);
+			if (!optionsOrig.pieChart) {
+				this.mainChart.isAppear = true;
+				this.mainChart.calculateMaxY(true, true);
+				this.appearChart(this.mainChart);
+			} else {
+				this.pieChart.appear();
+			}
 			if (this.isOverview) {
 				this.titleEl.style.display = 'inline-block';
 			} else {
@@ -1685,14 +1879,17 @@
 				mainOptions.y_scaled = true;
 				mapOptions.y_scaled = true;
 			}
+			let main = this.mainChart;
 			if (optionsOrig.pieChart) {
 				mapOptions.percentBars = true;
 
-				// ToDo: remove
-				mainOptions.percentBars = true;
+				this.mapChart.entangledChart = this.pieChart;
+				this.pieChart.setData(this.pieDetailsData);
+				main = this.pieChart;
+			} else {
+				this.mainChart.setData(collection, this.type, mainOptions);
+				this.mapChart.entangledChart = this.mainChart;
 			}
-			this.mainChart.setData(collection, this.type, mainOptions);
-			this.mapChart.entangledChart = this.mainChart;
 			this.mapChart.setData(collection, this.type, mapOptions);
 			if (this.isSingleBar && this.isOverview) {
 				this.map_container.style.marginTop = '0px';
@@ -1715,15 +1912,17 @@
 				});
 			}
 
-			this.mainChart.init();
+			main.init();
 			this.mapChart.init();
 			this.mapChart.calculateMaxY(true, options.isAppear);
 			if (!options.isAppear) {
 				this.setMapBox(true);
-				this.mainChart.calculateMaxY(true, options.isAppear);
+				if (!optionsOrig.pieChart) {
+					this.mainChart.calculateMaxY(true, options.isAppear);
+				}
 			}
 			if (this.isSaveBtnState && this.btnState) {
-				this.mainChart.graphs.forEach((gr, num) => {
+				main.graphs.forEach((gr, num) => {
 					if (!this.btnState[num]) {
 						gr.display = false;
 						this.mapChart.graphs[num].display = false;
@@ -1731,7 +1930,7 @@
 				});
 			}
 			if (options.isAppear) {
-				this.appear();
+				this.appear(optionsOrig);
 			} else {
 				this.updateLegend();
 			}
