@@ -1299,8 +1299,14 @@
 
 		updateLegend() {
 			const fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
-			const toDate = this.mainChart.x_vals[this.mainChart.end_i - 1];
-			this.legend_el.innerText = `${getFullDateText(fromDate)} - ${getFullDateText(toDate)}`;
+			const toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
+			const fromTxt = getFullDateText(fromDate);
+			const toTxt = getFullDateText(toDate);
+			if (fromTxt !== toTxt) {
+				this.legend_el.innerText = `${fromTxt} - ${toTxt}`;
+			} else {
+				this.legend_el.innerText = fromTxt;
+			}
 		}
 
 		moveChart(dx) {
@@ -1662,6 +1668,7 @@
 			} else {
 				this.zoomOutEl.style.display = 'inline-block';
 			}
+			this.updateLegend();
 		}
 
 		run(collection, optionsOrig) {
@@ -1721,9 +1728,10 @@
 					}
 				});
 			}
-			this.updateLegend();
 			if (options.isAppear) {
 				this.appear();
+			} else {
+				this.updateLegend();
 			}
 		}
 
