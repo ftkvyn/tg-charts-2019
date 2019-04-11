@@ -175,6 +175,11 @@
 		}
 
 		appear() {
+			this.graphs.forEach((gr) => {
+				if (!gr.display) {
+					this[gr.scaleKey] = 0;
+				}
+			});
 			this.drawAll();
 		}
 
@@ -220,7 +225,6 @@
 			for (let k = 0; k < this.graphs.length; k += 1) {
 				const gr = this.graphs[k];
 				if (this[gr.scaleKey]) {
-					// const multiplier = this[gr.scaleKey] / 100;
 					const currentAngle = 2 * Math.PI * gr.totalVal / sum;
 					this.ctx.beginPath();
 					this.ctx.moveTo(this.width, this.height);
