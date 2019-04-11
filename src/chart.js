@@ -1067,6 +1067,7 @@
 			return changed;
 		}
 
+		// ToDo: check if no unnecessary animation is appears.
 		changeKeyStep(key) {
 			const val = this.changes[key];
 			if (val.startTimestamp === -1) {
