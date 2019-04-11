@@ -1998,17 +1998,16 @@
 
 		showPieDetails() {
 			this.isOverview = false;
-			this.mainChart.isDetails = true;
 			this.run(this.pieDetailsData, { isAppear: true, pieChart: true });
 		}
 
 		showDetails() {
+			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num];
+			this.detailsFrom = selectedX;
 			if (this.isPieChartDetails) {
 				this.showPieDetails();
 				return;
 			}
-			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num];
-			this.detailsFrom = selectedX;
 			const selectedDate = new Date(selectedX);
 			const folder = `${selectedDate.getFullYear()}-${padZeros(selectedDate.getMonth() + 1)}`;
 			const file = padZeros(selectedDate.getDate());
