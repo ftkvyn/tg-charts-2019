@@ -388,9 +388,11 @@
 			if (start >= this.x_legend.length) {
 				start = this.x_legend.length - 1;
 			}
-			// ToDo: hide on appearence.
 			this.processXLabels(start, -1, skipItemsEachStep, isInitial);
 			this.processXLabels(start, this.x_legend.length, skipItemsEachStep, isInitial);
+			if (this.isAppear) {
+				this.x_legend.forEach((val) => { val.opacity = 0; });
+			}
 		}
 
 		drawAxis() {
