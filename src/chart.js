@@ -50,7 +50,6 @@
 		if (a === b) {
 			return true;
 		}
-		console.log(Math.abs((a - b) / Math.max(Math.abs(a), Math.abs(b))));
 		return Math.abs((a - b) / Math.max(Math.abs(a), Math.abs(b))) < 0.001;
 	}
 
@@ -192,6 +191,9 @@
 							opacity: 255,
 							display: true,
 						};
+						if (this.isAppear) {
+							result.opacity = 0;
+						}
 						if (this.isDetails) {
 							result.name = getHoursText(val);
 						}
@@ -761,6 +763,9 @@
 								// Initial creation
 								item.opacity = 255;
 							}
+							if (this.isAppear) {
+								item.opacity = 0;
+							}
 							val += step;
 							if (!this.isDisappearing) {
 								this.y_legend.push(item);
@@ -805,7 +810,6 @@
 			val.deltaValue = targetVal - this[key];
 			val.originalValue = this[key];
 			if (!this.animateFrameId) {
-				console.log(`${key.toString()} => ${targetVal}`);
 				this.animateFrameId = requestAnimationFrame(this.changeAllStep.bind(this));
 			}
 		}
@@ -1637,6 +1641,10 @@
 			} else {
 				this.moveSelectBoxForDetails();
 			}
+			this.mainChart.isAppear = true;
+			setTimeout(() => {
+				// this.mainChart.isAppear = false;
+			});
 			this.mainChart.calculateMaxY(true, true);
 			this.appearChart(this.mainChart);
 			if (this.isOverview) {
