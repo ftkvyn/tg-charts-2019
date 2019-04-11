@@ -42,7 +42,16 @@
 			startTimestamp: -1,
 			deltaValue: -1,
 			originalValue: -1,
+			targetVal: -1,
 		};
+	}
+
+	function eq(a, b) {
+		if (a === b) {
+			return true;
+		}
+		console.log(Math.abs((a - b) / Math.max(Math.abs(a), Math.abs(b))));
+		return Math.abs((a - b) / Math.max(Math.abs(a), Math.abs(b))) < 0.001;
 	}
 
 	function prettifyNumber(val) {
@@ -692,14 +701,14 @@
 					const dSmall = (newSmallVals.newMax - newSmallVals.newMin) || dBig;
 					const newScale = dBig / dSmall;
 					const newScalePad = newBigVals.newMin - (newSmallVals.newMin * newScale);
-					if (Math.abs(newScale - this.scale) > 0.0001) {
+					if (!eq(newScale, this.scale)) {
 						if (this.scale && !noDraw) {
 							this.startChangeKey('scale', newScale);
 						} else {
 							this.scale = newScale;
 						}
 					}
-					if (Math.abs(newScalePad - this.scale_pad) > 0.0001) {
+					if (!eq(newScalePad, this.scale_pad)) {
 						if (this.scale_pad && !noDraw) {
 							this.startChangeKey('scale_pad', newScalePad);
 						} else {
@@ -711,8 +720,10 @@
 					newMax += Math.round((newMax - this[zy]) * padding_y);
 					newMin -= Math.round(newMin * padding_y);
 				}
-				if ((newMax !== 0 && newMax !== this[my]) ||
-					(newMin !== this[zy])) {
+				newMax = Math.round(newMax);
+				newMin = Math.round(newMin);
+				if ((!eq(newMax, 0) && !eq(newMax, this[my])) ||
+					(!eq(newMin, this[zy]))) {
 					if (this.isDrawAxis) {
 						for (let i = 0; i < this.y_legend.length; i += 1) {
 							const item = this.y_legend[i];
@@ -786,10 +797,15 @@
 
 		startChangeKey(key, targetVal) {
 			const val = this.changes[key];
+			if (eq(val.targetVal, targetVal)) {
+				return;
+			}
+			val.targetVal = targetVal;
 			val.startTimestamp = Date.now();
 			val.deltaValue = targetVal - this[key];
 			val.originalValue = this[key];
 			if (!this.animateFrameId) {
+				console.log(`${key.toString()} => ${targetVal}`);
 				this.animateFrameId = requestAnimationFrame(this.changeAllStep.bind(this));
 			}
 		}
