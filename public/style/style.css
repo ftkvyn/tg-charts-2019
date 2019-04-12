@@ -82,13 +82,14 @@ body.isDark {
 .legend .date {
 	transition: width .2s;
 	display: inline-block;
-	width: 140px;
+	width: 125px;
 	text-align: center;
 	position: relative;
 	height: 12px;
 }
 
 .legend .date .part {
+	white-space: nowrap;
 	transform-origin: 00% 100%;
 	transition: transform .2s, opacity .2s, width .2s;
 	transform: scale(1);
@@ -103,7 +104,7 @@ body.isDark {
 	text-align: right;
 }
 .legend .date.to .part {
-	text-align: left;
+	text-align: right;
 }
 
 .legend .date .part.old{
@@ -119,6 +120,7 @@ body.isDark {
 
 .legend .date.dash {
 	width: 15px;
+	text-align: right;
 }
 
 .legend .date.hidden{
