@@ -74,9 +74,40 @@
 		return displayVal;
 	}
 
+	function changeLabels(el, text) {
+		const prevDetailEl = el.getElementsByClassName('detail')[0];
+		let currentTxt = '';
+		if (prevDetailEl) {
+			currentTxt = prevDetailEl.innerText;
+		}
+		if (currentTxt !== text) {
+			if (prevDetailEl) {
+				prevDetailEl.classList.add('old');
+			}
+			const detailPart = `<div class="part detail new">${text}</div>`;
+			const template = document.createElement('template');
+			template.innerHTML = detailPart;
+			const detailEl = template.content.firstChild;
+			if (prevDetailEl) {
+				el.appendChild(detailEl);
+				setTimeout(() => {
+					detailEl.classList.remove('new');
+				}, 0);
+				setTimeout(() => {
+					if (prevDetailEl && prevDetailEl.parentElement) {
+						prevDetailEl.parentElement.removeChild(prevDetailEl);
+					}
+				}, duration);
+			} else {
+				detailEl.classList.remove('new');
+				el.appendChild(detailEl);
+			}
+		}
+	}
+
 	function getDateText(timestamp) {
 		const date = new Date(timestamp);
-		return [`${months[date.getMonth()]} ${date.getDate()}`, days[date.getDay()]];
+		return [`${days[date.getDay()]}, ${date.getDate()}`, date.getDay()];
 	}
 
 	function padZeros(val) {
@@ -395,8 +426,11 @@
 					this.x_vals = col;
 					this.x_legend = col.map((val) => {
 						const dayNames = getDateText(val);
+						const date = new Date(val);
 						const result = {
 							name: dayNames[0],
+							monthName: months[date.getMonth()],
+							year: date.getFullYear(),
 							day: dayNames[1],
 							x: val,
 							opacity: 255,
@@ -1148,7 +1182,7 @@
 			this.details_num = -1;
 			this[det_x] = undefined;
 			this.clearDetails();
-			this.infoBox.style.display = 'none';
+			// this.infoBox.style.display = 'none';
 			if (this.type === 'bar') {
 				this.clearChart();
 				this.drawAxis();
@@ -1156,12 +1190,13 @@
 			}
 		}
 
-		findIntersection(chart, x) {
+		findIntersection(chart, x, goRight) {
+			const step = goRight ? 1 : -1;
 			const num = this.details_num;
 			const x0 = this.x_vals[num];
-			const x1 = this.x_vals[num + 1];
+			const x1 = this.x_vals[num + step];
 			const y0 = chart.y_vals[num];
-			const y1 = chart.y_vals[num + 1];
+			const y1 = chart.y_vals[num + step];
 
 			const dx = x1 - x0;
 			const dy = y1 - y0;
@@ -1216,7 +1251,7 @@
 							this.detailsCtx.lineWidth = this.thickness;
 							this.detailsCtx.strokeStyle = gr.color;
 							this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
-							const y = this.findIntersection(gr, this[det_x]);
+							const y = this.findIntersection(gr, this[det_x], this[det_x] > this.x_vals[this.details_num]);
 							this.detailsCtx.beginPath();
 							this.detailsCtx.arc(realX, this.translateY(y), this.thickness * 2, 0, 2 * Math.PI);
 							this.detailsCtx.fill();
@@ -1252,43 +1287,29 @@
 				}
 				this.prev_details_num = this.details_num;
 
-				const oldEls = this.infoDate.getElementsByClassName('old');
+				if (this.isDetails) {
+					this.infoHour.style.display = 'block';
+					this.infoDay.style.display = 'none';
+					this.infoMonth.style.display = 'none';
+				} else {
+					this.infoHour.style.display = 'none';
+					this.infoDay.style.display = 'block';
+					this.infoMonth.style.display = 'block';
+				}
+
+				const oldEls = this.infoBox.getElementsByClassName('old');
 				while (oldEls && oldEls.length) {
-					this.infoDate.removeChild(oldEls[0]);
+					oldEls[0].parentElement.removeChild(oldEls[0]);
 				}
 
 				if (this.isDetails) {
-					const prevDetailEl = this.infoDate.getElementsByClassName('detail')[0];
-					let currentTxt = '';
-					if (prevDetailEl) {
-						currentTxt = prevDetailEl.innerText;
-					}
 					const text = this.x_legend[this.details_num].name;
-					if (currentTxt !== text) {
-						if (prevDetailEl) {
-							prevDetailEl.classList.add('old');
-						}
-						const detailPart = `<div class="part detail new">${text}</div>`;
-						const template = document.createElement('template');
-						template.innerHTML = detailPart;
-						const detailEl = template.content.firstChild;
-						if (prevDetailEl) {
-							this.infoDate.appendChild(detailEl);
-							setTimeout(() => {
-								detailEl.classList.remove('new');
-							}, 0);
-							setTimeout(() => {
-								if (prevDetailEl && prevDetailEl.parentElement) {
-									prevDetailEl.parentElement.removeChild(prevDetailEl);
-								}
-							}, duration);
-						} else {
-							detailEl.classList.remove('new');
-							this.infoDate.appendChild(detailEl);
-						}
-					}
+					changeLabels(this.infoHour, text);
 				} else {
-					// this.infoDate.innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
+					const dayTxt = `${this.x_legend[this.details_num].name}`;
+					changeLabels(this.infoDay, dayTxt);
+					const monthTxt = `${this.x_legend[this.details_num].monthName} ${this.x_legend[this.details_num].year}`;
+					changeLabels(this.infoMonth, monthTxt);
 				}
 
 				this.infoBox.style.display = 'block';
@@ -1306,13 +1327,13 @@
 					left = 0;
 				}
 				this.infoBox.style.left = `${left}px`;
-				if (moreThanHalf > lessThanHalf) {
-					this.infoBox.style.top = '';
-					this.infoBox.style.bottom = `${x_legend_padding}px`;
-				} else {
+				// if (moreThanHalf > lessThanHalf) {
+				// 	this.infoBox.style.top = '';
+				// 	this.infoBox.style.bottom = `${x_legend_padding}px`;
+				// } else {
 					this.infoBox.style.bottom = '';
 					this.infoBox.style.top = '0px';
-				}
+				// }
 			}
 		}
 
@@ -1372,20 +1393,23 @@
 
 			const infoBoxHtml = `<div class="info" style="display:none;">
 				<div style="display:block;clear:both;overflow:hidden;margin-bottom:2px;">
-					<div class="date"></div>
+					<div class="hour date"></div>
+					<div class="day date"></div>
+					<div class="month date"></div>
 					<div class="show-more"></div>
 				</div>
 			</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = infoBoxHtml;
 			this.infoBox = template.content.firstChild;
-			this.infoDate = this.infoBox.getElementsByClassName('date')[0];
+			this.infoHour = this.infoBox.getElementsByClassName('hour')[0];
+			this.infoDay = this.infoBox.getElementsByClassName('day')[0];
+			this.infoMonth = this.infoBox.getElementsByClassName('month')[0];
 			this.showMore = this.infoBox.getElementsByClassName('show-more')[0];
 
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
 
 			this.detailsCanv.onclick = () => {
-				console.log("click");
 				if (!isTouch && !this.isDetails) {
 					this.changeChart();
 				}
