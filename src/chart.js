@@ -55,7 +55,7 @@
 		if (a === b) {
 			return true;
 		}
-		return Math.abs((a - b) / Math.max(Math.abs(a), Math.abs(b))) < 0.001;
+		return Math.abs((a - b) / Math.max(Math.abs(a), Math.abs(b))) < 0.0001;
 	}
 
 	function prettifyNumber(val) {
@@ -453,6 +453,7 @@
 						const date = new Date(val);
 						const result = {
 							name: dayNames[0],
+							nameClear: dayNames[0].replace(',',''),
 							monthName: months[date.getMonth()],
 							year: date.getFullYear(),
 							day: dayNames[1],
@@ -737,7 +738,7 @@
 					if (val.opacity) {
 						this.ctx.fillStyle = textColor + getOpacity(val.opacity);
 						const x = this.translateX(val.x) - Math.round(x_legend_val_width / 2);
-						this.ctx.fillText(val.name, x, -3);
+						this.ctx.fillText(val.nameClear, x, -3);
 					}
 				}
 			}
@@ -1625,6 +1626,33 @@
 			this.overlay_left.style.width = `${this.container_width - this.thumb_width}px`;
 		}
 
+		updateLegend(isInitial) {
+			const fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
+			const toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
+			const fromTxt = getFullDateText(fromDate);
+			const toTxt = getFullDateText(toDate);
+			if (isInitial) {
+				this.legend_els[0].classList.add('no-animate');
+				this.legend_els[2].classList.add('no-animate');
+			}
+			if (fromTxt !== toTxt) {
+				this.legend_els[0].classList.remove('hidden');
+				this.legend_els[1].classList.remove('hidden');
+				changeLabels(this.legend_els[0], fromTxt, true);
+				changeLabels(this.legend_els[2], toTxt, true);
+			} else {
+				this.legend_els[0].classList.add('hidden');
+				this.legend_els[1].classList.add('hidden');
+				changeLabels(this.legend_els[2], fromTxt, true);
+			}
+			setTimeout(() => {
+				if (isInitial) {
+					this.legend_els[0].classList.remove('no-animate');
+					this.legend_els[2].classList.remove('no-animate');
+				}
+			});
+		}
+
 		tryStartMovingX() {
 			if (this.isPieChartDetails && !this.isOverview) {
 				this.pieChart[zx] = this.nextfrom;
@@ -1672,33 +1700,6 @@
 				this.mainChart[zx] = from;
 				this.mainChart[mx] = to;
 			}
-		}
-
-		updateLegend(isInitial) {
-			const fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
-			const toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
-			const fromTxt = getFullDateText(fromDate);
-			const toTxt = getFullDateText(toDate);
-			if (isInitial) {
-				this.legend_els[0].classList.add('no-animate');
-				this.legend_els[2].classList.add('no-animate');
-			}
-			if (fromTxt !== toTxt) {
-				this.legend_els[0].classList.remove('hidden');
-				this.legend_els[1].classList.remove('hidden');
-				changeLabels(this.legend_els[0], fromTxt, true);
-				changeLabels(this.legend_els[2], toTxt, true);
-			} else {
-				this.legend_els[0].classList.add('hidden');
-				this.legend_els[1].classList.add('hidden');
-				changeLabels(this.legend_els[2], fromTxt, true);
-			}
-			setTimeout(() => {
-				if (isInitial) {
-					this.legend_els[0].classList.remove('no-animate');
-					this.legend_els[2].classList.remove('no-animate');
-				}
-			});
 		}
 
 		moveChart(dx) {
