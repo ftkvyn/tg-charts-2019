@@ -1180,7 +1180,6 @@
 					this.drawAxis();
 					this.drawChart();
 				}
-				this.prev_details_num = this.details_num;
 				this.clearDetails();
 				const x = this.translateX(this.x_vals[this.details_num]);
 				const realX = this.translateX(this[det_x]);
@@ -1249,11 +1248,49 @@
 					}
 				});
 
-				let text = this.x_legend[this.details_num].name;
-				if (!this.isDetails) {
-					text = `${this.x_legend[this.details_num].day}, ${text}`;
+				if (this.prev_details_num === this.details_num) {
+					return;
 				}
-				this.infoBox.getElementsByClassName('date')[0].innerText = text;
+				this.prev_details_num = this.details_num;
+
+				const oldEls = this.infoDate.getElementsByClassName('old');
+				while (oldEls && oldEls.length) {
+					this.infoDate.removeChild(oldEls[0]);
+				}
+
+				if (this.isDetails) {
+					const prevDetailEl = this.infoDate.getElementsByClassName('detail')[0];
+					let currentTxt = '';
+					if (prevDetailEl) {
+						currentTxt = prevDetailEl.innerText;
+					}
+					const text = this.x_legend[this.details_num].name;
+					if (currentTxt !== text) {
+						if (prevDetailEl) {
+							prevDetailEl.classList.add('old');
+						}
+						const detailPart = `<div class="part detail new">${text}</div>`;
+						const template = document.createElement('template');
+						template.innerHTML = detailPart;
+						const detailEl = template.content.firstChild;
+						if (prevDetailEl) {
+							this.infoDate.appendChild(detailEl);
+							setTimeout(() => {
+								detailEl.classList.remove('new');
+							}, 0);
+							setTimeout(() => {
+								if (prevDetailEl && prevDetailEl.parentElement) {
+									prevDetailEl.parentElement.removeChild(prevDetailEl);
+								}
+							}, duration);
+						} else {
+							detailEl.classList.remove('new');
+							this.infoDate.appendChild(detailEl);
+						}
+					}
+				} else {
+					// this.infoDate.innerText = `${this.x_legend[this.details_num].day}, ${this.x_legend[this.details_num].name}`;
+				}
 
 				this.infoBox.style.display = 'block';
 				let left = x - 50;
@@ -1334,6 +1371,7 @@
 			const template = document.createElement('template');
 			template.innerHTML = infoBoxHtml;
 			this.infoBox = template.content.firstChild;
+			this.infoDate = this.infoBox.getElementsByClassName('date')[0];
 			this.showMore = this.infoBox.getElementsByClassName('show-more')[0];
 
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
