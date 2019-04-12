@@ -405,12 +405,19 @@ a {
 	width: 100%;
 	font-size: 15px;
 	margin-bottom: 5px;
+	transition: height .2s;
+	height: 18px;
+}
+
+.info .item.hidden {
+	height: 0;
+	margin-bottom: 0;
 }
 
 .info .item .value .part {
 	text-align: right;
 	width: 100%;
-	transition: top .2s, opacity .2s;
+	transition: top .2s;
 	opacity: 1;
 	position: absolute;
     left: 0;
@@ -419,12 +426,14 @@ a {
 
 .info .item .value .part.old{
 	top: 20px;
-	opacity: 0;
+	transform: scale(1);
+	opacity: 1;
 }
 
 .info .item .value .part.new{
 	top: -20px;
-	opacity: 0;
+	transform: scale(1);
+	opacity: 1;
 }
 
 .info .item .value {

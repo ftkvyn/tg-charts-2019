@@ -448,7 +448,7 @@
 					const graph = {
 						name: this.data.names[key],
 						color: this.data.colors[key],
-						opacityKey: key,
+						opacityKey: `${key}_${type}`,
 						display: true,
 						y_vals: col,
 						scale: 1,
@@ -1186,7 +1186,7 @@
 			this.details_num = -1;
 			this[det_x] = undefined;
 			this.clearDetails();
-			// this.infoBox.style.display = 'none';
+			this.infoBox.style.display = 'none';
 			if (this.type === 'bar') {
 				this.clearChart();
 				this.drawAxis();
@@ -1256,13 +1256,19 @@
 					}
 				});
 
-				if (this.prev_details_num === this.details_num) {
+				if (this.prev_details_num === this.details_num && !this.force_redraw_details) {
 					return;
 				}
+
+				this.force_redraw_details = false;
 
 				const oldEls = this.infoBox.getElementsByClassName('old');
 				while (oldEls && oldEls.length) {
 					oldEls[0].parentElement.removeChild(oldEls[0]);
+				}
+				const grItems = this.infoBox.getElementsByClassName('item');
+				for (let i = 0; i < grItems.length; i += 1) {
+					grItems[i].classList.add('hidden');
 				}
 
 				this.graphs.forEach((gr) => {
@@ -1287,6 +1293,7 @@
 							infoEl.valueEl = valueEl;
 							this.infoBox.appendChild(infoEl);
 						}
+						infoEl.classList.remove('hidden');
 						changeLabels(infoEl.valueEl, valueText);
 					}
 				});
@@ -1295,7 +1302,7 @@
 				let moreThanHalf = 0;
 
 				if (this.type === 'line') {
-					const half = this.translateBackY(this.height - (this.infoBox.clientHeight || 80));
+					const half = this.translateBackY(this.height - (this.infoBox.clientHeight || 80) - x_legend_padding);
 					this.graphs.forEach((gr) => {
 						if (gr.display) {
 							if (gr.y_vals[this.details_num] >= half) {
@@ -1487,6 +1494,8 @@
 							this.entangledChart.startChangeKey(gr.opacityKey, targetOpacity);
 						}
 						this.entangledChart.toggleChart(gr.opacityKey);
+						this.entangledChart.force_redraw_details = true;
+						this.entangledChart.drawDetails();
 					}
 
 					if (isOff) {
