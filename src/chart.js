@@ -1591,7 +1591,7 @@
 			this.thumb_right = this.appEl.getElementsByClassName('thumb_right')[0];
 			this.overlay_left = this.appEl.getElementsByClassName('overlay_left')[0];
 			this.overlay_right = this.appEl.getElementsByClassName('overlay_right')[0];
-			this.isLight = true;
+			this.isLight = false;
 			this.windowWidth = global.outerWidth;
 
 			this.setupAllEvents();
@@ -1939,18 +1939,18 @@
 				this.pieChart.graphs.forEach((gr) => {
 					this.pieChart.startChangeKey(gr.paddingKey, this.pieChart.radius * 2);
 				});
-				this.zoomOutEl.style.display = 'none';
+				this.zoomOutEl.classList.add('hidden');
 			} else {
 				this.mainChart.isDisappearing = true;
 				this.mainChart.hideDetails();
 				if (this.isOverview) {
 					this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
 					this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
-					this.titleEl.style.display = 'none';
+					this.titleEl.classList.add('hidden');
 				} else {
 					this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
 					this.mainChart.startChangeKey(mx, this.mainChart[mx] - deltaMain / 2);
-					this.zoomOutEl.style.display = 'none';
+					this.zoomOutEl.classList.add('hidden');
 				}
 
 				this.mainChart.graphs.forEach((gr) => {
@@ -2031,9 +2031,9 @@
 				this.pieChart.appear();
 			}
 			if (this.isOverview) {
-				this.titleEl.style.display = 'inline-block';
+				this.titleEl.classList.remove('hidden');
 			} else {
-				this.zoomOutEl.style.display = 'inline-block';
+				this.zoomOutEl.classList.remove('hidden');
 			}
 			this.updateLegend();
 		}

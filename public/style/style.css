@@ -11,6 +11,7 @@ body {
 
 body.isDark {
 	background: rgb(36, 47, 62);
+	color: white;
 }
 
 .app-container {
@@ -59,7 +60,6 @@ body.isDark {
 	color: #108be3;
 	text-decoration: none;
 	font-weight: bolder;
-	display: none;
 	margin: 1em 0;
 	padding-left: 27px;
 	background-image: url('/img/mg_l.png');
@@ -70,6 +70,26 @@ body.isDark {
 .dark-theme .zoom-out {
 	background-image: url('/img/mg_d.png');
 	color: #48aaf0;
+}
+
+.title-container {
+	position: relative;
+}
+
+.title-container .item {
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform-origin: 00% 100%;
+	transition: transform .2s, opacity .2s, width .2s;
+	transform: scale(1);
+	opacity: 1;
+}
+
+.title-container .item.hidden {
+	transform-origin: 100% 0%;
+	transform: scale(0);
+	opacity: 0;
 }
 
 .legend {
