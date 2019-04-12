@@ -57,6 +57,9 @@
 	}
 
 	function prettifyNumber(val) {
+		if (!isFinite(val)) {
+			return 1;
+		}
 		let displayVal = val;
 		let pow = 0;
 		while (displayVal > 100) {
@@ -434,7 +437,7 @@
 
 			if (this.y_scaled) {
 				this.graphs[1].y_scaled = true;
-				this.scale = 0;
+				this.scale = 1;
 				this.scale_pad = 0;
 				this.changingFields.push('scale');
 				this.changingFields.push('scale_pad');
@@ -1019,6 +1022,7 @@
 			if (!eq(val.targetVal, targetVal)) {
 				val.startTimestamp = Date.now();
 			}
+			console.log(`${key.toString()} - ${targetVal}`);
 			val.targetVal = targetVal;
 			val.deltaValue = targetVal - this[key];
 			val.originalValue = this[key];
