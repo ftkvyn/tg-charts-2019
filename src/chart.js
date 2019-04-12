@@ -1241,11 +1241,6 @@
 					this.detailsCtx.stroke();
 				}
 
-				const oldInfo = this.infoBox.getElementsByClassName('item');
-				while (oldInfo.length > 0) {
-					this.infoBox.removeChild(oldInfo[0]);
-				}
-
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
 						if (this.type === 'line') {
@@ -1258,29 +1253,44 @@
 							this.detailsCtx.fill();
 							this.detailsCtx.stroke();
 						}
-
-						const infoHtml = `<div class="item">
-							<div class="value"></div>
-							<div class="name"></div>
-						</div>`;
-						const template = document.createElement('template');
-						template.innerHTML = infoHtml;
-						const infoEl = template.content.firstChild;
-						const valueEl = infoEl.getElementsByClassName('value')[0];
-						if (gr.y_scaled) {
-							valueEl.innerText = formatNumber(gr.y_vals_orig[this.details_num], true);
-						} else {
-							valueEl.innerText = formatNumber(gr.y_vals[this.details_num], true);
-						}
-						infoEl.getElementsByClassName('name')[0].innerText = gr.name;
-						valueEl.style.color = gr.color;
-						this.infoBox.appendChild(infoEl);
 					}
 				});
 
 				if (this.prev_details_num === this.details_num) {
 					return;
 				}
+
+				const oldEls = this.infoBox.getElementsByClassName('old');
+				while (oldEls && oldEls.length) {
+					oldEls[0].parentElement.removeChild(oldEls[0]);
+				}
+
+				this.graphs.forEach((gr) => {
+					if (gr.display) {
+						let infoEl = this.infoBox.getElementsByClassName(gr.opacityKey)[0];
+						let valueText = '';
+						if (gr.y_scaled) {
+							valueText = formatNumber(gr.y_vals_orig[this.details_num], true);
+						} else {
+							valueText = formatNumber(gr.y_vals[this.details_num], true);
+						}
+						if (!infoEl) {
+							// ToDo: create infos once, just hide and show items
+							const infoHtml = `<div class="item ${gr.opacityKey}">
+								<div class="value" style="color:${gr.color}"></div>
+								<div class="name">${gr.name}</div>
+							</div>`;
+							const template = document.createElement('template');
+							template.innerHTML = infoHtml;
+							infoEl = template.content.firstChild;
+							const valueEl = infoEl.getElementsByClassName('value')[0];
+							infoEl.valueEl = valueEl;
+							this.infoBox.appendChild(infoEl);
+						}
+						changeLabels(infoEl.valueEl, valueText);
+					}
+				});
+
 				this.prev_details_num = this.details_num;
 				let moreThanHalf = 0;
 
@@ -1303,11 +1313,6 @@
 					this.infoHour.style.display = 'none';
 					this.infoDay.style.display = 'block';
 					this.infoMonth.style.display = 'block';
-				}
-
-				const oldEls = this.infoBox.getElementsByClassName('old');
-				while (oldEls && oldEls.length) {
-					oldEls[0].parentElement.removeChild(oldEls[0]);
 				}
 
 				if (this.isDetails) {
