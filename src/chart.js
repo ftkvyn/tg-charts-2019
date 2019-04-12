@@ -1619,6 +1619,14 @@
 		}
 
 		tryStartMovingX() {
+			if (this.isPieChartDetails && !this.isOverview) {
+				this.pieChart[zx] = this.nextfrom;
+				this.pieChart[mx] = this.nextto;
+				this.pieChart.drawAll();
+				this.updateLegend();
+				setTimeout(this.updateLegend.bind(this), duration * 1.2);
+				return;
+			}
 			if (this.mainChart.changes[zx].startTimestamp === -1 ||
 				(Date.now() - this.mainChart.changes[zx].startTimestamp > (duration * 0.75))) {
 				this.mainChart.startChangeKey(zx, this.nextfrom);
@@ -1634,6 +1642,10 @@
 		}
 
 		setMapBox(isInitial) {
+			// ToDo: for pie chart:
+			//		* turn on animation;
+			//		* accumulate changes;
+			//		* proceed with changes only for integer numbers.
 			if (this.container_width < this.thumb_width) {
 				this.thumb_width = 200;
 				this.thumb.style.width = `${this.thumb_width}px`;
