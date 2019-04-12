@@ -505,6 +505,10 @@
 			return Math.floor((-orig_y + this[zy]) * this.scale_y) - (this.isDrawAxis ? x_legend_padding : 0);
 		}
 
+		translateBackY(real_y) {
+			return (real_y / this.scale_y) + this[zy];
+		}
+
 		translateBackX(real_x) {
 			return (real_x / this.scale_x) + this[zx];
 		}
@@ -1217,9 +1221,6 @@
 				this.clearDetails();
 				const x = this.translateX(this.x_vals[this.details_num]);
 				const realX = this.translateX(this[det_x]);
-				let moreThanHalf = 0;
-				let lessThanHalf = 0;
-				const half = ((this[my] - this[zy]) / 2) + this[zy];
 				// Configuration
 				if (this.type === 'line' || this.type === 'area') {
 					let strokeColor = null;
@@ -1256,11 +1257,6 @@
 							this.detailsCtx.arc(realX, this.translateY(y), this.thickness * 2, 0, 2 * Math.PI);
 							this.detailsCtx.fill();
 							this.detailsCtx.stroke();
-							if (gr.y_vals[this.details_num] > half) {
-								moreThanHalf += 1;
-							} else {
-								lessThanHalf += 1;
-							}
 						}
 
 						const infoHtml = `<div class="item">
@@ -1286,6 +1282,18 @@
 					return;
 				}
 				this.prev_details_num = this.details_num;
+				let moreThanHalf = 0;
+
+				if (this.type === 'line') {
+					const half = this.translateBackY(this.height - (this.infoBox.clientHeight || 80));
+					this.graphs.forEach((gr) => {
+						if (gr.display) {
+							if (gr.y_vals[this.details_num] >= half) {
+								moreThanHalf += 1;
+							}
+						}
+					});
+				}
 
 				if (this.isDetails) {
 					this.infoHour.style.display = 'block';
@@ -1313,12 +1321,12 @@
 				}
 
 				this.infoBox.style.display = 'block';
-				let left = x - 50;
+				let left = x - 80;
 				if (this.type === 'bar') {
 					left = x - this.infoBox.clientWidth + this.bar_width - 10;
 				}
-				if (this.type === 'area') {
-					left = x - this.infoBox.clientWidth - 10;
+				if (this.type === 'area' || moreThanHalf > 0) {
+					left = x - this.infoBox.clientWidth - 20;
 				}
 				if (this.width - left < 190) {
 					left = this.width - 190;
@@ -1326,14 +1334,8 @@
 				if (left < 0) {
 					left = 0;
 				}
+				this.infoBox.style.top = '0px';
 				this.infoBox.style.left = `${left}px`;
-				// if (moreThanHalf > lessThanHalf) {
-				// 	this.infoBox.style.top = '';
-				// 	this.infoBox.style.bottom = `${x_legend_padding}px`;
-				// } else {
-					this.infoBox.style.bottom = '';
-					this.infoBox.style.top = '0px';
-				// }
 			}
 		}
 
@@ -2192,9 +2194,4 @@
 		chart.initMapBox();
 		chart.showOverview(true);
 	}
-
-	// const chart = new ChartContainer(chartsEls[0], 5, true, true);
-	// charts.push(chart);
-	// chart.initMapBox();
-	// chart.showOverview(true);
 }(window));
