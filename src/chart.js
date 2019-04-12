@@ -1022,7 +1022,6 @@
 			if (!eq(val.targetVal, targetVal)) {
 				val.startTimestamp = Date.now();
 			}
-			console.log(`${key.toString()} - ${targetVal}`);
 			val.targetVal = targetVal;
 			val.deltaValue = targetVal - this[key];
 			val.originalValue = this[key];
@@ -1331,6 +1330,7 @@
 			this.detailsCanv = detailsCanvas;
 			this.detailsCtx = detailsCanvas.getContext('2d');
 			this.calculateDetailsOffset();
+			let isTouch = false;
 			let endId,
 				cancelId;
 
@@ -1339,7 +1339,15 @@
 				clearTimeout(endId);
 				clearTimeout(cancelId);
 			};
+			this.detailsCanv.addEventListener('touchstart', (event) => {
+				isTouch = true;
+				const touch = event.changedTouches[0];
+				this.showDetails(touch.clientX - this.detailsCanvOffset);
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			});
 			this.detailsCanv.addEventListener('touchmove', (event) => {
+				isTouch = true;
 				const touch = event.changedTouches[0];
 				this.showDetails(touch.clientX - this.detailsCanvOffset);
 				clearTimeout(endId);
@@ -1352,11 +1360,13 @@
 				endId = setTimeout(this.hideDetails.bind(this), 1200);
 			};
 			this.detailsCanv.addEventListener('touchend', () => {
+				isTouch = false;
 				clearTimeout(endId);
 				clearTimeout(cancelId);
 				endId = setTimeout(this.hideDetails.bind(this), 1200);
 			});
 			this.detailsCanv.addEventListener('touchcancel', () => {
+				isTouch = false;
 				clearTimeout(endId);
 				clearTimeout(cancelId);
 				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
@@ -1377,7 +1387,8 @@
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
 
 			this.detailsCanv.onclick = () => {
-				if (!this.isDetails) {
+				// Enable on
+				if (!isTouch && !this.isDetails) {
 					this.changeChart();
 				}
 			};
