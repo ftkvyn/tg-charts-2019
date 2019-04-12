@@ -1,3 +1,4 @@
+/* eslint-disable space-unary-ops */
 /* eslint-disable no-mixed-operators */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-continue */
@@ -194,7 +195,7 @@
 					const graph = {
 						name: this.data.names[key],
 						color: this.data.colors[key],
-						scaleKey: key,
+						scaleKey: `${key}_area`,
 						paddingKey: `${key}_pad`,
 						display: true,
 						y_vals: col,
@@ -262,6 +263,10 @@
 			this.drawChart();
 		}
 
+		drawDetails() {
+			//Do nothing.
+		}
+
 		drawChart() {
 			let angle = 0;
 
@@ -282,6 +287,9 @@
 				const gr = this.graphs[k];
 				if (this[gr.scaleKey]) {
 					const currentAngle = 2 * Math.PI * gr.totalVal / sum;
+					if (k === 0) {
+						angle = - currentAngle / 2;
+					}
 					let x0 = this.width;
 					let y0 = this.height;
 					if (this[gr.paddingKey]) {
