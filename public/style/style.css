@@ -23,7 +23,7 @@ body.isDark {
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	max-width: 1000px;
-	min-height: 560px;
+	min-height: 500px;
 	height: 100%;
 	position: relative;
 	margin: auto;
@@ -153,6 +153,17 @@ body.isDark {
 .legend .date.hidden .part{
 	/* width: 0; */
 	display: none;
+}
+
+@media(max-width: 450px) {
+	.legend {
+		width: 100%;
+		margin-top: 2.8em;
+	}
+
+	.title-container {
+		width: 100%;
+	}
 }
 
 .main-chart-container {
