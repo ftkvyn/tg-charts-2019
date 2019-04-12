@@ -5,3 +5,4 @@
 16. Details and legend for pie chart. 
 17. Changing pie chart by map box.
 18. All left padding to X to allow selecting most left value
+19. Check if data is displayed correctly

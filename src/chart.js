@@ -497,8 +497,12 @@
 				this.graphs[1].y_scaled = true;
 				this.scale = 1;
 				this.scale_pad = 0;
-				this.changingFields.push('scale');
-				this.changingFields.push('scale_pad');
+				if (this.changingFields.indexOf('scale') === -1) {
+					this.changingFields.push('scale');
+				}
+				if (this.changingFields.indexOf('scale_pad') === -1) {
+					this.changingFields.push('scale_pad');
+				}
 				this.graphs[1].y_vals_orig = this.graphs[1].y_vals.map((val) => { return val; });
 			}
 
@@ -937,8 +941,7 @@
 				.map((gr) => { return Math.min(...gr.y_vals.slice(this.prev_start_i, this.prev_end_i)); }));
 
 			if (!this.y_scaled) {
-				newMax += Math.round((newMax - this[zy]) * padding_y);
-				newMin -= Math.round(newMin * padding_y);
+				newMax += Math.round((newMax - newMin) * padding_y);
 			}
 			if (newMin < 0) {
 				newMin = 0;
@@ -973,7 +976,7 @@
 					return;
 				}
 				let { newMax, newMin } = this.getMinAndMax(visibleCharts);
-				if (this.y_scaled && this.graphs[0].display && this.graphs[1].display) {
+				if (this.y_scaled) { //  && this.graphs[0].display && this.graphs[1].display
 					const newBigVals = this.getLinesMinAndMax([this.graphs[0]]);
 					newMax = newBigVals.newMax;
 					newMin = newBigVals.newMin;
@@ -983,7 +986,7 @@
 					const newScale = dBig / dSmall;
 					const newScalePad = newBigVals.newMin - (newSmallVals.newMin * newScale);
 					if (!eq(newScale, this.scale)) {
-						if (this.scale && !noDraw) {
+						if ((this.scale !== 1) && !noDraw) {
 							this.startChangeKey('scale', newScale);
 						} else {
 							this.scale = newScale;
@@ -997,14 +1000,18 @@
 						}
 					}
 				}
+				let scaled_visible = '';
 				if (this.y_scaled) {
-					newMax += Math.round((newMax - this[zy]) * padding_y);
-					newMin -= Math.round(newMin * padding_y);
+					newMax += Math.round((newMax - newMin) * padding_y);
+					scaled_visible = `${this.graphs[0].display}_${this.graphs[1].display}`;
 				}
 				newMax = Math.round(newMax);
 				newMin = Math.round(newMin);
-				if ((!eq(newMax, 0) && !eq(newMax, this[my])) ||
-					(!eq(newMin, this[zy]))) {
+				if (
+					(!eq(newMax, 0) && !eq(newMax, this[my])) ||
+					(!eq(newMin, this[zy])) ||
+					(this.y_scaled && this.prev_scaled_visible !== scaled_visible)) {
+					this.prev_scaled_visible = scaled_visible;
 					if (this.isDrawAxis) {
 						for (let i = 0; i < this.y_legend.length; i += 1) {
 							const item = this.y_legend[i];
@@ -1516,8 +1523,8 @@
 					const isOff = el.classList.contains('btn-off');
 					const targetOpacity = isOff ? 255 : 0;
 
-					this.startChangeKey(gr.opacityKey, targetOpacity);
 					this.toggleChart(gr.opacityKey);
+					this.startChangeKey(gr.opacityKey, targetOpacity);
 
 					if (this.entangledChart) {
 						if (!this.entangledChart.isPieChart) {
@@ -1607,7 +1614,7 @@
 			this.overlay_left = this.appEl.getElementsByClassName('overlay_left')[0];
 			this.overlay_right = this.appEl.getElementsByClassName('overlay_right')[0];
 			this.isLight = false;
-			this.windowWidth = global.outerWidth;
+			this.windowWidth = this.appEl.clientWidth;
 
 			this.setupAllEvents();
 		}
@@ -2140,10 +2147,10 @@
 			this.setupMouseEvents();
 
 			global.addEventListener('resize', () => {
-				if (this.windowWidth === global.outerWidth) {
+				if (this.windowWidth === this.appEl.clientWidth) {
 					return;
 				}
-				this.windowWidth = global.outerWidth;
+				this.windowWidth = this.appEl.clientWidth;
 				if (!this.isOverview && this.isPieChartDetails) {
 					this.pieChart.init();
 					this.pieChart.drawAll();
