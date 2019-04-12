@@ -79,6 +79,58 @@ body.isDark {
 	margin-top: 1.25em;
 }
 
+.legend .date {
+	transition: width .2s;
+	display: inline-block;
+	width: 140px;
+	text-align: center;
+	position: relative;
+	height: 12px;
+}
+
+.legend .date .part {
+	transform-origin: 00% 100%;
+	transition: transform .2s, opacity .2s, width .2s;
+	transform: scale(1);
+	opacity: 1;
+	position: absolute;
+    left: 0;
+	top: 0;
+	width: 100%;
+}
+
+.legend .date.from .part {
+	text-align: right;
+}
+.legend .date.to .part {
+	text-align: left;
+}
+
+.legend .date .part.old{
+	transform-origin: 100% 0%;
+	transform: scale(0);
+	opacity: 0;
+}
+
+.legend .date .part.new{
+	transform: scale(0);
+	opacity: 0;
+}
+
+.legend .date.dash {
+	width: 15px;
+}
+
+.legend .date.hidden{
+	/* width: 0; */
+	display: none;
+}
+
+.legend .date.hidden .part{
+	/* width: 0; */
+	display: none;
+}
+
 .main-chart-container {
 	position: relative;
 	-moz-user-select: none;
@@ -361,7 +413,6 @@ a {
 	font-size: 15px;
 	margin-bottom: 5px;
 	font-weight: bolder;
-	float: left;
 	display: inline-block;
 	position: relative;
 	height: 18px;

@@ -75,7 +75,16 @@
 	}
 
 	function changeLabels(el, text) {
-		const prevDetailEl = el.getElementsByClassName('detail')[0];
+		const prevDetailEls = el.getElementsByClassName('detail');
+		let prevDetailEl = null;
+		for (let i = 0; i < prevDetailEls.length; i += 1) {
+			if (!prevDetailEls[i].classList.contains('old')) {
+				if (prevDetailEl && prevDetailEl.parentElement) {
+					prevDetailEl.parentElement.removeChild(prevDetailEl);
+				}
+				prevDetailEl = prevDetailEls[i];
+			}
+		}
 		let currentTxt = '';
 		if (prevDetailEl) {
 			currentTxt = prevDetailEl.innerText;
@@ -1552,7 +1561,7 @@
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
 			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
 			this.chart_map = this.appEl.getElementsByClassName('chart_map')[0];
-			this.legend_el = this.appEl.getElementsByClassName('legend')[0];
+			this.legend_els = this.appEl.getElementsByClassName('legend')[0].getElementsByClassName('date');
 			this.zoomOutEl = this.appEl.getElementsByClassName('zoom-out')[0];
 			this.titleEl = this.appEl.getElementsByClassName('title')[0];
 			this.height = 300;
@@ -1631,9 +1640,14 @@
 			const fromTxt = getFullDateText(fromDate);
 			const toTxt = getFullDateText(toDate);
 			if (fromTxt !== toTxt) {
-				this.legend_el.innerText = `${fromTxt} - ${toTxt}`;
+				this.legend_els[0].classList.remove('hidden');
+				changeLabels(this.legend_els[0], fromTxt);
+				this.legend_els[1].classList.remove('hidden');
+				changeLabels(this.legend_els[2], toTxt);
 			} else {
-				this.legend_el.innerText = fromTxt;
+				this.legend_els[0].classList.add('hidden');
+				this.legend_els[1].classList.add('hidden');
+				changeLabels(this.legend_els[2], fromTxt);
 			}
 		}
 
