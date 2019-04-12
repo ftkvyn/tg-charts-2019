@@ -1247,7 +1247,7 @@
 					this.detailsCtx.lineWidth = this.axisThickness;
 					this.detailsCtx.strokeStyle = strokeColor;
 					this.detailsCtx.beginPath();
-					this.detailsCtx.moveTo(realX, this.translateY(0));
+					this.detailsCtx.moveTo(realX, - x_legend_padding);
 					if (this.type === 'line') {
 						this.detailsCtx.lineTo(realX, -this.height);
 					} else {

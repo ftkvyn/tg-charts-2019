@@ -32,18 +32,18 @@ body.isDark {
 
 .appHeader {
 	overflow: hidden;
-	height: 60px;
+	min-height: 60px;
 }
 
 .title {
-	font-size: 18px;
+	font-size: 16px;
 	font-weight: bolder;
 	float: left;
 	margin: 1em 0;
 }
 
 .theme-link {
-	font-size: 18px;
+	font-size: 16px;
 	cursor: pointer;
 	text-decoration: none;
 	color: #108be3;
@@ -54,7 +54,7 @@ body.isDark {
 }
 
 .zoom-out {
-	font-size: 18px;
+	font-size: 16px;
 	cursor: pointer;
 	color: #108be3;
 	text-decoration: none;
@@ -73,7 +73,7 @@ body.isDark {
 }
 
 .legend {
-	font-size: 15px;
+	font-size: 14px;
 	font-weight: bolder;
 	float: right;
 	margin-top: 1.25em;
@@ -414,7 +414,7 @@ a {
 }
 
 .info .date {
-	font-size: 15px;
+	font-size: 14px;
 	margin-bottom: 5px;
 	font-weight: bolder;
 	display: inline-block;
@@ -458,7 +458,7 @@ a {
 	overflow: hidden;
 	clear: both;
 	width: 100%;
-	font-size: 15px;
+	font-size: 14px;
 	margin-bottom: 5px;
 	transition: height .2s;
 	height: 18px;
