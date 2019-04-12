@@ -74,7 +74,7 @@
 		return displayVal;
 	}
 
-	function changeLabels(el, text) {
+	function changeLabels(el, text, isCalculateWidth) {
 		const prevDetailEls = el.getElementsByClassName('detail');
 		let prevDetailEl = null;
 		for (let i = 0; i < prevDetailEls.length; i += 1) {
@@ -111,6 +111,9 @@
 				detailEl.classList.remove('new');
 				el.appendChild(detailEl);
 			}
+		}
+		if (isCalculateWidth) {
+			el.style.width = `${el.getElementsByClassName('detail')[0].clientWidth}px`;
 		}
 	}
 
@@ -1634,21 +1637,31 @@
 			}
 		}
 
-		updateLegend() {
+		updateLegend(isInitial) {
 			const fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
 			const toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
 			const fromTxt = getFullDateText(fromDate);
 			const toTxt = getFullDateText(toDate);
+			if (isInitial) {
+				this.legend_els[0].classList.add('no-animate');
+				this.legend_els[2].classList.add('no-animate');
+			}
 			if (fromTxt !== toTxt) {
 				this.legend_els[0].classList.remove('hidden');
-				changeLabels(this.legend_els[0], fromTxt);
+				changeLabels(this.legend_els[0], fromTxt, true);
 				this.legend_els[1].classList.remove('hidden');
-				changeLabels(this.legend_els[2], toTxt);
+				changeLabels(this.legend_els[2], toTxt, true);
 			} else {
 				this.legend_els[0].classList.add('hidden');
 				this.legend_els[1].classList.add('hidden');
-				changeLabels(this.legend_els[2], fromTxt);
+				changeLabels(this.legend_els[2], fromTxt, true);
 			}
+			setTimeout(() => {
+				if (isInitial) {
+					this.legend_els[0].classList.remove('no-animate');
+					this.legend_els[2].classList.remove('no-animate');
+				}
+			});
 		}
 
 		moveChart(dx) {
@@ -2088,7 +2101,7 @@
 			if (options.isAppear) {
 				this.appear(optionsOrig);
 			} else {
-				this.updateLegend();
+				this.updateLegend(true);
 			}
 		}
 
