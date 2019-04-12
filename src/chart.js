@@ -1360,13 +1360,11 @@
 				endId = setTimeout(this.hideDetails.bind(this), 1200);
 			};
 			this.detailsCanv.addEventListener('touchend', () => {
-				isTouch = false;
 				clearTimeout(endId);
 				clearTimeout(cancelId);
 				endId = setTimeout(this.hideDetails.bind(this), 1200);
 			});
 			this.detailsCanv.addEventListener('touchcancel', () => {
-				isTouch = false;
 				clearTimeout(endId);
 				clearTimeout(cancelId);
 				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
@@ -1387,7 +1385,7 @@
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
 
 			this.detailsCanv.onclick = () => {
-				// Enable on
+				console.log("click");
 				if (!isTouch && !this.isDetails) {
 					this.changeChart();
 				}
