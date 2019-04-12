@@ -28,6 +28,7 @@
 		padding_x = 0.003,
 		pie_pad = 0.1,
 		main_chart_padding = 16,
+		map_left_padding = 0.01,
 		min_thumb_width = 20,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,
@@ -496,6 +497,9 @@
 			this[zx] = Math.min(...this.x_vals);
 			this[mx] = Math.max(...this.x_vals);
 			this[mx] += Math.round((this[mx] - this[zx]) * padding_x);
+			if (this.entangledChart) {
+				this[zx] -= (this[mx] - this[zx]) * map_left_padding;
+			}
 
 			this[zy] = 0;
 		}
@@ -1171,7 +1175,7 @@
 			const data_x = this.translateBackX(offsetX);
 			this.details_num = -1;
 			let prevDelta = Infinity;
-			for (let i = this.prev_start_i; i < this.prev_end_i; i += 1) {
+			for (let i = this.start_i - 1; i < this.end_i; i += 1) {
 				if (this.x_vals[i]) {
 					if (this.type === 'line' || this.type === 'area') {
 						const delta = Math.abs(this.x_vals[i] - data_x);
@@ -1216,6 +1220,9 @@
 			const x1 = this.x_vals[num + step];
 			const y0 = chart.y_vals[num];
 			const y1 = chart.y_vals[num + step];
+			if (!x1) {
+				return y0;
+			}
 
 			const dx = x1 - x0;
 			const dy = y1 - y0;
