@@ -114,6 +114,9 @@
 		}
 		if (isCalculateWidth) {
 			el.style.width = `${el.getElementsByClassName('detail')[0].clientWidth}px`;
+			setTimeout(() => {
+				el.style.width = `${el.getElementsByClassName('detail')[0].clientWidth}px`;
+			}, duration);
 		}
 	}
 
@@ -1648,8 +1651,8 @@
 			}
 			if (fromTxt !== toTxt) {
 				this.legend_els[0].classList.remove('hidden');
-				changeLabels(this.legend_els[0], fromTxt, true);
 				this.legend_els[1].classList.remove('hidden');
+				changeLabels(this.legend_els[0], fromTxt, true);
 				changeLabels(this.legend_els[2], toTxt, true);
 			} else {
 				this.legend_els[0].classList.add('hidden');
