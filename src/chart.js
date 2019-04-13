@@ -465,7 +465,7 @@
 							result.opacity = 0;
 						}
 						if (this.isDetails) {
-							result.name = getHoursText(val);
+							result.nameClear = getHoursText(val);
 						}
 						return result;
 					});
@@ -1361,7 +1361,7 @@
 				}
 
 				if (this.isDetails) {
-					const text = this.x_legend[this.details_num].name;
+					const text = this.x_legend[this.details_num].nameClear;
 					changeLabels(this.infoHour, text);
 				} else {
 					const dayTxt = `${this.x_legend[this.details_num].name}`;
