@@ -391,6 +391,117 @@
 			chart.display = !chart.display;
 			this.startChangeKey(chart.scaleKey, chart.display ? 100 : 0);
 		}
+
+		calculateOffset() {
+			let parent = this.canv;
+			let offsetX = 0,
+				offsetY = 0;
+			while (parent.offsetParent) {
+				offsetX += parent.offsetLeft - parent.scrollLeft;
+				offsetY += parent.offsetTop - parent.scrollTop;
+				parent = parent.offsetParent;
+			}
+			this.offsetX = offsetX;
+			this.offsetY = offsetY;
+		}
+
+		showDetails(x, y) {
+			return;
+			if (this.isSilent) {
+				return;
+			}
+			console.log(x,y);
+			this.ctx.beginPath();
+			this.ctx.fillStyle = '#ff0000';
+			this.ctx.arc(x * 2, y * 2, 10, 0, 2 * Math.PI);
+			this.ctx.fill();
+		}
+
+		hideDetails() {
+
+		}
+
+		setUpPieHover() {
+			this.calculateOffset();
+			let endId,
+				cancelId;
+
+			this.canv.addEventListener('mousemove', (event) => {
+				this.showDetails(event.offsetX, event.offsetY);
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			});
+			this.canv.addEventListener('touchstart', (event) => {
+				const touch = event.changedTouches[0];
+				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY);
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			});
+			this.canv.addEventListener('touchmove', (event) => {
+				const touch = event.changedTouches[0];
+				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY);
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			});
+
+			this.canv.addEventListener('mouseleave',() => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
+			this.canv.addEventListener('touchend', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
+			this.canv.addEventListener('touchcancel', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
+
+			// const infoBoxHtml = `<div class="info" style="display:none;">
+			// 	<div style="display:block;clear:both;overflow:hidden;margin-bottom:2px;">
+			// 		<div class="hour date"></div>
+			// 		<div class="day date"></div>
+			// 		<div class="month date"></div>
+			// 		<div class="show-more"></div>
+			// 	</div>
+			// </div>`;
+			// const template = document.createElement('template');
+			// template.innerHTML = infoBoxHtml;
+			// this.infoBox = template.content.firstChild;
+			// this.infoHour = this.infoBox.getElementsByClassName('hour')[0];
+			// this.infoDay = this.infoBox.getElementsByClassName('day')[0];
+			// this.infoMonth = this.infoBox.getElementsByClassName('month')[0];
+			// this.showMore = this.infoBox.getElementsByClassName('show-more')[0];
+
+			// this.canv.parentElement.appendChild(this.infoBox);
+
+			// this.infoBox.onmousemove = () => {
+			// 	clearTimeout(endId);
+			// 	clearTimeout(cancelId);
+			// };
+			// this.infoBox.addEventListener('touchmove', () => {
+			// 	clearTimeout(endId);
+			// 	clearTimeout(cancelId);
+			// });
+			// this.infoBox.onmouseleave = () => {
+			// 	clearTimeout(endId);
+			// 	clearTimeout(cancelId);
+			// 	endId = setTimeout(this.hideDetails.bind(this), 1200);
+			// };
+			// this.infoBox.addEventListener('touchend', () => {
+			// 	clearTimeout(endId);
+			// 	clearTimeout(cancelId);
+			// 	endId = setTimeout(this.hideDetails.bind(this), 1200);
+			// });
+			// this.infoBox.addEventListener('touchcancel', () => {
+			// 	clearTimeout(endId);
+			// 	clearTimeout(cancelId);
+			// 	cancelId = setTimeout(this.hideDetails.bind(this), 1200);
+			// });
+		}
 	}
 
 	class Chart {
@@ -1207,7 +1318,7 @@
 		}
 
 		showDetails(offsetX) {
-			if (this.isDisappearing) {
+			if (this.isDisappearing || this.isSilent) {
 				return;
 			}
 			const data_x = this.translateBackX(offsetX);
@@ -1429,11 +1540,11 @@
 			let endId,
 				cancelId;
 
-			this.detailsCanv.onmousemove = (event) => {
+			this.detailsCanv.addEventListener('mousemove', (event) => {
 				this.showDetails(event.offsetX);
 				clearTimeout(endId);
 				clearTimeout(cancelId);
-			};
+			});
 			this.detailsCanv.addEventListener('touchstart', (event) => {
 				isTouch = true;
 				const touch = event.changedTouches[0];
@@ -1484,7 +1595,7 @@
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
 
 			this.detailsCanv.onclick = () => {
-				if (!isTouch && !this.isDetails) {
+				if (!isTouch && !this.isDetails && !this.isSilent) {
 					this.changeChart();
 				}
 			};
@@ -1628,6 +1739,7 @@
 
 			if (pieChartDetails) {
 				this.pieChart = new PieChart(this.main_chart, this.height);
+				this.pieChart.setUpPieHover();
 			}
 
 			this.map_container = this.appEl.getElementsByClassName('map_container')[0];
@@ -2110,12 +2222,20 @@
 			let main = this.mainChart;
 			if (optionsOrig.pieChart) {
 				mapOptions.percentBars = true;
+				this.mainChart.isSilent = true;
+				this.pieChart.isSilent = false;
+				this.details_chart.style.display = 'none';
 
 				this.mapChart.entangledChart = this.pieChart;
 				this.pieChart.init();
 				this.pieChart.setData(this.pieDetailsData);
 				main = this.pieChart;
 			} else {
+				this.mainChart.isSilent = false;
+				this.details_chart.style.display = 'block';
+				if (this.pieChart) {
+					this.pieChart.isSilent = true;
+				}
 				this.mainChart.setData(collection, this.type, mainOptions);
 				this.mapChart.entangledChart = this.mainChart;
 			}
