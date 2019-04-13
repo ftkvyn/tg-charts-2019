@@ -2152,8 +2152,13 @@
 					this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
 					this.titleEl.classList.add('hidden');
 				} else {
-					this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
-					this.mainChart.startChangeKey(mx, this.mainChart[mx] - deltaMain / 2);
+					if (!this.isSingleBar) {
+						this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
+						this.mainChart.startChangeKey(mx, this.mainChart[mx] - deltaMain / 2);
+					} else {
+						this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
+						this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
+					}
 					this.zoomOutEl.classList.add('hidden');
 				}
 
@@ -2359,12 +2364,17 @@
 		}
 
 		loadMainData() {
-			// ToDo: save and reuse main collection.
-			return fetch(`/data_1/${this.num}/overview.json`)
-				.then((response) => {
-					const jsonData = response.json();
-					return jsonData;
-				});
+			if (!this.overviewData) {
+				return fetch(`/data_1/${this.num}/overview.json`)
+					.then((response) => {
+						const jsonData = response.json();
+						this.overviewData = jsonData;
+						return jsonData;
+					});
+			}
+			return new Promise((resolve) => {
+				resolve(this.overviewData);
+			});
 		}
 
 		generatePieDetailsData() {
