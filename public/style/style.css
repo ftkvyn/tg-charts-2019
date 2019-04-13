@@ -37,14 +37,14 @@ body.isDark {
 }
 
 .title {
-	font-size: 14px;
+	font-size: 18px;
 	font-weight: bolder;
 	float: left;
 	margin: 1em 0;
 }
 
 .theme-link {
-	font-size: 14px;
+	font-size: 18px;
 	cursor: pointer;
 	text-decoration: none;
 	color: #108be3;
@@ -55,7 +55,7 @@ body.isDark {
 }
 
 .zoom-out {
-	font-size: 14px;
+	font-size: 18px;
 	cursor: pointer;
 	color: #108be3;
 	text-decoration: none;

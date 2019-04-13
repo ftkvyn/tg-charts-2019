@@ -286,7 +286,8 @@
 			for (let k = 0; k < this.graphs.length; k += 1) {
 				const gr = this.graphs[k];
 				if (this[gr.scaleKey]) {
-					const currentAngle = 2 * Math.PI * gr.totalVal / sum;
+					const fraction = gr.totalVal / sum;
+					const currentAngle = 2 * Math.PI * fraction;
 					if (k === 0) {
 						angle = - currentAngle / 2;
 					}
@@ -305,6 +306,27 @@
 					this.ctx.lineTo(x0, y0);
 					this.ctx.closePath();
 					this.ctx.fill();
+
+					if (fraction > 0.02) {
+						let fontSize = 50;
+						let radiusDelay = 0.5;
+
+						if (fraction < 0.3) {
+							fontSize = fraction * 100 + 20;
+							radiusDelay = 0.5 + (0.3 - fraction);
+						}
+
+						x0 = this.width + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.cos(angle + currentAngle / 2);
+						y0 = this.height + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.sin(angle + currentAngle / 2);
+
+						this.ctx.font = `bold ${fontSize}px Arial`;
+						this.ctx.fillStyle = '#ffffffbb';
+						const txt = `${Math.round(fraction * 100)}%`;
+						const measures = this.ctx.measureText(txt);
+
+						this.ctx.fillText(txt, x0 - measures.width / 2, y0 + fontSize / 2);
+					}
+
 					angle += currentAngle;
 				}
 			}
