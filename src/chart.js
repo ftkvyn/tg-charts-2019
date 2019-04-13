@@ -31,7 +31,7 @@
 		pie_pad = 0.2,
 		main_chart_padding = 16,
 		map_left_padding = 0.01,
-		min_thumb_width = 30,
+		min_thumb_width = 20,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,
 		y_legend_row_height = 50,
@@ -1893,8 +1893,18 @@
 		}
 
 		updateLegend(isInitial) {
-			const fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
-			const toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
+			let fromDate = '';
+			let toDate = '';
+			if (this.isPieChartDetails && !this.isOverview) {
+				fromDate = this.pieChart.x_vals[this.pieChart.start_i];
+				toDate = fromDate;
+				if (this.pieChart.selectedDays > 1) {
+					toDate = this.pieChart.x_vals[this.pieChart.start_i + this.pieChart.selectedDays - 1];
+				}
+			} else {
+				fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
+				toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
+			}
 			const fromTxt = getFullDateText(fromDate);
 			const toTxt = getFullDateText(toDate);
 			if (isInitial) {
@@ -1965,6 +1975,8 @@
 			} else {
 				this.mainChart[zx] = from;
 				this.mainChart[mx] = to;
+				this.overlay_right.targetWidth = null;
+				this.overlay_left.targetWidth = null;
 			}
 		}
 
@@ -2014,13 +2026,14 @@
 			if (left_width + dx_int < 0) {
 				dx_int = -left_width;
 			}
+			const right = +this.thumb.style.right.slice(0, -2);
 			if (this.thumb_width - dx_int < min_thumb_width) {
 				dx_int = this.thumb_width - min_thumb_width;
 			}
 			this.thumb_width -= dx_int;
 			this.thumb.style.width = `${this.thumb_width}px`;
 
-			this.overlay_left.targetWidth = left_width + dx_int;
+			this.overlay_left.targetWidth = this.container_width - right - this.thumb_width;
 			this.overlay_left.style.width = `${this.overlay_left.targetWidth}px`;
 
 			this.setMapBox();
@@ -2054,7 +2067,7 @@
 			this.thumb.style.width = `${this.thumb_width}px`;
 			this.thumb.style.right = `${right - dx_int}px`;
 
-			this.overlay_right.targetWidth = right_width - dx_int;
+			this.overlay_right.targetWidth = right - dx_int;
 			this.overlay_right.style.width = `${this.overlay_right.targetWidth}px`;
 
 			this.setMapBox();
@@ -2552,8 +2565,6 @@
 				columns: [],
 			};
 
-			this.pieDetailsData.selectedX = this.mainChart.x_vals[this.mainChart.details_num];
-
 			const from = this.mainChart.start_i;
 			const to = this.mainChart.end_i;
 			this.collection.columns.forEach((col) => {
@@ -2569,7 +2580,7 @@
 		}
 
 		showDetails() {
-			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num];
+			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num + 1];
 			this.detailsFrom = selectedX;
 			if (this.isPieChartDetails) {
 				this.showPieDetails();
