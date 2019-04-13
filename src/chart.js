@@ -36,6 +36,7 @@
 		y_legend_row_height = 50,
 		y_legend_text_height = 10,
 		op = Symbol('Opacity'),
+		sum_all = Symbol('Sum'),
 		det_x = Symbol('Details X'),
 		mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
@@ -170,7 +171,7 @@
 			this.ctx = canv.getContext('2d');
 			this.changes = {};
 
-			this.changingFields = [op];
+			this.changingFields = [op, sum_all];
 
 			this.graphs = [];
 		}
@@ -178,13 +179,12 @@
 		setData(data) {
 			this.isDisappearing = false;
 			this[op] = 0;
+			this[sum_all] = 0;
 
 			this.graphs = [];
 			this.data = data;
 			this.prev_details_num = undefined;
 			this.details_num = -1;
-
-			this.sum = 0;
 
 			for (let i = 0; i < this.data.columns.length; i += 1) {
 				const col = [...this.data.columns[i]];
@@ -197,17 +197,22 @@
 						color: this.data.colors[key],
 						scaleKey: `${key}_area`,
 						paddingKey: `${key}_pad`,
+						sumKey: `${key}_sum`,
 						display: true,
 						y_vals: col,
 					};
 					this[graph.scaleKey] = 100;
 					this[graph.paddingKey] = this.radius * 2;
+					this[graph.sumKey] = 0;
 					this.graphs.push(graph);
 					if (this.changingFields.findIndex((val) => { return val === graph.scaleKey; }) === -1) {
 						this.changingFields.push(graph.scaleKey);
 					}
 					if (this.changingFields.findIndex((val) => { return val === graph.paddingKey; }) === -1) {
 						this.changingFields.push(graph.paddingKey);
+					}
+					if (this.changingFields.findIndex((val) => { return val === graph.sumKey; }) === -1) {
+						this.changingFields.push(graph.sumKey);
 					}
 				}
 			}
@@ -227,6 +232,11 @@
 			this.ctx.clearRect(0, 0, this.canv.width * 2, this.canv.height * 2);
 		}
 
+		init() {
+			this.changingFields.forEach(initChangesObject.bind(this.changes));
+			this.setChartWidths();
+		}
+
 		appear() {
 			this.graphs.forEach((gr) => {
 				if (!gr.display) {
@@ -237,7 +247,7 @@
 				}
 			});
 			this.startChangeKey(op, 0xff);
-			this.drawAll();
+			this.calculateSections();
 		}
 
 		setStartEnd() {
@@ -267,9 +277,7 @@
 			//Do nothing.
 		}
 
-		drawChart() {
-			let angle = 0;
-
+		calculateSections() {
 			this.setStartEnd();
 			let sum = 0;
 
@@ -283,58 +291,70 @@
 				}
 			}
 
+			this.startChangeKey(sum_all, sum);
 			for (let k = 0; k < this.graphs.length; k += 1) {
 				const gr = this.graphs[k];
-				if (this[gr.scaleKey]) {
-					const fraction = gr.totalVal / sum;
-					const currentAngle = 2 * Math.PI * fraction;
-					if (k === 0) {
-						angle = - currentAngle / 2;
-					}
-					let x0 = this.width;
-					let y0 = this.height;
-					if (this[gr.paddingKey]) {
-						x0 += this[gr.paddingKey] * Math.cos(angle + currentAngle / 2);
-						y0 += this[gr.paddingKey] * Math.sin(angle + currentAngle / 2);
-					}
-
-					this.ctx.beginPath();
-					this.ctx.moveTo(x0, y0);
-					this.ctx.fillStyle = `${gr.color}${getOpacity(this[op])}`;
-					// eslint-disable-next-line space-unary-ops
-					this.ctx.arc(x0, y0, this.radius, angle, currentAngle + angle);
-					this.ctx.lineTo(x0, y0);
-					this.ctx.closePath();
-					this.ctx.fill();
-
-					if (fraction > 0.02) {
-						let fontSize = 50;
-						let radiusDelay = 0.5;
-
-						if (fraction < 0.3) {
-							fontSize = fraction * 100 + 20;
-							radiusDelay = 0.5 + (0.3 - fraction);
-						}
-
-						x0 = this.width + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.cos(angle + currentAngle / 2);
-						y0 = this.height + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.sin(angle + currentAngle / 2);
-
-						this.ctx.font = `bold ${fontSize}px Arial`;
-						this.ctx.fillStyle = '#ffffffbb';
-						const txt = `${Math.round(fraction * 100)}%`;
-						const measures = this.ctx.measureText(txt);
-
-						this.ctx.fillText(txt, x0 - measures.width / 2, y0 + fontSize / 2);
-					}
-
-					angle += currentAngle;
-				}
+				this.startChangeKey(gr.sumKey, gr.totalVal);
 			}
 		}
 
-		init() {
-			this.changingFields.forEach(initChangesObject.bind(this.changes));
-			this.setChartWidths();
+		drawChart() {
+			if (!this[sum_all]) {
+				return;
+			}
+			let angle = 0;
+
+			for (let k = 0; k < this.graphs.length; k += 1) {
+				const gr = this.graphs[k];
+				const fraction = this[gr.sumKey] / this[sum_all];
+				const currentAngle = 2 * Math.PI * fraction;
+				if (k === 0) {
+					angle = - currentAngle / 2;
+				}
+				gr.fromAngle = angle;
+				gr.toAngle = angle + currentAngle;
+				if (k === this.graphs.length) {
+					gr.toAngle = this.graphs[0].fromAngle;
+				}
+				let x0 = this.width;
+				let y0 = this.height;
+				if (this[gr.paddingKey]) {
+					x0 += this[gr.paddingKey] * Math.cos(angle + currentAngle / 2);
+					y0 += this[gr.paddingKey] * Math.sin(angle + currentAngle / 2);
+				}
+
+				this.ctx.beginPath();
+				this.ctx.moveTo(x0, y0);
+				this.ctx.fillStyle = `${gr.color}${getOpacity(this[op])}`;
+				// eslint-disable-next-line space-unary-ops
+				this.ctx.arc(x0, y0, this.radius, gr.fromAngle, gr.toAngle);
+				this.ctx.lineTo(x0, y0);
+				this.ctx.closePath();
+				this.ctx.fill();
+
+				// Writing labels
+				if (fraction > 0.02) {
+					let fontSize = 50;
+					let radiusDelay = 0.5;
+
+					if (fraction < 0.3) {
+						fontSize = fraction * 100 + 20;
+						radiusDelay = 0.5 + (0.3 - fraction);
+					}
+
+					x0 = this.width + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.cos(angle + currentAngle / 2);
+					y0 = this.height + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.sin(angle + currentAngle / 2);
+
+					this.ctx.font = `bold ${fontSize}px Arial`;
+					this.ctx.fillStyle = '#ffffffbb';
+					const txt = `${Math.round(fraction * 100)}%`;
+					const measures = this.ctx.measureText(txt);
+
+					this.ctx.fillText(txt, x0 - measures.width / 2, y0 + fontSize / 2);
+				}
+
+				angle += currentAngle;
+			}
 		}
 
 		startChangeKey(key, targetVal) {
@@ -389,7 +409,9 @@
 		toggleChart(key) {
 			const chart = this.graphs.find((ch) => { return ch.scaleKey === key; });
 			chart.display = !chart.display;
-			this.startChangeKey(chart.scaleKey, chart.display ? 100 : 0);
+			// this.startChangeKey(chart.scaleKey, chart.display ? 100 : 0);
+			this[chart.scaleKey] = chart.display ? 100 : 0;
+			this.calculateSections();
 		}
 
 		calculateOffset() {
@@ -409,10 +431,10 @@
 			if (this.isSilent) {
 				return;
 			}
-			this.ctx.beginPath();
-			this.ctx.fillStyle = '#ff0000';
-			this.ctx.arc(x * 2, y * 2, 10, 0, 2 * Math.PI);
-			this.ctx.fill();
+			// this.ctx.beginPath();
+			// this.ctx.fillStyle = '#ff0000';
+			// this.ctx.arc(x * 2, y * 2, 10, 0, 2 * Math.PI);
+			// this.ctx.fill();
 
 			const xr = x * 2 - this.width;
 			const yr = y * 2 - this.height;
@@ -1370,6 +1392,7 @@
 		}
 
 		findIntersection(chart, x, goRight) {
+			// ToDo: check it on 4th line, fast moving mouse.
 			const step = goRight ? 1 : -1;
 			const num = this.details_num;
 			const x0 = this.x_vals[num];
@@ -1798,7 +1821,7 @@
 			if (this.isPieChartDetails && !this.isOverview) {
 				this.pieChart[zx] = this.nextfrom;
 				this.pieChart[mx] = this.nextto;
-				this.pieChart.drawAll();
+				this.pieChart.calculateSections();
 				this.updateLegend();
 				setTimeout(this.updateLegend.bind(this), duration * 1.2);
 				return;
@@ -1941,8 +1964,13 @@
 			this.overlay_right.style.width = `${rightVal}px`;
 			this.overlay_left.style.width = `${leftVal}px`;
 
-			this.mainChart[zx] = this.detailsFrom;
-			this.mainChart[mx] = toX;
+			if (this.pieChart) {
+				this.pieChart[zx] = this.detailsFrom;
+				this.pieChart[mx] = toX;
+			} else {
+				this.mainChart[zx] = this.detailsFrom;
+				this.mainChart[mx] = toX;
+			}
 		}
 
 		setupTouchEvents() {
@@ -2178,8 +2206,14 @@
 				chart[mx] -= delta * 0.55;
 				chart[zx] += delta * 0.55;
 			} else {
-				chart[mx] += delta * 0.65;
-				chart[zx] -= delta * 0.65;
+				// eslint-disable-next-line no-lonely-if
+				if (!this.isSingleBar) {
+					chart[mx] += delta * 0.65;
+					chart[zx] -= delta * 0.65;
+				} else {
+					chart[mx] -= delta * 0.55;
+					chart[zx] += delta * 0.55;
+				}
 			}
 			chart.startChangeKey(zx, origZx);
 			chart.startChangeKey(mx, origMx);
