@@ -27,7 +27,7 @@
 		duration = 180, // ms
 		padding_y = 0.03,
 		padding_x = 0.003,
-		pie_pad = 0.1,
+		pie_pad = 0.2,
 		main_chart_padding = 16,
 		map_left_padding = 0.01,
 		min_thumb_width = 20,
@@ -307,6 +307,7 @@
 			for (let k = 0; k < this.graphs.length; k += 1) {
 				const gr = this.graphs[k];
 				const fraction = this[gr.sumKey] / this[sum_all];
+				gr.fraction = fraction;
 				const currentAngle = 2 * Math.PI * fraction;
 				if (k === 0) {
 					angle = - currentAngle / 2;
@@ -427,25 +428,104 @@
 			this.offsetY = offsetY;
 		}
 
+		setInfoBox(gr) {
+			this.infoBox.style.display = 'block';
+			const prevDetailEls = this.infoBox.getElementsByClassName('pie-info-value');
+			let prevDetailEl = null;
+			for (let i = 0; i < prevDetailEls.length; i += 1) {
+				if (!prevDetailEls[i].classList.contains('old')) {
+					if (prevDetailEl && prevDetailEl.parentElement) {
+						prevDetailEl.parentElement.removeChild(prevDetailEl);
+					}
+					prevDetailEl = prevDetailEls[i];
+				}
+			}
+
+			if (prevDetailEl) {
+				prevDetailEl.style.width = `${prevDetailEl.clientWidth}px`;
+				prevDetailEl.classList.add('old');
+			}
+			const itemHtml = `<div class="pie-info-value item part new">
+					<div class="pie-val name">${gr.name}</div>
+					<div class="pie-val value" style="color:${gr.color};">${prettifyNumber(gr.totalVal)}</div>
+				</div>`;
+			const template = document.createElement('template');
+			template.innerHTML = itemHtml;
+			const detailEl = template.content.firstChild;
+			if (prevDetailEl) {
+				this.infoBox.appendChild(detailEl);
+				setTimeout(() => {
+					detailEl.classList.remove('new');
+				}, 0);
+				setTimeout(() => {
+					if (prevDetailEl && prevDetailEl.parentElement) {
+						prevDetailEl.parentElement.removeChild(prevDetailEl);
+					}
+				}, duration);
+			} else {
+				detailEl.classList.remove('new');
+				this.infoBox.appendChild(detailEl);
+			}
+			// ToDo: set box position
+		}
+
+		showChartDetails(gr) {
+			if (this.currentDetailGraph === gr) {
+				return;
+			}
+			if (this.currentDetailGraph) {
+				this.startChangeKey(this.currentDetailGraph.paddingKey, 0);
+			}
+			this.currentDetailGraph = gr;
+			let paddingVal = 20;
+			if (gr.fraction < 0.3) {
+				paddingVal += (1 - gr.fraction) * 20;
+			}
+			this.startChangeKey(gr.paddingKey, paddingVal);
+			this.setInfoBox(gr);
+		}
+
 		showDetails(x, y, event) {
 			if (this.isSilent) {
 				return;
 			}
-			// this.ctx.beginPath();
-			// this.ctx.fillStyle = '#ff0000';
-			// this.ctx.arc(x * 2, y * 2, 10, 0, 2 * Math.PI);
-			// this.ctx.fill();
 
 			const xr = x * 2 - this.width;
 			const yr = y * 2 - this.height;
+			const isInside = ((xr * xr + yr * yr) <= this.radius * this.radius);
+			if (!isInside) {
+				if (this.currentDetailGraph) {
+					this.startChangeKey(this.currentDetailGraph.paddingKey, 0);
+					this.currentDetailGraph = undefined;
+				}
+				return;
+			}
 
-			if (event && ((xr * xr + yr * yr) <= this.radius * this.radius) ) {
+			if (event) {
 				event.preventDefault();
 			}
+
+			let angle = Math.atan2(yr, xr);
+			if (angle < 0) {
+				angle += 2 * Math.PI;
+			}
+
+			for (let k = 0; k < this.graphs.length; k += 1) {
+				const gr = this.graphs[k];
+				if (gr.fromAngle < angle && angle <= gr.toAngle) {
+					this.showChartDetails(gr);
+					return;
+				}
+			}
+			// Fallback for 1st section
+			this.showChartDetails(this.graphs[0]);
 		}
 
 		hideDetails() {
-
+			if (this.currentDetailGraph) {
+				this.startChangeKey(this.currentDetailGraph.paddingKey, 0);
+			}
+			// this.infoBox.style.display = 'none';
 		}
 
 		setUpPieHover() {
@@ -489,47 +569,37 @@
 				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
 			});
 
-			// const infoBoxHtml = `<div class="info" style="display:none;">
-			// 	<div style="display:block;clear:both;overflow:hidden;margin-bottom:2px;">
-			// 		<div class="hour date"></div>
-			// 		<div class="day date"></div>
-			// 		<div class="month date"></div>
-			// 		<div class="show-more"></div>
-			// 	</div>
-			// </div>`;
-			// const template = document.createElement('template');
-			// template.innerHTML = infoBoxHtml;
-			// this.infoBox = template.content.firstChild;
-			// this.infoHour = this.infoBox.getElementsByClassName('hour')[0];
-			// this.infoDay = this.infoBox.getElementsByClassName('day')[0];
-			// this.infoMonth = this.infoBox.getElementsByClassName('month')[0];
-			// this.showMore = this.infoBox.getElementsByClassName('show-more')[0];
+			const infoBoxHtml = `<div class="pie-info info" style="display:none;">
+			</div>`;
+			const template = document.createElement('template');
+			template.innerHTML = infoBoxHtml;
+			this.infoBox = template.content.firstChild;
 
-			// this.canv.parentElement.appendChild(this.infoBox);
+			this.canv.parentElement.appendChild(this.infoBox);
 
-			// this.infoBox.onmousemove = () => {
-			// 	clearTimeout(endId);
-			// 	clearTimeout(cancelId);
-			// };
-			// this.infoBox.addEventListener('touchmove', () => {
-			// 	clearTimeout(endId);
-			// 	clearTimeout(cancelId);
-			// });
-			// this.infoBox.onmouseleave = () => {
-			// 	clearTimeout(endId);
-			// 	clearTimeout(cancelId);
-			// 	endId = setTimeout(this.hideDetails.bind(this), 1200);
-			// };
-			// this.infoBox.addEventListener('touchend', () => {
-			// 	clearTimeout(endId);
-			// 	clearTimeout(cancelId);
-			// 	endId = setTimeout(this.hideDetails.bind(this), 1200);
-			// });
-			// this.infoBox.addEventListener('touchcancel', () => {
-			// 	clearTimeout(endId);
-			// 	clearTimeout(cancelId);
-			// 	cancelId = setTimeout(this.hideDetails.bind(this), 1200);
-			// });
+			this.infoBox.onmousemove = () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			};
+			this.infoBox.addEventListener('touchmove', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+			});
+			this.infoBox.onmouseleave = () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			};
+			this.infoBox.addEventListener('touchend', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				endId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
+			this.infoBox.addEventListener('touchcancel', () => {
+				clearTimeout(endId);
+				clearTimeout(cancelId);
+				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
+			});
 		}
 	}
 
@@ -2139,6 +2209,7 @@
 				this.overviewTo = this.mainChart[mx];
 			}
 			if (this.isPieDetails && !this.isOverview) {
+				this.pieChart.hideDetails();
 				this.pieChart.startChangeKey(op, 0);
 				this.pieChart.graphs.forEach((gr) => {
 					this.pieChart.startChangeKey(gr.paddingKey, this.pieChart.radius * 2);
