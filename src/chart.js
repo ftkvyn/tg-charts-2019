@@ -323,6 +323,8 @@
 					x0 += this[gr.paddingKey] * Math.cos(angle + currentAngle / 2);
 					y0 += this[gr.paddingKey] * Math.sin(angle + currentAngle / 2);
 				}
+				gr.xc = this.width + (this.radius / 2) * Math.cos(angle + currentAngle / 2);
+				gr.yc = this.height + (this.radius / 2) * Math.sin(angle + currentAngle / 2);
 
 				this.ctx.beginPath();
 				this.ctx.moveTo(x0, y0);
@@ -343,11 +345,17 @@
 						radiusDelay = 0.5 + (0.3 - fraction);
 					}
 
-					x0 = this.width + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.cos(angle + currentAngle / 2);
-					y0 = this.height + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.sin(angle + currentAngle / 2);
+					if (fraction < 1) {
+						x0 = this.width + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.cos(angle + currentAngle / 2);
+						y0 = this.height + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.sin(angle + currentAngle / 2);
+					} else {
+						// ToDo: animate this.
+						x0 = this.width;
+						y0 = this.height;
+					}
 
 					this.ctx.font = `bold ${fontSize}px Arial`;
-					this.ctx.fillStyle = '#ffffffbb';
+					this.ctx.fillStyle = '#ffffffee';
 					const txt = `${Math.round(fraction * 100)}%`;
 					const measures = this.ctx.measureText(txt);
 
@@ -408,6 +416,7 @@
 		}
 
 		toggleChart(key) {
+			this.hideDetails();
 			const chart = this.graphs.find((ch) => { return ch.scaleKey === key; });
 			chart.display = !chart.display;
 			// this.startChangeKey(chart.scaleKey, chart.display ? 100 : 0);
@@ -447,7 +456,7 @@
 			}
 			const itemHtml = `<div class="pie-info-value item part new">
 					<div class="pie-val name">${gr.name}</div>
-					<div class="pie-val value" style="color:${gr.color};">${prettifyNumber(gr.totalVal)}</div>
+					<div class="pie-val value" style="color:${gr.color};">${formatNumber(gr.totalVal)}</div>
 				</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = itemHtml;
@@ -466,7 +475,19 @@
 				detailEl.classList.remove('new');
 				this.infoBox.appendChild(detailEl);
 			}
-			// ToDo: set box position
+			const width = this.infoBox.clientWidth;
+			let left = gr.xc / 2;
+			if (gr.xc <= this.width) {
+				left -= width * 0.7;
+			} else {
+				left -= width * 0.3;
+			}
+			this.infoBox.style.left = `${left}px`;
+			if (gr.yc <= this.height) {
+				this.infoBox.style.top = `${this.height / 2 + 20}px`;
+			} else {
+				this.infoBox.style.top = `${this.height / 2 - 50}px`;
+			}
 		}
 
 		showChartDetails(gr) {
@@ -525,7 +546,7 @@
 			if (this.currentDetailGraph) {
 				this.startChangeKey(this.currentDetailGraph.paddingKey, 0);
 			}
-			// this.infoBox.style.display = 'none';
+			this.infoBox.style.display = 'none';
 		}
 
 		setUpPieHover() {
