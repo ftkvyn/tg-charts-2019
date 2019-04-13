@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 /* eslint-disable space-unary-ops */
 /* eslint-disable no-mixed-operators */
 /* eslint-disable prefer-destructuring */
@@ -30,7 +31,7 @@
 		pie_pad = 0.2,
 		main_chart_padding = 16,
 		map_left_padding = 0.01,
-		min_thumb_width = 20,
+		min_thumb_width = 30,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,
 		y_legend_row_height = 50,
@@ -60,6 +61,7 @@
 	}
 
 	function prettifyNumber(val) {
+		// eslint-disable-next-line no-restricted-globals
 		if (!isFinite(val)) {
 			return 1;
 		}
@@ -255,15 +257,7 @@
 			if (start_i > 0) {
 				start_i -= 1; // Starting from the first point beyond the chart to the left;
 			}
-			let end_i = start_i;
-			for (; end_i < this.x_vals.length; end_i += 1) {
-				if (this.x_vals[end_i] >= this[mx]) {
-					break;
-				}
-			}
-			if (end_i < this.x_vals.length) {
-				end_i += 1; // Going till the first one beyond the chart to the right;
-			}
+			const end_i = start_i + this.selectedDays;
 			this.start_i = start_i;
 			this.end_i = end_i;
 		}
@@ -274,7 +268,7 @@
 		}
 
 		drawDetails() {
-			//Do nothing.
+			return false;
 		}
 
 		calculateSections() {
@@ -285,7 +279,7 @@
 				const gr = this.graphs[k];
 				const multiplier = this[gr.scaleKey] / 100;
 				gr.totalVal = 0;
-				for (let i = this.start_i + 1; i < this.end_i; i += 1) {
+				for (let i = this.start_i; i < this.end_i; i += 1) {
 					sum += multiplier * gr.y_vals[i];
 					gr.totalVal += multiplier * gr.y_vals[i];
 				}
@@ -501,7 +495,7 @@
 			if (gr.fraction < 0.3) {
 				paddingVal += (1 - gr.fraction) * 20;
 			}
-			if(eq(gr.fraction, 1)) {
+			if (eq(gr.fraction, 1)) {
 				paddingVal = 0;
 			}
 			this.startChangeKey(gr.paddingKey, paddingVal);
@@ -1166,6 +1160,7 @@
 
 		drawBarChart() {
 			this.setStartEnd();
+			this.bar_width = undefined;
 			const x_step = this.x_vals[this.end_i - 1] - this.x_vals[this.end_i - 2];
 			for (let i = this.start_i + 1; i < this.end_i; i += 1) {
 				let currentHeight = 0;
@@ -1414,7 +1409,6 @@
 			return changed;
 		}
 
-		// ToDo: check if no unnecessary animation is appears.
 		changeKeyStep(key) {
 			const val = this.changes[key];
 			if (val.startTimestamp === -1) {
@@ -1591,7 +1585,6 @@
 							valueText = formatNumber(gr.y_vals[this.details_num], true);
 						}
 						if (!infoEl) {
-							// ToDo: create infos once, just hide and show items
 							const infoHtml = `<div class="item ${gr.opacityKey}">
 								<div class="value" style="color:${gr.color}"></div>
 								<div class="name">${gr.name}</div>
@@ -1977,6 +1970,15 @@
 
 		moveChart(dx) {
 			let dx_int = Math.round(dx);
+			if (!this.isOverview && this.isPieDetails) {
+				dx_int += this.accumDx || 0;
+				if (Math.abs(dx_int) < this.allowedStep) {
+					this.accumDx = dx_int;
+					return;
+				}
+				dx_int = Math.round(dx_int / this.allowedStep) * this.allowedStep;
+				this.accumDx = 0;
+			}
 			const right = +this.thumb.style.right.slice(0, -2);
 			if (right - dx_int < 0) {
 				dx_int = right;
@@ -1994,7 +1996,21 @@
 
 		moveLeftBorder(dx) {
 			let dx_int = Math.round(dx);
-			const left_width = this.overlay_left.offsetWidth;
+			if (!this.isOverview && this.isPieDetails) {
+				dx_int += this.accumLDx || 0;
+				if (Math.abs(dx_int) < this.allowedStep) {
+					this.accumLDx = dx_int;
+					return;
+				}
+				const addDays = Math.round(dx_int / this.allowedStep);
+				dx_int = addDays * this.allowedStep;
+				if (this.pieChart.selectedDays - addDays < this.pieChart.minSelectedDays) {
+					return;
+				}
+				this.pieChart.selectedDays -= addDays;
+				this.accumLDx = 0;
+			}
+			const left_width = this.overlay_left.targetWidth || this.overlay_left.offsetWidth;
 			if (left_width + dx_int < 0) {
 				dx_int = -left_width;
 			}
@@ -2004,14 +2020,29 @@
 			this.thumb_width -= dx_int;
 			this.thumb.style.width = `${this.thumb_width}px`;
 
-			this.overlay_left.style.width = `${left_width + dx_int}px`;
+			this.overlay_left.targetWidth = left_width + dx_int;
+			this.overlay_left.style.width = `${this.overlay_left.targetWidth}px`;
 
 			this.setMapBox();
 		}
 
 		moveRightBorder(dx) {
 			let dx_int = Math.round(dx);
-			const right_width = this.overlay_right.offsetWidth;
+			if (!this.isOverview && this.isPieDetails) {
+				dx_int += this.accumRDx || 0;
+				if (Math.abs(dx_int) < this.allowedStep) {
+					this.accumRDx = dx_int;
+					return;
+				}
+				const addDays = Math.round(dx_int / this.allowedStep);
+				dx_int = addDays * this.allowedStep;
+				if (this.pieChart.selectedDays + addDays < this.pieChart.minSelectedDays) {
+					return;
+				}
+				this.pieChart.selectedDays += addDays;
+				this.accumRDx = 0;
+			}
+			const right_width = this.overlay_right.targetWidth || this.overlay_right.offsetWidth;
 			const right = +this.thumb.style.right.slice(0, -2);
 			if (right_width - dx_int < 0) {
 				dx_int = right_width;
@@ -2023,7 +2054,8 @@
 			this.thumb.style.width = `${this.thumb_width}px`;
 			this.thumb.style.right = `${right - dx_int}px`;
 
-			this.overlay_right.style.width = `${right_width - dx_int}px`;
+			this.overlay_right.targetWidth = right_width - dx_int;
+			this.overlay_right.style.width = `${this.overlay_right.targetWidth}px`;
 
 			this.setMapBox();
 		}
@@ -2056,16 +2088,25 @@
 				return;
 			}
 			this.map_container.classList.add('animating');
-			setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
+			if (!this.isPieChartDetails) {
+				setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
+			}
 			this.detailsFrom -= 3600000;
-			const toX = this.detailsFrom + 86400000; // Adding 1day in ms
+			let toX = this.detailsFrom + 86400000; // Adding 1day in ms
 			const totalX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1] - this.mapChart.x_vals[0];
 			const scale = totalX / this.container_width;
 			const pad = this.mapChart.x_vals[0];
-			const rightVal = this.container_width - ((toX - pad) / scale);
 			const leftVal = (this.detailsFrom - pad) / scale;
-			const widthVal = this.container_width - rightVal - leftVal;
-
+			let rightVal = this.container_width - ((toX - pad) / scale);
+			let widthVal = this.container_width - rightVal - leftVal;
+			let daysDelta = 1;
+			while (widthVal < min_thumb_width) {
+				toX += 86400000;
+				daysDelta += 1;
+				rightVal = this.container_width - ((toX - pad) / scale);
+				widthVal = this.container_width - rightVal - leftVal;
+			}
+			
 			this.thumb_width = widthVal;
 			this.thumb.style.width = `${this.thumb_width}px`;
 			this.thumb.style.right = `${rightVal}px`;
@@ -2076,6 +2117,8 @@
 			if (this.pieChart) {
 				this.pieChart[zx] = this.detailsFrom;
 				this.pieChart[mx] = toX;
+				this.pieChart.selectedDays = daysDelta;
+				this.pieChart.minSelectedDays = daysDelta;
 			} else {
 				this.mainChart[zx] = this.detailsFrom;
 				this.mainChart[mx] = toX;
@@ -2353,6 +2396,7 @@
 				this.mainChart.calculateMaxY(true, true);
 				this.appearChart(this.mainChart);
 			} else {
+				setTimeout(() => { this.setPieMapAllowedX(); }, duration * 2);
 				this.pieChart.appear();
 			}
 			if (this.isOverview) {
@@ -2453,6 +2497,7 @@
 				if (!this.isOverview && this.isPieChartDetails) {
 					this.pieChart.init();
 					this.pieChart.drawAll();
+					setTimeout(() => { this.setPieMapAllowedX(); }, duration);
 				} else {
 					this.mainChart.init();
 					this.mainChart.calculateDetailsOffset();
@@ -2485,6 +2530,15 @@
 			return new Promise((resolve) => {
 				resolve(this.overviewData);
 			});
+		}
+
+		setPieMapAllowedX() {
+			this.allowedPieX = [];
+			this.allowedStep = 0;
+			for (let i = 0; i < this.mapChart.x_vals.length; i += 1) {
+				this.allowedPieX.push(this.mapChart.translateX(this.mapChart.x_vals[i]));
+				this.allowedStep = this.allowedPieX[i] - this.allowedPieX[i - 1];
+			}
 		}
 
 		generatePieDetailsData() {
