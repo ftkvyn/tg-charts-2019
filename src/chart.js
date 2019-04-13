@@ -406,11 +406,9 @@
 		}
 
 		showDetails(x, y) {
-			return;
 			if (this.isSilent) {
 				return;
 			}
-			console.log(x,y);
 			this.ctx.beginPath();
 			this.ctx.fillStyle = '#ff0000';
 			this.ctx.arc(x * 2, y * 2, 10, 0, 2 * Math.PI);
@@ -433,12 +431,14 @@
 			});
 			this.canv.addEventListener('touchstart', (event) => {
 				const touch = event.changedTouches[0];
+				this.calculateOffset();
 				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY);
 				clearTimeout(endId);
 				clearTimeout(cancelId);
 			});
 			this.canv.addEventListener('touchmove', (event) => {
 				const touch = event.changedTouches[0];
+				this.calculateOffset();
 				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY);
 				clearTimeout(endId);
 				clearTimeout(cancelId);
