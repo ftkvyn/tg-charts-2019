@@ -412,7 +412,6 @@
 			this.hideDetails();
 			const chart = this.graphs.find((ch) => { return ch.scaleKey === key; });
 			chart.display = !chart.display;
-			// this.startChangeKey(chart.scaleKey, chart.display ? 100 : 0);
 			this[chart.scaleKey] = chart.display ? 100 : 0;
 			this.calculateSections();
 		}
@@ -1940,8 +1939,8 @@
 			}
 			if (this.mainChart.changes[zx].startTimestamp === -1 ||
 				(Date.now() - this.mainChart.changes[zx].startTimestamp > (duration * 0.75))) {
-				this.mainChart.startChangeKey(zx, this.nextfrom);
-				this.mainChart.startChangeKey(mx, this.nextto);
+				this.mainChart.startChangeKey(zx, this.nextfrom, true);
+				this.mainChart.startChangeKey(mx, this.nextto, true);
 				this.updateLegend();
 				setTimeout(this.updateLegend.bind(this), duration * 1.2);
 			} else {
