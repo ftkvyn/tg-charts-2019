@@ -508,7 +508,7 @@
 
 		showDetails(x, y, event) {
 			if (this.isSilent) {
-				return;
+				return false;
 			}
 
 			const xr = x * 2 - this.width;
@@ -519,7 +519,7 @@
 					this.startChangeKey(this.currentDetailGraph.paddingKey, 0);
 					this.currentDetailGraph = undefined;
 				}
-				return;
+				return false;
 			}
 
 			if (event) {
@@ -535,11 +535,12 @@
 				const gr = this.graphs[k];
 				if (gr.fromAngle < angle && angle <= gr.toAngle) {
 					this.showChartDetails(gr);
-					return;
+					return true;
 				}
 			}
 			// Fallback for 1st section
 			this.showChartDetails(this.graphs[0]);
+			return true;
 		}
 
 		hideDetails() {
@@ -555,39 +556,54 @@
 				cancelId;
 
 			this.canv.addEventListener('mousemove', (event) => {
-				this.showDetails(event.offsetX, event.offsetY);
-				clearTimeout(endId);
-				clearTimeout(cancelId);
+				if (this.showDetails(event.offsetX, event.offsetY)) {
+					clearTimeout(endId);
+					clearTimeout(cancelId);
+				} else {
+					clearTimeout(endId);
+					clearTimeout(cancelId);
+					endId = setTimeout(this.hideDetails.bind(this), 800);
+				}
 			});
 			this.canv.addEventListener('touchstart', (event) => {
 				const touch = event.changedTouches[0];
 				this.calculateOffset();
-				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY);
-				clearTimeout(endId);
-				clearTimeout(cancelId);
+				if (this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY)) {
+					clearTimeout(endId);
+					clearTimeout(cancelId);
+				} else {
+					clearTimeout(endId);
+					clearTimeout(cancelId);
+					endId = setTimeout(this.hideDetails.bind(this), 800);
+				}
 			});
 			this.canv.addEventListener('touchmove', (event) => {
 				const touch = event.changedTouches[0];
 				this.calculateOffset();
-				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY, event);
-				clearTimeout(endId);
-				clearTimeout(cancelId);
+				if (this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY, event)) {
+					clearTimeout(endId);
+					clearTimeout(cancelId);
+				} else {
+					clearTimeout(endId);
+					clearTimeout(cancelId);
+					endId = setTimeout(this.hideDetails.bind(this), 800);
+				}
 			});
 
-			this.canv.addEventListener('mouseleave',() => {
+			this.canv.addEventListener('mouseleave', () => {
 				clearTimeout(endId);
 				clearTimeout(cancelId);
-				endId = setTimeout(this.hideDetails.bind(this), 1200);
+				endId = setTimeout(this.hideDetails.bind(this), 800);
 			});
 			this.canv.addEventListener('touchend', () => {
 				clearTimeout(endId);
 				clearTimeout(cancelId);
-				endId = setTimeout(this.hideDetails.bind(this), 1200);
+				endId = setTimeout(this.hideDetails.bind(this), 800);
 			});
 			this.canv.addEventListener('touchcancel', () => {
 				clearTimeout(endId);
 				clearTimeout(cancelId);
-				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
+				cancelId = setTimeout(this.hideDetails.bind(this), 800);
 			});
 
 			const infoBoxHtml = `<div class="pie-info info" style="display:none;">
