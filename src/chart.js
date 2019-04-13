@@ -44,6 +44,8 @@
 		zx = Symbol('Shift X'),
 		zy = Symbol('Shift Y');
 
+	const timestamp_0 = 1515000000000;
+
 	function initChangesObject(key) {
 		this[key] = {
 			startTimestamp: -1,
@@ -56,6 +58,9 @@
 	function eq(a, b) {
 		if (a === b) {
 			return true;
+		}
+		if (a > timestamp_0 && b > timestamp_0) {
+			return Math.abs((a - b) / Math.max(Math.abs(a - timestamp_0), Math.abs(b - timestamp_0))) < 0.0001;
 		}
 		return Math.abs((a - b) / Math.max(Math.abs(a), Math.abs(b))) < 0.0001;
 	}
@@ -1939,8 +1944,8 @@
 			}
 			if (this.mainChart.changes[zx].startTimestamp === -1 ||
 				(Date.now() - this.mainChart.changes[zx].startTimestamp > (duration * 0.75))) {
-				this.mainChart.startChangeKey(zx, this.nextfrom, true);
-				this.mainChart.startChangeKey(mx, this.nextto, true);
+				this.mainChart.startChangeKey(zx, this.nextfrom);
+				this.mainChart.startChangeKey(mx, this.nextto);
 				this.updateLegend();
 				setTimeout(this.updateLegend.bind(this), duration * 1.2);
 			} else {
