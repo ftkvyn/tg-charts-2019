@@ -349,7 +349,6 @@
 						x0 = this.width + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.cos(angle + currentAngle / 2);
 						y0 = this.height + (this[gr.paddingKey] + this.radius * radiusDelay) * Math.sin(angle + currentAngle / 2);
 					} else {
-						// ToDo: animate this.
 						x0 = this.width;
 						y0 = this.height;
 					}
@@ -501,6 +500,9 @@
 			let paddingVal = 20;
 			if (gr.fraction < 0.3) {
 				paddingVal += (1 - gr.fraction) * 20;
+			}
+			if(eq(gr.fraction, 1)) {
+				paddingVal = 0;
 			}
 			this.startChangeKey(gr.paddingKey, paddingVal);
 			this.setInfoBox(gr);
