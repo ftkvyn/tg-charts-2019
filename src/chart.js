@@ -1953,10 +1953,6 @@
 		}
 
 		setMapBox(isInitial) {
-			// ToDo: for pie chart:
-			//		* turn on animation;
-			//		* accumulate changes;
-			//		* proceed with changes only for integer numbers.
 			if (this.container_width < this.thumb_width) {
 				this.thumb_width = 200;
 				this.thumb.style.width = `${this.thumb_width}px`;
@@ -2546,11 +2542,11 @@
 		}
 
 		setPieMapAllowedX() {
-			this.allowedPieX = [];
+			const allowedPieX = [];
 			this.allowedStep = 0;
 			for (let i = 0; i < this.mapChart.x_vals.length; i += 1) {
-				this.allowedPieX.push(this.mapChart.translateX(this.mapChart.x_vals[i]));
-				this.allowedStep = this.allowedPieX[i] - this.allowedPieX[i - 1];
+				allowedPieX.push(this.mapChart.translateX(this.mapChart.x_vals[i]));
+				this.allowedStep = allowedPieX[i] - allowedPieX[i - 1];
 			}
 		}
 
