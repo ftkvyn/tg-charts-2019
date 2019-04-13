@@ -236,7 +236,7 @@
 					this.startChangeKey(gr.paddingKey, 0);
 				}
 			});
-			this.startChangeKey(op, 0xaa);
+			this.startChangeKey(op, 0xff);
 			this.drawAll();
 		}
 
@@ -405,7 +405,7 @@
 			this.offsetY = offsetY;
 		}
 
-		showDetails(x, y) {
+		showDetails(x, y, event) {
 			if (this.isSilent) {
 				return;
 			}
@@ -413,6 +413,13 @@
 			this.ctx.fillStyle = '#ff0000';
 			this.ctx.arc(x * 2, y * 2, 10, 0, 2 * Math.PI);
 			this.ctx.fill();
+
+			const xr = x * 2 - this.width;
+			const yr = y * 2 - this.height;
+
+			if (event && ((xr * xr + yr * yr) <= this.radius * this.radius) ) {
+				event.preventDefault();
+			}
 		}
 
 		hideDetails() {
@@ -439,7 +446,7 @@
 			this.canv.addEventListener('touchmove', (event) => {
 				const touch = event.changedTouches[0];
 				this.calculateOffset();
-				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY);
+				this.showDetails(touch.clientX - this.offsetX, touch.pageY - this.offsetY, event);
 				clearTimeout(endId);
 				clearTimeout(cancelId);
 			});
