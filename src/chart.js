@@ -1499,9 +1499,14 @@
 		}
 
 		findIntersection(chart, x, goRight) {
-			// ToDo: check it on 4th line, fast moving mouse.
 			const step = goRight ? 1 : -1;
-			const num = this.details_num;
+			let num = 0;
+			while (this.x_vals[num] && this.x_vals[num] < x) {
+				num += 1;
+			}
+			if (goRight) {
+				num -= 1;
+			}
 			const x0 = this.x_vals[num];
 			const x1 = this.x_vals[num + step];
 			const y0 = chart.y_vals[num];
