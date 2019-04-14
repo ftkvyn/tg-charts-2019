@@ -1553,12 +1553,12 @@
 		}
 
 		static changeLegendEntry(val) {
-			if (!val.startTimestamp) {
-				return 0;
-			}
+			// if (!val.startTimestamp) {
+			// 	return 0;
+			// }
 			const delta = Date.now() - val.startTimestamp;
 			let deltaScale = delta / duration;
-			if (deltaScale > 1) {
+			if (deltaScale > 1 || (!deltaScale && deltaScale !== 0)) {
 				deltaScale = 1;
 			}
 			if (deltaScale === 1) {
