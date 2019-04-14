@@ -610,6 +610,7 @@ a {
 	top: 100px;
 	height: 23px;
 	overflow: hidden;
+	pointer-events: none;
 }
 
 .pie-info .info .item {

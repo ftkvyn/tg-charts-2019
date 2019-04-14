@@ -1663,7 +1663,7 @@
 		}
 
 		hideDetails() {
-			if (this.details_num && this.details_num !== -1) {
+			if (this.details_num !== undefined && this.details_num !== -1) {
 				this.last_details_num = this.details_num;
 			}
 			this.prev_details_num = undefined;
@@ -2342,14 +2342,10 @@
 			}
 			this.detailsFrom -= 3600000;
 			let toX = this.detailsFrom + 86400000; // Adding 1day in ms
-			if (this.pieChart) {
-				this.detailsFrom -= 86400000;
-				toX -= 86400000;
-			}
 			const totalX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1] - this.mapChart.x_vals[0];
 			const scale = totalX / this.container_width;
 			const pad = this.mapChart.x_vals[0];
-			const leftVal = (this.detailsFrom - pad) / scale;
+			let leftVal = (this.detailsFrom - pad) / scale;
 			let rightVal = this.container_width - ((toX - pad) / scale);
 			let widthVal = this.container_width - rightVal - leftVal;
 			let daysDelta = 1;
@@ -2358,6 +2354,10 @@
 				daysDelta += 1;
 				rightVal = this.container_width - ((toX - pad) / scale);
 				widthVal = this.container_width - rightVal - leftVal;
+			}
+			if (this.pieChart && this.pieDetailsData.extraRightSpace) {
+				rightVal += widthVal;
+				leftVal -= widthVal;
 			}
 
 			this.thumb_width = widthVal;
@@ -2368,8 +2368,8 @@
 			this.overlay_left.style.width = `${leftVal}px`;
 
 			if (this.pieChart) {
-				this.pieChart[zx] = this.detailsFrom + 86400000;
-				this.pieChart[mx] = toX + 86400000;
+				this.pieChart[zx] = this.detailsFrom + 0;
+				this.pieChart[mx] = toX + 0;
 				this.pieChart.selectedDays = daysDelta;
 				this.pieChart.minSelectedDays = daysDelta;
 			} else {
@@ -2823,8 +2823,13 @@
 				columns: [],
 			};
 
-			const from = this.mainChart.start_i;
-			const to = this.mainChart.end_i + 1;
+			let from = this.mainChart.start_i;
+			let to = this.mainChart.end_i + 2;
+			this.pieDetailsData.extraRightSpace = this.mainChart.end_i === this.mainChart.x_vals.length;
+			if (from === 0) {
+				from += 1;
+				to += 1;
+			}
 			this.collection.columns.forEach((col) => {
 				const newCol = [col[0], ...col.slice(from, to)];
 				this.pieDetailsData.columns.push(newCol);
