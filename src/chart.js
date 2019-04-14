@@ -1832,6 +1832,18 @@
 					}
 					justTurnedOff = true;
 				};
+
+				el.addEventListener('mousedown', (event) => {
+					event.preventDefault();
+					clearTimeout(swichOtherOffId);
+					swichOtherOffId = setTimeout(turnOffFn, 750);
+				});
+
+				el.addEventListener('mouseup', () => {
+					clearTimeout(swichOtherOffId);
+				});
+				el.addEventListener('mouseleave', () => { clearTimeout(swichOtherOffId); });
+
 				el.addEventListener('touchstart', (event) => {
 					event.preventDefault();
 					clearTimeout(swichOtherOffId);
@@ -1942,7 +1954,6 @@
 				[0, 1, 2].forEach((num) => {
 					le[num].classList.add('hidden');
 				});
-				// ToDo: add day of week here. : Day, date, month, year
 				changeLabels(le[3], `${fromTxt[3]},`, true);
 				changeLabels(le[4], fromTxt[0], true);
 				changeLabels(le[5], fromTxt[1], true);
