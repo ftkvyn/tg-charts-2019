@@ -2238,7 +2238,11 @@
 					this.accumDx = dx_int;
 					return;
 				}
-				dx_int = Math.round(dx_int / this.allowedStep) * this.allowedStep;
+				const addDays = Math.round(dx_int / this.allowedStep);
+				dx_int = addDays * this.allowedStep;
+				if (this.pieChart.start_i + this.pieChart.selectedDays + addDays >= this.pieChart.x_vals.length) {
+					return;
+				}
 				this.accumDx = 0;
 			}
 			const right = +this.thumb.style.right.slice(0, -2);
@@ -2300,6 +2304,9 @@
 				const addDays = Math.round(dx_int / this.allowedStep);
 				dx_int = addDays * this.allowedStep;
 				if (this.pieChart.selectedDays + addDays < this.pieChart.minSelectedDays) {
+					return;
+				}
+				if (this.pieChart.start_i + this.pieChart.selectedDays + addDays >= this.pieChart.x_vals.length) {
 					return;
 				}
 				this.pieChart.selectedDays += addDays;
