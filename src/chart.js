@@ -2358,16 +2358,23 @@
 			}
 			this.detailsFrom -= 3600000;
 			let toX = this.detailsFrom + 86400000; // Adding 1day in ms
-			const totalX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1] - this.mapChart.x_vals[0];
+			const lastX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1];
+			const totalX = lastX - this.mapChart.x_vals[0];
 			const scale = totalX / this.container_width;
 			const pad = this.mapChart.x_vals[0];
+
 			let leftVal = (this.detailsFrom - pad) / scale;
 			let rightVal = this.container_width - ((toX - pad) / scale);
 			let widthVal = this.container_width - rightVal - leftVal;
 			let daysDelta = 1;
 			while (widthVal < min_thumb_width) {
-				toX += 86400000;
+				if (toX + 86400000 <= lastX) {
+					toX += 86400000;
+				} else {
+					this.detailsFrom -= 86400000;
+				}
 				daysDelta += 1;
+				leftVal = (this.detailsFrom - pad) / scale;
 				rightVal = this.container_width - ((toX - pad) / scale);
 				widthVal = this.container_width - rightVal - leftVal;
 			}
