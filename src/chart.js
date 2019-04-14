@@ -14,7 +14,8 @@
 
 	const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		months = monthsFull.map((m) => { return m.substr(0, 3); }),
-		days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+		daysFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+		days = daysFull.map((m) => { return m.substr(0, 3); }),
 		dark_background_color = '#1d2837',
 		dark_color = '#242f3e',
 		white_color = '#ffffff',
@@ -99,7 +100,8 @@
 		if (prevDetailEl) {
 			currentTxt = prevDetailEl.innerText;
 		}
-		if (currentTxt !== text) {
+		// eslint-disable-next-line eqeqeq
+		if (currentTxt != text) {
 			if (prevDetailEl) {
 				prevDetailEl.classList.add('old');
 			}
@@ -146,7 +148,7 @@
 
 	function getFullDateText(timestamp) {
 		const date = new Date(timestamp);
-		return `${date.getDate()} ${monthsFull[date.getMonth()]} ${date.getFullYear()}`;
+		return [date.getDate(), monthsFull[date.getMonth()], date.getFullYear(), daysFull[date.getDay()]];
 	}
 
 	function getOpacity(val) {
@@ -722,7 +724,7 @@
 						const date = new Date(val);
 						const result = {
 							name: dayNames[0],
-							nameClear: dayNames[0].replace(',',''),
+							nameClear: dayNames[0].replace(',', ''),
 							monthName: months[date.getMonth()],
 							year: date.getFullYear(),
 							day: dayNames[1],
@@ -1910,30 +1912,47 @@
 				if (this.pieChart.selectedDays > 1) {
 					toDate = this.pieChart.x_vals[this.pieChart.start_i + this.pieChart.selectedDays - 1];
 				}
+			} else if (!this.isOverview) {
+				fromDate = this.mainChart.x_vals[this.mainChart.start_i + 5];
+				toDate = this.mainChart.x_vals[this.mainChart.end_i - 5];
 			} else {
 				fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
 				toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
 			}
 			const fromTxt = getFullDateText(fromDate);
 			const toTxt = getFullDateText(toDate);
+			const le = this.legend_els;
 			if (isInitial) {
-				this.legend_els[0].classList.add('no-animate');
-				this.legend_els[2].classList.add('no-animate');
+				[0, 1, 2, 3, 4, 5, 6].forEach((num) => {
+					le[num].classList.add('no-animate');
+				});
 			}
-			if (fromTxt !== toTxt) {
-				this.legend_els[0].classList.remove('hidden');
-				this.legend_els[1].classList.remove('hidden');
-				changeLabels(this.legend_els[0], fromTxt, true);
-				changeLabels(this.legend_els[2], toTxt, true);
+			if (fromTxt.join() !== toTxt.join()) {
+				[0, 1, 2].forEach((num) => {
+					le[num].classList.remove('hidden');
+				});
+				changeLabels(le[0], fromTxt[0], true);
+				changeLabels(le[1], fromTxt[1], true);
+				changeLabels(le[2], fromTxt[2], true);
+				changeLabels(le[3], '-', true);
+				changeLabels(le[4], toTxt[0], true);
+				changeLabels(le[5], toTxt[1], true);
+				changeLabels(le[6], toTxt[2], true);
 			} else {
-				this.legend_els[0].classList.add('hidden');
-				this.legend_els[1].classList.add('hidden');
-				changeLabels(this.legend_els[2], fromTxt, true);
+				[0, 1, 2].forEach((num) => {
+					le[num].classList.add('hidden');
+				});
+				// ToDo: add day of week here. : Day, date, month, year
+				changeLabels(le[3], `${fromTxt[3]},`, true);
+				changeLabels(le[4], fromTxt[0], true);
+				changeLabels(le[5], fromTxt[1], true);
+				changeLabels(le[6], fromTxt[2], true);
 			}
 			setTimeout(() => {
 				if (isInitial) {
-					this.legend_els[0].classList.remove('no-animate');
-					this.legend_els[2].classList.remove('no-animate');
+					[0, 1, 2, 3, 4, 5, 6].forEach((num) => {
+						le[num].classList.remove('no-animate');
+					});
 				}
 			});
 		}
@@ -2124,7 +2143,7 @@
 				rightVal = this.container_width - ((toX - pad) / scale);
 				widthVal = this.container_width - rightVal - leftVal;
 			}
-			
+
 			this.thumb_width = widthVal;
 			this.thumb.style.width = `${this.thumb_width}px`;
 			this.thumb.style.right = `${rightVal}px`;
