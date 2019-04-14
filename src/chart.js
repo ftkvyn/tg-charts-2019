@@ -935,6 +935,9 @@
 			}
 
 			this[zx] = Math.min(...this.x_vals);
+			if (type === 'bar') {
+				this[zx] -= this.x_vals[1] - this.x_vals[0];
+			}
 			this[mx] = Math.max(...this.x_vals);
 			this[mx] += Math.round((this[mx] - this[zx]) * padding_x);
 			if (this.entangledChart) {
@@ -1342,7 +1345,7 @@
 			this.setStartEnd();
 			this.bar_width = undefined;
 			const x_step = this.x_vals[this.end_i - 2] - this.x_vals[this.end_i - 3];
-			for (let i = this.start_i + 1; i < this.end_i; i += 1) {
+			for (let i = this.start_i; i < this.end_i; i += 1) {
 				let currentHeight = 0;
 				let sum = 0;
 				for (let k = 0; k < this.graphs.length; k += 1) {
@@ -1648,7 +1651,11 @@
 							this.details_num = i;
 						}
 					} else if (this.type === 'bar') {
-						if (this.x_vals[i - 1] && (data_x > this.x_vals[i - 1])) {
+						let x_val = this.x_vals[i - 1];
+						if (i === 0) {
+							x_val = this.x_vals[0] - (this.x_vals[1] - this.x_vals[0]);
+						}
+						if (x_val && (data_x > x_val)) {
 							this.details_num = i;
 						}
 					}
