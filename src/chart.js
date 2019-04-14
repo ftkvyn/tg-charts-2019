@@ -1544,6 +1544,9 @@
 		}
 
 		static changeLegendEntry(val) {
+			if (!val.startTimestamp) {
+				return 0;
+			}
 			const delta = Date.now() - val.startTimestamp;
 			let deltaScale = delta / duration;
 			if (deltaScale > 1) {
@@ -1657,6 +1660,7 @@
 			if (this.details_num !== -1) {
 				this.last_details_num = this.details_num;
 			}
+			this.prev_details_num = undefined;
 			this.details_num = -1;
 			this[det_x] = undefined;
 			this.clearDetails();
