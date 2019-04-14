@@ -1660,7 +1660,7 @@
 		}
 
 		hideDetails() {
-			if (this.details_num !== -1) {
+			if (this.details_num && this.details_num !== -1) {
 				this.last_details_num = this.details_num;
 			}
 			this.prev_details_num = undefined;
@@ -2290,12 +2290,14 @@
 		moveSelectBoxForOverview() {
 			this.map_container.classList.add('animating');
 			setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
-			this.thumb_width = this.mapBoxParams.thumb_width * this.container_width;
-			this.thumb.style.width = `${this.thumb_width}px`;
-			this.thumb.style.right = `${this.mapBoxParams.right * this.container_width}px`;
+			if (this.mapBoxParams) {
+				this.thumb_width = this.mapBoxParams.thumb_width * this.container_width;
+				this.thumb.style.width = `${this.thumb_width}px`;
+				this.thumb.style.right = `${this.mapBoxParams.right * this.container_width}px`;
 
-			this.overlay_right.style.width = `${this.mapBoxParams.right * this.container_width}px`;
-			this.overlay_left.style.width = `${this.mapBoxParams.left * this.container_width}px`;
+				this.overlay_right.style.width = `${this.mapBoxParams.right * this.container_width}px`;
+				this.overlay_left.style.width = `${this.mapBoxParams.left * this.container_width}px`;
+			}
 
 			this.mainChart[zx] = this.overviewFrom;
 			this.mainChart[mx] = this.overviewTo;
@@ -2820,6 +2822,14 @@
 					this.isOverview = false;
 					this.mainChart.isDetails = true;
 					this.run(detailsData, { isAppear: true });
+				})
+				.catch((err) => {
+					console.error(err);
+					document.getElementById('error-box').classList.add('shown');
+					setTimeout(() => {
+						document.getElementById('error-box').classList.remove('shown');
+					}, 4000);
+					this.showOverview();
 				});
 		}
 
@@ -2829,6 +2839,13 @@
 					this.isOverview = true;
 					this.mainChart.isDetails = false;
 					this.run(jsonData, { isAppear: !isInitial });
+				})
+				.catch((err) => {
+					console.error(err);
+					document.getElementById('error-box').classList.add('shown');
+					setTimeout(() => {
+						document.getElementById('error-box').classList.remove('shown');
+					}, 4000);
 				});
 		}
 	}
