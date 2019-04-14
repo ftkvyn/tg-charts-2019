@@ -1,24 +1,7 @@
 
 Night Theme
-Tooltip Arrow D2D5D7
-
-Grid Lines FFFFFF, 10%
-
-Zoom Out Text 48AAF0
-
-Scroll Background 304259, 60%
-
-Scroll Selector 56626D
-
 
 Followers, Interactions, Growth
-Red Line E6574F, Button CF5D57, Tooltip Text F7655E
-
-Green Line 4BD964, Button 5AB34D, Tooltip Text 4BD964
-
-Blue Line 108BE3, Button 4681BB, Tooltip Text 108BE3
-
-Yellow Line DEB93F, Button C9AF4F, Tooltip Text DEB93F
 
 X/Y Axis Text A3B1C2, 60%
 
@@ -27,33 +10,6 @@ X/Y Axis Text A3B1C2, 60%
 Messages, Apps
 Bars and Charts:
 
-Blue 4681BB, Dark Blue 345B9C, Light Green 88BA52, Green 3DA05A, Yellow D9B856, Orange D49548, Red CF5D57, Light Blue 479FC4
-
-Buttons:
-
-Blue 4681BB, Dark Blue 466FB3, Light Green 88BA52, Green 3DA05A, Yellow F5BD25, Orange D49548, Red CF5D57, Light Blue 479FC4
-
-Text:
-
-Blue 5199DF, Dark Blue 3E65CF, Light Green 99CF60, Green 3CB560, Yellow DBB630, Orange EE9D39, Red F7655E, Light Blue 43ADDE
-
 Y Axis Text ECF2F8, 50%
 
 X Axis Text A3B1C2, 60%
-
-Darken Mask 242F3E, 50%
-
-
-
-Onlines
-Blue Line 4082CE, Button 4082CE, Tooltip Text 4082CE
-
-Dark Blue Line 4461AB, Button 4461AB, Tooltip Text 4461AB
-
-Light Blue Line 4697B3, Button 4697B3, Tooltip Text 4697B3
-
-
-
-
-
-

@@ -49,13 +49,13 @@
 		zx = Symbol('Shift X'),
 		zy = Symbol('Shift Y'),
 		colors = {
-			'#4BD964': {
-				btn: '#5FB641',
-				text: '#3CC23F',
-			},
 			'#FE3C30': {
 				btn: '#E65850',
 				text: '#F34C44',
+			},
+			'#4BD964': {
+				btn: '#5FB641',
+				text: '#3CC23F',
 			},
 			'#108BE3': {
 				btn: '#3497ED',
@@ -111,31 +111,90 @@
 			},
 		},
 		colorsDark = {
-			// '#4BD964': {
-			// 	btn: '#5FB641',
-			// 	text: '#3CC23F',
-			// },
-			// '#FE3C30': {
-			// 	btn: '#E65850',
-			// 	text: '#F34C44',
-			// },
-			// '#108BE3': {
-			// 	btn: '#3497ED',
-			// 	text: '#108BE3',
-			// },
-			// '#E8AF14': {
-			// 	btn: '#F5BD25',
-			// 	text: '#E4AE1B',
-			// },
+			'#FE3C30': {
+				btn: '#CF5D57',
+				text: '#F7655E',
+				chart: '#E6574F',
+			},
+			'#4BD964': {
+				btn: '#5AB34D',
+				text: '#4BD964',
+				chart: '#4BD964',
+			},
+			'#108BE3': {
+				btn: '#4681BB',
+				text: '#108BE3',
+				chart: '#108BE3',
+			},
+			'#E8AF14': {
+				btn: '#C9AF4F',
+				text: '#DEB93F',
+				chart: '#DEB93F',
+			},
+			'#5FB641': {
+				btn: '#3DA05A',
+				text: '#3CB560',
+				chart: '#3DA05A',
+			},
+			'#3497ED': {
+				btn: '#4681BB',
+				text: '#5199DF',
+				chart: '#4681BB',
+			},
+			'#2373DB': {
+				btn: '#466FB3',
+				text: '#3E65CF',
+				chart: '#345B9C',
+			},
+			'#9ED448': {
+				btn: '#88BA52',
+				text: '#99CF60',
+				chart: '#88BA52',
+			},
+			'#F5BD25': {
+				btn: '#F5BD25',
+				text: '#DBB630',
+				chart: '#D9B856',
+			},
+			'#F79E39': {
+				btn: '#D49548',
+				text: '#EE9D39',
+				chart: '#D49548',
+			},
+			'#E65850': {
+				btn: '#CF5D57',
+				text: '#F7655E',
+				chart: '#CF5D57',
+			},
+			'#55BFE6': {
+				btn: '#479FC4',
+				text: '#43ADDE',
+				chart: '#479FC4',
+			},
+			'#64ADED': {
+				btn: '#4082CE',
+				text: '#4082CE',
+				chart: '#4082CE',
+			},
+			'#558DED': {
+				btn: '#4461AB',
+				text: '#4461AB',
+				chart: '#4461AB',
+			},
+			'#5CBCDF': {
+				btn: '#4697B3',
+				text: '#4697B3',
+				chart: '#4697B3',
+			},
 		};
 
 
 	function getColor(original, isLight, key) {
 		const colorObj = isLight ? colors[original] : colorsDark[original];
 		if (!colorObj) {
-			return '#000000';
+			return original;
 		}
-		return colorObj[key] || '#000000';
+		return colorObj[key] || original;
 	}
 
 	const timestamp_0 = 1515000000000;
@@ -422,7 +481,7 @@
 
 				this.ctx.beginPath();
 				this.ctx.moveTo(x0, y0);
-				this.ctx.fillStyle = `${gr.color}${getOpacity(this[op])}`;
+				this.ctx.fillStyle = `${getColor(gr.color, this.isLight, 'chart')}${getOpacity(this[op])}`;
 				// eslint-disable-next-line space-unary-ops
 				this.ctx.arc(x0, y0, this.radius, gr.fromAngle, gr.toAngle);
 				this.ctx.lineTo(x0, y0);
@@ -1185,7 +1244,7 @@
 			this.graphs.forEach((gr) => {
 				if (this[gr.opacityKey]) {
 					const opacity = getOpacity(this[gr.opacityKey]);
-					this.startDraw(this.x_vals[this.start_i], gr.y_vals[this.start_i], `${gr.color}${opacity}`);
+					this.startDraw(this.x_vals[this.start_i], gr.y_vals[this.start_i], `${getColor(gr.color, this.isLight, 'chart')}${opacity}`);
 					for (let i = this.start_i + 1; i < this.end_i; i += 1) {
 						this.drawNextPoint(this.x_vals[i], gr.y_vals[i]);
 					}
@@ -1248,7 +1307,7 @@
 						this.drawNextPoint(this.x_vals[i], y);
 					}
 					prevLine = line;
-					this.endDrawArea(gr.color);
+					this.endDrawArea(getColor(gr.color, this.isLight, 'chart'));
 				}
 			}
 			this.calculateMaxY();
@@ -1300,7 +1359,7 @@
 						if (this.percentBars) {
 							dy = 100 * dy / sum;
 						}
-						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, gr.color);
+						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, getColor(gr.color, this.isLight, 'chart'));
 						currentHeight += dy;
 					}
 				}
@@ -1669,7 +1728,7 @@
 					if (gr.display) {
 						if (this.type === 'line') {
 							this.detailsCtx.lineWidth = this.thickness;
-							this.detailsCtx.strokeStyle = gr.color;
+							this.detailsCtx.strokeStyle = getColor(gr.color, this.isLight, 'chart');
 							this.detailsCtx.fillStyle = this.isLight ? white_color : dark_background_color;
 							const y = this.findIntersection(gr, this[det_x], this[det_x] > this.x_vals[this.details_num]);
 							this.detailsCtx.beginPath();
