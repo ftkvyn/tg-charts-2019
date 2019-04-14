@@ -24,8 +24,12 @@
 		axis_color_zero = '#182D3B1A',
 		axis_color_dark = '#ffffff',
 		axis_color_dark_zero = '#ffffff1A',
-		text_color_dark = '#546778',
-		text_color_light = '#96a2aa',
+
+		text_color_dark = '#A3B1C2',
+		text_color_bar_dark = '#546778',
+		text_color_light = '#8E8E93',
+		text_color_bar_light = '#252529',
+
 		duration = 180, // ms
 		padding_y = 0.03,
 		padding_x = 0.003,
@@ -92,6 +96,18 @@
 			'#55BFE6': {
 				btn: '#35AADC',
 				text: '#269ED4',
+			},
+			'#64ADED': {
+				btn: '#3896E8',
+				text: '#3896E8',
+			},
+			'#558DED': {
+				btn: '#558DED',
+				text: '#558DED',
+			},
+			'#5CBCDF': {
+				btn: '#5CBCDF',
+				text: '#5CBCDF',
 			},
 		},
 		colorsDark = {
@@ -1036,7 +1052,10 @@
 				strokeColor = axis_color_dark;
 			}
 			this.ctx.font = '12px Arial';
-			const textColor = this.isLight ? text_color_light : text_color_dark;
+			let textColor = this.isLight ? text_color_light : text_color_dark;
+			if (this.type === 'bar' || this.type === 'area') {
+				textColor = this.isLight ? text_color_bar_light : text_color_bar_dark;
+			}
 
 			// y-legend
 			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
@@ -1065,7 +1084,17 @@
 						this.ctx.fillText(`${formatNumber(item.scaled_y)}`, this.width - main_chart_padding - 30, this.translateY(item.realY) - y_legend_text_height);
 					}
 				} else {
-					this.ctx.fillStyle = textColor + getOpacity(item.opacity);
+					let opacityMult = 1;
+					if (this.type === 'bar' || this.type === 'area') {
+						if (this.isLight) {
+							opacityMult = 0.5;
+						} else {
+							// TBD
+						}
+					} else if (!this.isLight) {
+						opacityMult = 0.6;
+					}
+					this.ctx.fillStyle = textColor + getOpacity(item.opacity * opacityMult);
 					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.realY) - y_legend_text_height);
 				}
 			}
@@ -1077,7 +1106,17 @@
 				if (this.x_legend[i]) {
 					const val = this.x_legend[i];
 					if (val.opacity) {
-						this.ctx.fillStyle = textColor + getOpacity(val.opacity);
+						let opacityMult = 1;
+						if (this.type === 'bar' || this.type === 'area') {
+							if (this.isLight) {
+								opacityMult = 0.5;
+							} else {
+								// TBD
+							}
+						} else if (!this.isLight) {
+							opacityMult = 0.6;
+						}
+						this.ctx.fillStyle = textColor + getOpacity(val.opacity * opacityMult);
 						const x = this.translateX(val.x) - Math.round(x_legend_val_width / 2);
 						this.ctx.fillText(val.nameClear, x, -3);
 					}
@@ -1092,8 +1131,8 @@
 			if (this.y_scaled) {
 				this.recalculateScaledY();
 			}
-			this.drawAxis();
 			this.drawChart();
+			this.drawAxis();
 			if (this.detailsCanv) {
 				this.drawDetails();
 			}
@@ -1169,9 +1208,9 @@
 
 		endDrawArea(color) {
 			this.ctx.closePath();
-			this.ctx.fillStyle = `${color}aa`;
+			this.ctx.fillStyle = `${color}ff`;
 			if (this.isDisappearing) {
-				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey] * (0xaa / 0xff))}`;
+				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
 			}
 			this.ctx.fill();
 		}
@@ -1221,14 +1260,14 @@
 				y1 = this.translateY(from_y),
 				y2 = this.translateY(to_y);
 			if (this.details_num === -1) {
-				this.ctx.fillStyle = `${color}aa`;
+				this.ctx.fillStyle = `${color}ff`;
 			} else if (this.details_num === num) {
-				this.ctx.fillStyle = `${color}cc`;
+				this.ctx.fillStyle = `${color}ff`;
 			} else {
-				this.ctx.fillStyle = `${color}50`;
+				this.ctx.fillStyle = `${color}80`;
 			}
 			if (this.isDisappearing) {
-				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey] * (0xaa / 0xff))}`;
+				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
 			}
 			this.bar_width = x2 - x1;
 			this.ctx.fillRect(x1, y1, this.bar_width, y2 - y1);
@@ -1565,8 +1604,8 @@
 			this.infoBox.style.display = 'none';
 			if (this.type === 'bar') {
 				this.clearChart();
-				this.drawAxis();
 				this.drawChart();
+				this.drawAxis();
 			}
 		}
 

@@ -1,31 +1,3 @@
-Day Theme
-Grid Lines 182D3B, 10%
-
-Zoom Out Text 108BE3
-
-Tooltip Arrow D2D5D7
-
-
-Followers, Interactions, Growth
-
-X/Y Axis Text 8E8E93
-
-
-
-Messages, Apps
-Bars and Charts:
-
-X/Y Axis Text 252529, 50%
-
-
-Onlines
-Blue Line 64ADED, Button 3896E8, Tooltip Text 3896E8
-
-Dark Blue Line 558DED, Button 558DED, Tooltip Text 558DED
-
-Light Blue Line 5CBCDF, Button 5CBCDF, Tooltip Text 5CBCDF
-
-==========================================================
 
 Night Theme
 Tooltip Arrow D2D5D7
