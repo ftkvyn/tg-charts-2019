@@ -2127,8 +2127,17 @@
 					toDate = this.mainChart.x_vals[this.mainChart.end_i - 5];
 				}
 			} else {
-				fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
-				toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
+				if (this.mainChart[zx] < this.mainChart.x_vals[this.mainChart.start_i]) {
+					fromDate = this.mainChart.x_vals[this.mainChart.start_i];
+				} else {
+					fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
+				}
+
+				if (this.mainChart[mx] > this.mainChart.x_vals[this.mainChart.end_i - 1]) {
+					toDate = this.mainChart.x_vals[this.mainChart.end_i - 1];
+				} else {
+					toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
+				}
 			}
 			const fromTxt = getFullDateText(fromDate);
 			const toTxt = getFullDateText(toDate);
