@@ -193,7 +193,7 @@
 	function getColor(original, isLight, key) {
 		const colorObj = isLight ? colors[original] : colorsDark[original];
 		if (!colorObj) {
-			return original;
+			return '#000000'; //original;
 		}
 		return colorObj[key] || original;
 	}
@@ -423,6 +423,9 @@
 		}
 
 		drawAll() {
+			if (this.isSilent) {
+				return;
+			}
 			this.clearChart();
 			this.drawChart();
 		}
@@ -1129,17 +1132,17 @@
 				this.ctx.stroke();
 				if (this.y_scaled) {
 					if (!item.hideLeft) {
-						this.ctx.fillStyle = this.graphs[0].color + getOpacity(item.opacity);
+						this.ctx.fillStyle = getColor(this.graphs[0].color, this.isLight, 'text') + getOpacity(item.opacity);
 						if (!this.graphs[0].display) {
-							this.ctx.fillStyle = this.graphs[0].color + getOpacity(this[this.graphs[0].opacityKey]);
+							this.ctx.fillStyle = getColor(this.graphs[0].color, this.isLight, 'text') + getOpacity(this[this.graphs[0].opacityKey]);
 						}
 						this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.realY) - y_legend_text_height);
 					}
 
 					if (!item.hideRight) {
-						this.ctx.fillStyle = this.graphs[1].color + getOpacity(item.opacity);
+						this.ctx.fillStyle = getColor(this.graphs[1].color, this.isLight, 'text') + getOpacity(item.opacity);
 						if (!this.graphs[1].display) {
-							this.ctx.fillStyle = this.graphs[1].color + getOpacity(this[this.graphs[1].opacityKey]);
+							this.ctx.fillStyle = getColor(this.graphs[1].color, this.isLight, 'text') + getOpacity(this[this.graphs[1].opacityKey]);
 						}
 						this.ctx.fillText(`${formatNumber(item.scaled_y)}`, this.width - main_chart_padding - 30, this.translateY(item.realY) - y_legend_text_height);
 					}
@@ -2507,6 +2510,9 @@
 			if (!isInitial) {
 				this.mainChart.drawAll();
 				this.mapChart.drawAll();
+				if (this.pieChart) {
+					this.pieChart.drawAll();
+				}
 			}
 		}
 
