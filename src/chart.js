@@ -2004,11 +2004,11 @@
 			}
 		}
 
-		moveChart(dx) {
+		moveChart(dx, isForce) {
 			let dx_int = Math.round(dx);
 			if (!this.isOverview && this.isPieDetails) {
 				dx_int += this.accumDx || 0;
-				if (Math.abs(dx_int) < this.allowedStep) {
+				if (Math.abs(dx_int) < this.allowedStep && !isForce) {
 					this.accumDx = dx_int;
 					return;
 				}
@@ -2534,7 +2534,11 @@
 				if (!this.isOverview && this.isPieChartDetails) {
 					this.pieChart.init();
 					this.pieChart.drawAll();
-					setTimeout(() => { this.setPieMapAllowedX(); }, duration);
+					setTimeout(() => {
+						this.setPieMapAllowedX();
+						this.moveChart(0, true);
+						this.setMapBox();
+					}, duration);
 				} else {
 					this.mainChart.init();
 					this.mainChart.calculateDetailsOffset();
