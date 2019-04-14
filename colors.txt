@@ -7,13 +7,6 @@ Tooltip Arrow D2D5D7
 
 
 Followers, Interactions, Growth
-Red Line FE3C30, Button E65850, Tooltip Text F34C44
-
-Green Line 4BD964, Button 5FB641, Tooltip Text 3CC23F
-
-Blue Line 108BE3, Button 3497ED, Tooltip Text 108BE3
-
-Yellow Line E8AF14, Button F5BD25, Tooltip Text E4AE1B
 
 X/Y Axis Text 8E8E93
 
@@ -22,20 +15,7 @@ X/Y Axis Text 8E8E93
 Messages, Apps
 Bars and Charts:
 
-Blue 3497ED, Dark Blue 2373DB, Light Green 9ED448, Green 5FB641, Yellow F5BD25, Orange F79E39, Red E65850, Light Blue 55BFE6
-
-Buttons:
-
-Blue 3497ED, Dark Blue 3381E8, Light Green 9ED448, Green 5FB641, Yellow F5BD25, Orange F79E39, Red E65850, Light Blue 35AADC
-
-Text:
-
-Blue 108BE3, Dark Blue 2373DB, Light Green 89C32E, Green 4BAB29, Yellow EAAF10, Orange F58608, Red F34C44, Light Blue 269ED4
-
 X/Y Axis Text 252529, 50%
-
-Lighten Mask FFFFFF, 50%
-
 
 
 Onlines

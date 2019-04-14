@@ -61,6 +61,38 @@
 				btn: '#F5BD25',
 				text: '#E4AE1B',
 			},
+			'#5FB641': {
+				btn: '#5FB641',
+				text: '#4BAB29',
+			},
+			'#3497ED': {
+				btn: '#3497ED',
+				text: '#108BE3',
+			},
+			'#2373DB': {
+				btn: '#3381E8',
+				text: '#2373DB',
+			},
+			'#9ED448': {
+				btn: '#9ED448',
+				text: '#89C32E',
+			},
+			'#F5BD25': {
+				btn: '#F5BD25',
+				text: '#EAAF10',
+			},
+			'#F79E39': {
+				btn: '#F79E39',
+				text: '#F58608',
+			},
+			'#E65850': {
+				btn: '#E65850',
+				text: '#F34C44',
+			},
+			'#55BFE6': {
+				btn: '#35AADC',
+				text: '#269ED4',
+			},
 		},
 		colorsDark = {
 			// '#4BD964': {
@@ -2363,8 +2395,13 @@
 				this.appContainerEl.style.color = white_color;
 				this.appContainerEl.classList.add('dark-theme');
 			}
+			this.mainChart.hideDetails();
 			this.mainChart.isLight = this.isLight;
 			this.mapChart.isLight = this.isLight;
+			if (this.pieChart) {
+				this.pieChart.hideDetails();
+				this.pieChart.isLight = this.isLight;
+			}
 			if (!isInitial) {
 				this.mainChart.drawAll();
 				this.mapChart.drawAll();
