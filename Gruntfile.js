@@ -12,7 +12,6 @@ module.exports = function (grunt) {
 				},
 				files: {
 					'public/js/chart.js': 'src/chart.js',
-					'public/js/data.js': 'src/data.js',
 				},
 			},
 		},
