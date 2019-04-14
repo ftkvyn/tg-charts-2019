@@ -1964,6 +1964,7 @@
 				const html = `<div class="btn btn-on">
 				<div class="btn-filler show-light" style="border-color: ${getColor(gr.color, true, 'btn')}"></div>
 				<div class="btn-filler show-dark" style="border-color: ${getColor(gr.color, false, 'btn')}"></div>
+				<div class="btn-overlay"></div>
 				<div class="btn-mark"><img class="on-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wMMDTMnCMtF7AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAG5SURBVFjD7dhbSwJBFADgc6K3AvEvdPGx8t0hsSwruxhJF6QIwhCEHusv9BMK+iWGbY7mpashSEJBYVEoobaWuuL2GuZl13VXH3YeZ2eXj5kzh3MWDb5x6MbRA106VJgKU2EqTIXJNHoV3wnsgXODl/87Z/KbkeO5zu1YLRQAgNfg4Tt2lPVQHY0xBBSFUgSGgOAjZ3xX3UqhKJPfjIrChKAmAlP/bqSsMEqYpihzwIKlSkm5oxSKKlQK4mJMrxkDShieEoYf7htqO2r6YrYhCgAAq5sRSphPANBWrTsk1HjQDpQlOIf5cr6lW6mtMbdPCeOUipoJWgWhxMbYESXMZKsoa2gB2TIrWx7zUMIMiEXNh5Ywy+WkJditm21s8s7jqGZEMGoxbMMMlxGfnGt14rp+HZzoj3mpacMWXsF0Kd2+QjHBJsB550IpqOWIvWVUwxiLf8XBFXW3hLNHVjFVTMlXWsdyMXDf74nCrV1u4HvxQ/6aP5qNAgAMCvnY+pUDXwtvyjUjhBqfAMDcaI3jehOTP0nluyRCjaf1nu3cOvH5+6Vz7RuhxlrxtvvAJtpfZKp/FFWYzOMXdz2r/357T48AAAAASUVORK5CYII=" /></div>
 				<div class="btn-text show-light" style="color: ${getColor(gr.color, true, 'btn')}">${gr.name}</div>
 				<div class="btn-text show-dark" style="color: ${getColor(gr.color, false, 'btn')}">${gr.name}</div>
@@ -2001,6 +2002,7 @@
 				};
 				let swichOtherOffId = null;
 				const turnOffFn = function turnOffFn() {
+					el.classList.remove('holding');
 					for (let i = 0; i < btns.length; i += 1) {
 						if (btns[i] !== el && btns[i].classList.contains('btn-on')) {
 							btns[i].click();
@@ -2016,21 +2018,28 @@
 					event.preventDefault();
 					clearTimeout(swichOtherOffId);
 					swichOtherOffId = setTimeout(turnOffFn, 750);
+					el.classList.add('holding');
 				});
 
 				el.addEventListener('mouseup', () => {
 					clearTimeout(swichOtherOffId);
+					el.classList.remove('holding');
 				});
-				el.addEventListener('mouseleave', () => { clearTimeout(swichOtherOffId); });
+				el.addEventListener('mouseleave', () => {
+					clearTimeout(swichOtherOffId);
+					el.classList.remove('holding');
+				});
 
 				el.addEventListener('touchstart', (event) => {
 					event.preventDefault();
 					clearTimeout(swichOtherOffId);
 					swichOtherOffId = setTimeout(turnOffFn, 750);
+					el.classList.add('holding');
 				});
 
 				el.addEventListener('touchend', (e) => {
 					clearTimeout(swichOtherOffId);
+					el.classList.remove('holding');
 					let target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 					while (target && target !== el) {
 						target = target.parentElement;
@@ -2039,7 +2048,10 @@
 						el.click();
 					}
 				});
-				el.addEventListener('touchcancel', () => { clearTimeout(swichOtherOffId); });
+				el.addEventListener('touchcancel', () => {
+					clearTimeout(swichOtherOffId);
+					el.classList.remove('holding');
+				});
 				return el;
 			});
 			return btns;

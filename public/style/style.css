@@ -357,6 +357,25 @@ a {
 	
 }
 
+.btn .btn-overlay {
+	pointer-events: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 0;
+	height: 100%;
+	opacity: 0;
+	background: #3b4750;
+	transition: width .2s linear .2s, opacity .2s;
+	border-radius: 30px;
+}
+
+.btn.holding .btn-overlay {
+	width: 100%;
+	opacity: 0.5;
+	transition: width .75s, opacity .75s;
+}
+
 .btn-filler {
 	  border-radius: 30px;
     border-width: 18px;	
