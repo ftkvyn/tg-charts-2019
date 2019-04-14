@@ -1,10 +1,4 @@
-JS Design Specification
-April 07, 2019
 Day Theme
-Scroll Background E2EEF9, 60%
-
-Scroll Selector C0D1E1
-
 Grid Lines 182D3B, 10%
 
 Zoom Out Text 108BE3
@@ -51,7 +45,7 @@ Dark Blue Line 558DED, Button 558DED, Tooltip Text 558DED
 
 Light Blue Line 5CBCDF, Button 5CBCDF, Tooltip Text 5CBCDF
 
-
+==========================================================
 
 Night Theme
 Tooltip Arrow D2D5D7

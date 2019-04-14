@@ -20,10 +20,10 @@
 		dark_color = '#242f3e',
 		white_color = '#ffffff',
 		black_color = '#000000',
-		axis_color = '#f2f4f5',
-		axis_color_zero = '#ecf0f3',
-		axis_color_dark = '#293544',
-		axis_color_dark_zero = '#313d4d',
+		axis_color = '#182D3B',
+		axis_color_zero = '#182D3B1A',
+		axis_color_dark = '#ffffff',
+		axis_color_dark_zero = '#ffffff1A',
 		text_color_dark = '#546778',
 		text_color_light = '#96a2aa',
 		duration = 180, // ms
@@ -43,7 +43,52 @@
 		mx = Symbol('Max X'),
 		my = Symbol('Max Y'),
 		zx = Symbol('Shift X'),
-		zy = Symbol('Shift Y');
+		zy = Symbol('Shift Y'),
+		colors = {
+			'#4BD964': {
+				btn: '#5FB641',
+				text: '#3CC23F',
+			},
+			'#FE3C30': {
+				btn: '#E65850',
+				text: '#F34C44',
+			},
+			'#108BE3': {
+				btn: '#3497ED',
+				text: '#108BE3',
+			},
+			'#E8AF14': {
+				btn: '#F5BD25',
+				text: '#E4AE1B',
+			},
+		},
+		colorsDark = {
+			// '#4BD964': {
+			// 	btn: '#5FB641',
+			// 	text: '#3CC23F',
+			// },
+			// '#FE3C30': {
+			// 	btn: '#E65850',
+			// 	text: '#F34C44',
+			// },
+			// '#108BE3': {
+			// 	btn: '#3497ED',
+			// 	text: '#108BE3',
+			// },
+			// '#E8AF14': {
+			// 	btn: '#F5BD25',
+			// 	text: '#E4AE1B',
+			// },
+		};
+
+
+	function getColor(original, isLight, key) {
+		const colorObj = isLight ? colors[original] : colorsDark[original];
+		if (!colorObj) {
+			return '#000000';
+		}
+		return colorObj[key] || '#000000';
+	}
 
 	const timestamp_0 = 1515000000000;
 
@@ -455,7 +500,7 @@
 			}
 			const itemHtml = `<div class="pie-info-value item part new">
 					<div class="pie-val name">${gr.name}</div>
-					<div class="pie-val value" style="color:${gr.color};">${formatNumber(gr.totalVal)}</div>
+					<div class="pie-val value" style="color:${getColor(gr.color, this.isLight, 'text')};">${formatNumber(gr.totalVal)}</div>
 				</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = itemHtml;
@@ -966,14 +1011,7 @@
 			for (let i = 0; i < this.y_legend.length; i += 1) {
 				this.ctx.lineWidth = this.axisThickness;
 				const item = this.y_legend[i];
-				if (item.y === 0) {
-					if (this.isLight) {
-						strokeColor = axis_color_zero;
-					} else {
-						strokeColor = axis_color_dark_zero;
-					}
-				}
-				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity);
+				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity / 10);
 				this.ctx.beginPath();
 				this.ctx.moveTo(main_chart_padding, this.translateY(item.realY));
 				this.ctx.lineTo(this.width - main_chart_padding, this.translateY(item.realY));
@@ -1597,7 +1635,7 @@
 						}
 						if (!infoEl) {
 							const infoHtml = `<div class="item ${gr.opacityKey}">
-								<div class="value" style="color:${gr.color}"></div>
+								<div class="value" style="color:${getColor(gr.color, this.isLight, 'text')}"></div>
 								<div class="name">${gr.name}</div>
 							</div>`;
 							const template = document.createElement('template');
@@ -1606,6 +1644,8 @@
 							const valueEl = infoEl.getElementsByClassName('value')[0];
 							infoEl.valueEl = valueEl;
 							this.infoBox.appendChild(infoEl);
+						} else {
+							infoEl.valueEl.style.color = getColor(gr.color, this.isLight, 'text');
 						}
 						infoEl.classList.remove('hidden');
 						changeLabels(infoEl.valueEl, valueText);
@@ -1785,9 +1825,11 @@
 			const btns = this.graphs.map((gr) => {
 				const template = document.createElement('template');
 				const html = `<div class="btn btn-on">
-				<div class="btn-filler" style="border-color: ${gr.color}"></div>
+				<div class="btn-filler show-light" style="border-color: ${getColor(gr.color, true, 'btn')}"></div>
+				<div class="btn-filler show-dark" style="border-color: ${getColor(gr.color, false, 'btn')}"></div>
 				<div class="btn-mark"><img class="on-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wMMDTMnCMtF7AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAG5SURBVFjD7dhbSwJBFADgc6K3AvEvdPGx8t0hsSwruxhJF6QIwhCEHusv9BMK+iWGbY7mpashSEJBYVEoobaWuuL2GuZl13VXH3YeZ2eXj5kzh3MWDb5x6MbRA106VJgKU2EqTIXJNHoV3wnsgXODl/87Z/KbkeO5zu1YLRQAgNfg4Tt2lPVQHY0xBBSFUgSGgOAjZ3xX3UqhKJPfjIrChKAmAlP/bqSsMEqYpihzwIKlSkm5oxSKKlQK4mJMrxkDShieEoYf7htqO2r6YrYhCgAAq5sRSphPANBWrTsk1HjQDpQlOIf5cr6lW6mtMbdPCeOUipoJWgWhxMbYESXMZKsoa2gB2TIrWx7zUMIMiEXNh5Ywy+WkJditm21s8s7jqGZEMGoxbMMMlxGfnGt14rp+HZzoj3mpacMWXsF0Kd2+QjHBJsB550IpqOWIvWVUwxiLf8XBFXW3hLNHVjFVTMlXWsdyMXDf74nCrV1u4HvxQ/6aP5qNAgAMCvnY+pUDXwtvyjUjhBqfAMDcaI3jehOTP0nluyRCjaf1nu3cOvH5+6Vz7RuhxlrxtvvAJtpfZKp/FFWYzOMXdz2r/357T48AAAAASUVORK5CYII=" /></div>
-				<div class="btn-text" style="color: ${gr.color}">${gr.name}</div>
+				<div class="btn-text show-light" style="color: ${getColor(gr.color, true, 'btn')}">${gr.name}</div>
+				<div class="btn-text show-dark" style="color: ${getColor(gr.color, false, 'btn')}">${gr.name}</div>
 			</div>`;
 				template.innerHTML = html;
 				const el = template.content.firstChild;

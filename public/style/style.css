@@ -57,7 +57,7 @@ body.isDark {
 .zoom-out {
 	font-size: 18px;
 	cursor: pointer;
-	color: #108be3;
+	color: #108BE3;
 	text-decoration: none;
 	font-weight: bolder;
 	margin: 1em 0;
@@ -70,6 +70,22 @@ body.isDark {
 .dark-theme .zoom-out {
 	background-image: url('/img/mg_d.png');
 	color: #48aaf0;
+}
+
+.show-light {
+	display: initial !important;
+}
+
+.show-dark {
+	display: none !important;
+}
+
+.dark-theme .show-dark {
+	display: initial !important;
+}
+
+.dark-theme .show-light {
+	display: none !important;
 }
 
 .title-container {
@@ -212,8 +228,8 @@ a {
 .overlay{
   position: absolute;
   height: 40px;
-  background: #e7f5fc;
-  opacity: 0.7;
+  background: #E2EEF9;
+  opacity: 0.6;
   width: 100px;
   -webkit-tap-highlight-color: transparent;
   -moz-user-select: none;
