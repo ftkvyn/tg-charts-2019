@@ -639,9 +639,9 @@
 			}
 			this.infoBox.style.left = `${left}px`;
 			if (gr.yc <= this.height) {
-				this.infoBox.style.top = `${this.height / 2 + 20}px`;
+				this.infoBox.style.top = `${-gr.yc * 0.1}px`;
 			} else {
-				this.infoBox.style.top = `${this.height / 2 - 50}px`;
+				this.infoBox.style.top = `${gr.yc * 0.3}px`;
 			}
 		}
 
