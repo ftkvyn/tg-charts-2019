@@ -26,7 +26,8 @@
 		axis_color_dark_zero = '#ffffff1A',
 
 		text_color_dark = '#A3B1C2',
-		text_color_bar_dark = '#546778',
+		text_color_bar_dark_x = '#A3B1C2',
+		text_color_bar_dark_y = '#ECF2F8',
 		text_color_light = '#8E8E93',
 		text_color_bar_light = '#252529',
 
@@ -1113,7 +1114,7 @@
 			this.ctx.font = '12px Arial';
 			let textColor = this.isLight ? text_color_light : text_color_dark;
 			if (this.type === 'bar' || this.type === 'area') {
-				textColor = this.isLight ? text_color_bar_light : text_color_bar_dark;
+				textColor = this.isLight ? text_color_bar_light : text_color_bar_dark_y;
 			}
 
 			// y-legend
@@ -1145,11 +1146,7 @@
 				} else {
 					let opacityMult = 1;
 					if (this.type === 'bar' || this.type === 'area') {
-						if (this.isLight) {
-							opacityMult = 0.5;
-						} else {
-							// TBD
-						}
+						opacityMult = 0.5;
 					} else if (!this.isLight) {
 						opacityMult = 0.6;
 					}
@@ -1159,6 +1156,9 @@
 			}
 
 			this.ctx.lineWidth = this.axisThickness;
+			if (this.type === 'bar' || this.type === 'area') {
+				textColor = this.isLight ? text_color_bar_light : text_color_bar_dark_x;
+			}
 
 			// x-legend
 			for (let i = this.prev_start_i - 2; i < this.prev_end_i; i += 1) {
@@ -1170,7 +1170,7 @@
 							if (this.isLight) {
 								opacityMult = 0.5;
 							} else {
-								// TBD
+								opacityMult = 0.6;
 							}
 						} else if (!this.isLight) {
 							opacityMult = 0.6;

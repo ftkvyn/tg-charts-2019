@@ -1,2 +1,1 @@
-8. Colors
 19. Check if data is displayed correctly
