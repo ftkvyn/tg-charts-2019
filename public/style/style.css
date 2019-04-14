@@ -205,6 +205,10 @@ a {
   transition: margin .2s;
 }
 
+.map_container .chart_map {
+	  border-radius: 10px;
+}
+
 .overlay{
   position: absolute;
   height: 40px;
@@ -219,11 +223,15 @@ a {
 	background: #1d2837;
 }
 .overlay.overlay_left{
-  left: 0;
+	left: 0;
+	border-bottom-left-radius: 10px;
+	border-top-left-radius: 10px;
 }
 .overlay.overlay_right{
   right: 0;
-  width: 0;
+	width: 0;
+	border-bottom-right-radius: 10px;
+	border-top-right-radius: 10px;
 }
 .selected{
   position: absolute;
