@@ -2104,8 +2104,13 @@
 					toDate = this.pieChart.x_vals[this.pieChart.start_i + this.pieChart.selectedDays - 1];
 				}
 			} else if (!this.isOverview) {
-				fromDate = this.mainChart.x_vals[this.mainChart.start_i + 5];
-				toDate = this.mainChart.x_vals[this.mainChart.end_i - 5];
+				if (this.isSingleBar) {
+					fromDate = this.mainChart.x_vals[Math.round(this.mainChart.x_vals.length / 2)];
+					toDate = fromDate;
+				} else {
+					fromDate = this.mainChart.x_vals[this.mainChart.start_i + 5];
+					toDate = this.mainChart.x_vals[this.mainChart.end_i - 5];
+				}
 			} else {
 				fromDate = this.mainChart.x_vals[this.mainChart.start_i + 1];
 				toDate = this.mainChart.x_vals[this.mainChart.end_i - 2];
@@ -2344,8 +2349,8 @@
 			this.overlay_left.style.width = `${leftVal}px`;
 
 			if (this.pieChart) {
-				this.pieChart[zx] = this.detailsFrom;
-				this.pieChart[mx] = toX;
+				this.pieChart[zx] = this.detailsFrom + 86400000;
+				this.pieChart[mx] = toX + 86400000;
 				this.pieChart.selectedDays = daysDelta;
 				this.pieChart.minSelectedDays = daysDelta;
 			} else {
@@ -2479,6 +2484,7 @@
 
 			this.mainChart.changeChart = () => {
 				if (this.isPieChartDetails) {
+					this.mainChart.last_details_num += 1;
 					this.generatePieDetailsData();
 				}
 				this.disappear();
@@ -2808,7 +2814,7 @@
 		}
 
 		showDetails() {
-			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num + 1];
+			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num];
 			this.detailsFrom = selectedX;
 			if (this.isPieChartDetails) {
 				this.showPieDetails();
