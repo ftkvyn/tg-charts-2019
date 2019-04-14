@@ -415,7 +415,7 @@
 		setStartEnd() {
 			let start_i = this.x_vals.findIndex((val) => { return val >= this[zx]; });
 			if (start_i > 0) {
-				start_i -= 1; // Starting from the first point beyond the chart to the left;
+				// start_i -= 1; // Starting from the first point beyond the chart to the left;
 			}
 			const end_i = start_i + this.selectedDays;
 			this.start_i = start_i;
@@ -638,7 +638,6 @@
 				left -= width * 0.3;
 			}
 			this.infoBox.style.left = `${left}px`;
-			console.log(gr.yc);
 			if (gr.yc <= this.height) {
 				this.infoBox.style.top = `${gr.yc / 2 - 120}px`;
 			} else {
@@ -1215,6 +1214,9 @@
 			if (end_i < this.x_vals.length) {
 				end_i += 1; // Going till the first one beyond the chart to the right;
 			}
+			if (this.percentBars) {
+				end_i = this.x_vals.length + 1;
+			}
 			this.start_i = start_i;
 			this.end_i = end_i;
 		}
@@ -1339,7 +1341,7 @@
 		drawBarChart() {
 			this.setStartEnd();
 			this.bar_width = undefined;
-			const x_step = this.x_vals[this.end_i - 1] - this.x_vals[this.end_i - 2];
+			const x_step = this.x_vals[this.end_i - 2] - this.x_vals[this.end_i - 3];
 			for (let i = this.start_i + 1; i < this.end_i; i += 1) {
 				let currentHeight = 0;
 				let sum = 0;
@@ -2340,6 +2342,10 @@
 			}
 			this.detailsFrom -= 3600000;
 			let toX = this.detailsFrom + 86400000; // Adding 1day in ms
+			if (this.pieChart) {
+				this.detailsFrom -= 86400000;
+				toX -= 86400000;
+			}
 			const totalX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1] - this.mapChart.x_vals[0];
 			const scale = totalX / this.container_width;
 			const pad = this.mapChart.x_vals[0];
@@ -2613,6 +2619,11 @@
 
 		// eslint-disable-next-line class-methods-use-this
 		appearChart(chart) {
+			if (chart.percentBars) {
+				// ToDo: remove
+				chart.drawAll();
+				return;
+			}
 			const origMx = chart[mx];
 			const origZx = chart[zx];
 			const delta = origMx - origZx;
@@ -2771,7 +2782,7 @@
 		}
 
 		loadDetails(folder, file) {
-			return fetch(`/data_1/${this.num}/${folder}/${file}.json`)
+			return fetch(`data_1/${this.num}/${folder}/${file}.json`)
 				.then((response) => {
 					const jsonData = response.json();
 					return jsonData;
@@ -2780,7 +2791,7 @@
 
 		loadMainData() {
 			if (!this.overviewData) {
-				return fetch(`/data_1/${this.num}/overview.json`)
+				return fetch(`data_1/${this.num}/overview.json`)
 					.then((response) => {
 						const jsonData = response.json();
 						this.overviewData = jsonData;
@@ -2813,7 +2824,7 @@
 			};
 
 			const from = this.mainChart.start_i;
-			const to = this.mainChart.end_i;
+			const to = this.mainChart.end_i + 1;
 			this.collection.columns.forEach((col) => {
 				const newCol = [col[0], ...col.slice(from, to)];
 				this.pieDetailsData.columns.push(newCol);
