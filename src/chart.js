@@ -31,7 +31,7 @@
 		padding_x = 0.003,
 		pie_pad = 0.2,
 		main_chart_padding = 16,
-		map_left_padding = 0.01,
+		map_left_padding = 0.002,
 		min_thumb_width = 20,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,

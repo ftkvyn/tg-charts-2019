@@ -1,4 +1,2 @@
 8. Colors
-9. Handle long click
-18. All left padding to X to allow selecting most left value
 19. Check if data is displayed correctly
