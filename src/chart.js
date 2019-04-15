@@ -882,6 +882,7 @@
 							name: dayNames[0],
 							nameClear: dayNames[0].replace(',', ''),
 							monthName: months[date.getMonth()],
+							dayMonth: `${date.getDate()} ${months[date.getMonth()]}`,
 							year: date.getFullYear(),
 							day: dayNames[1],
 							x: val,
@@ -1183,7 +1184,11 @@
 						}
 						this.ctx.fillStyle = textColor + getOpacity(val.opacity * opacityMult);
 						const x = this.translateX(val.x) - Math.round(x_legend_val_width / 2);
-						this.ctx.fillText(val.nameClear, x, -3);
+						if (this.isDetails) {
+							this.ctx.fillText(val.nameClear, x, -3);
+						} else {
+							this.ctx.fillText(val.dayMonth, x, -3);
+						}
 					}
 				}
 			}
