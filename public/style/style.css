@@ -62,13 +62,13 @@ body.isDark {
 	font-weight: bolder;
 	margin: 1em 0;
 	padding-left: 27px;
-	background-image: url('img/mg_l.png');
+	background-image: url('../img/mg_l.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 }
 
 .dark-theme .zoom-out {
-	background-image: url('img/mg_d.png');
+	background-image: url('../img/mg_d.png');
 	color: #48aaf0;
 }
 
