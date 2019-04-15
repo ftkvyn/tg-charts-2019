@@ -494,7 +494,7 @@ a {
 	font-weight: bold;
 	width: 7px;
 	height: 13px;
-	background-image: url('img/more_l.png');
+	background-image: url('../img/more_l.png');
 	background-size: 100%;
 	background-repeat: no-repeat;
 	cursor: pointer;
@@ -503,7 +503,7 @@ a {
 }
 
 .dark-theme .info .show-more{
-	background-image: url('img/more_d.png');
+	background-image: url('../img/more_d.png');
 }
 
 .dark-theme .info {
