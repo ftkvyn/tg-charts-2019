@@ -1613,7 +1613,11 @@
 				deltaScale = 1;
 			}
 			const additionalVal = val.deltaValue * deltaScale;
-			this[key] = val.originalValue + additionalVal;
+			if (deltaScale < 1 && Math.abs(additionalVal) > 10) {
+				this[key] = r(val.originalValue + additionalVal);
+			} else {
+				this[key] = val.originalValue + additionalVal;
+			}
 			if (deltaScale >= 1) {
 				initChangesObject.call(this.changes, key);
 			}
