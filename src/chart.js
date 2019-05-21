@@ -12,6 +12,8 @@
 	global.webkitRequestAnimationFrame || global.msRequestAnimationFrame;
 	global.requestAnimationFrame = requestAnimationFrame;
 
+	const r = Math.round;
+
 	const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		months = monthsFull.map((m) => { return m.substr(0, 3); }),
 		daysFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -1131,8 +1133,8 @@
 				const item = this.y_legend[i];
 				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity / 10);
 				this.ctx.beginPath();
-				this.ctx.moveTo(main_chart_padding, this.translateY(item.realY));
-				this.ctx.lineTo(this.width - main_chart_padding, this.translateY(item.realY));
+				this.ctx.moveTo(r(main_chart_padding), r(this.translateY(item.realY)));
+				this.ctx.lineTo(r(this.width - main_chart_padding), r(this.translateY(item.realY)));
 				this.ctx.stroke();
 				if (this.y_scaled) {
 					if (!item.hideLeft) {
@@ -1239,13 +1241,13 @@
 
 			const x0 = this.translateX(orig_x0),
 				y0 = this.translateY(orig_y0);
-			this.ctx.moveTo(x0, y0);
+			this.ctx.moveTo(r(x0), r(y0));
 		}
 
 		drawNextPoint(orig_x, orig_y) {
 			const x = this.translateX(orig_x),
 				y = this.translateY(orig_y);
-			this.ctx.lineTo(x, y);
+			this.ctx.lineTo(r(x), r(y));
 		}
 
 		endDraw() {
@@ -1273,7 +1275,7 @@
 			this.ctx.beginPath();
 			const x0 = this.translateX(prevLine[prevLine.length - 1].x),
 				y0 = this.translateY(prevLine[prevLine.length - 1].y);
-			this.ctx.moveTo(x0, y0);
+			this.ctx.moveTo(r(x0), r(y0));
 			for (let i = prevLine.length - 2; i >= 0; i -= 1) {
 				this.drawNextPoint(prevLine[i].x, prevLine[i].y);
 			}
@@ -1343,7 +1345,7 @@
 				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
 			}
 			this.bar_width = x2 - x1;
-			this.ctx.fillRect(x1, y1, this.bar_width, y2 - y1);
+			this.ctx.fillRect(r(x1), r(y1), r(this.bar_width), r(y2 - y1));
 		}
 
 		drawBarChart() {
