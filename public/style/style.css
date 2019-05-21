@@ -364,7 +364,7 @@ a {
 
 .btn-filler {
 	  border-radius: 30px;
-    border-width: 18px;	
+    border-width: 20px;	
     border-style: solid;	
     box-sizing: border-box;	
     transition: border-width .2s;	
@@ -404,7 +404,7 @@ a {
 .btn .btn-mark img{
 	position: absolute;
 	left: 10px;
-	top: 9px;
+	top: 11px;
 	width: 16px;
 	height: 16px;
 	transform: scale(1);
@@ -418,7 +418,7 @@ a {
 .btn .btn-text {
 	display: block;
 	float: right;
-	padding-top: 3px;
+	padding-top: 5px;
 	padding-left: 7px;
 	padding-right: 7px;
 	position: relative;
