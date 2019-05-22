@@ -824,6 +824,8 @@
 			this.ctx = canv.getContext('2d');
 			this.changes = {};
 
+			this.xLegendContainer = canv.parentElement.getElementsByClassName('x-labels')[0];
+
 			this.thickness = 2;
 			this.axisThickness = 1;
 
@@ -1123,7 +1125,7 @@
 			}
 		}
 
-		drawAxis() {
+		drawAxis(isInitial) {
 			if (!this.isDrawAxis) {
 				return;
 			}
@@ -1135,10 +1137,7 @@
 				strokeColor = axis_color_dark;
 			}
 			this.ctx.font = '12px Arial';
-			let textColor = this.isLight ? text_color_light : text_color_dark;
-			if (this.type === 'bar' || this.type === 'area') {
-				textColor = this.isLight ? text_color_bar_light : text_color_bar_dark_y;
-			}
+			const textColor = this.isLight ? text_color_light : text_color_dark;
 
 			// y-legend
 			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
@@ -1178,33 +1177,39 @@
 				}
 			}
 
-			this.ctx.lineWidth = this.axisThickness;
-			if (this.type === 'bar' || this.type === 'area') {
-				textColor = this.isLight ? text_color_bar_light : text_color_bar_dark_x;
-			}
-
 			// x-legend
-			for (let i = this.prev_start_i - 2; i < this.prev_end_i; i += 1) {
+			if (this.isDisappearing) {
+				return;
+			}
+			for (let i = 0; i < this.x_legend.length; i += 1) {
 				if (this.x_legend[i]) {
 					const val = this.x_legend[i];
-					if (val.opacity) {
-						let opacityMult = 1;
-						if (this.type === 'bar' || this.type === 'area') {
-							if (this.isLight) {
-								opacityMult = 0.5;
-							} else {
-								opacityMult = 0.6;
-							}
-						} else if (!this.isLight) {
-							opacityMult = 0.6;
-						}
-						this.ctx.fillStyle = textColor + getOpacity(val.opacity * opacityMult);
-						const x = this.translateX(val.x) - Math.round(x_legend_val_width / 2);
-						if (this.isDetails) {
-							this.ctx.fillText(val.nameClear, x, -3);
+					if (val.opacity && (i > this.prev_start_i - 2 && i < this.prev_end_i + 2)) {
+						const x = this.translateX(val.x);
+						if (!val.labelEl) {
+							const template = document.createElement('template');
+							template.innerHTML = `<div class="x-label ${isInitial ? '' : 'hidden'}" style="left:${x}px;color:${textColor}">${this.isDetails ? val.nameClear : val.dayMonth}</div>`;
+							const labelEl = template.content.firstChild;
+							this.xLegendContainer.appendChild(labelEl);
+							val.labelEl = labelEl;
+							setTimeout(() => {
+								if (val.labelEl) {
+									val.labelEl.classList.remove('hidden');
+								}
+							});
 						} else {
-							this.ctx.fillText(val.dayMonth, x, -3);
+							val.labelEl.classList.remove('hidden');
+							val.labelEl.style.left = `${x}px`;
+							val.labelEl.style.color = textColor;
 						}
+					} else if (val.labelEl) {
+						val.labelEl.classList.add('hidden');
+						setTimeout(() => {
+							if (val.labelEl && val.labelEl.classList.contains('hidden')) {
+								this.xLegendContainer.removeChild(val.labelEl);
+								val.labelEl = null;
+							}
+						}, duration);
 					}
 				}
 			}
@@ -1218,7 +1223,7 @@
 				this.recalculateScaledY();
 			}
 			this.drawChart();
-			this.drawAxis();
+			this.drawAxis(isInitial);
 			if (this.detailsCanv) {
 				this.drawDetails();
 			}
@@ -2699,10 +2704,15 @@
 				}
 
 				for (let i = 0; i < this.mainChart.x_legend.length; i += 1) {
-					const item = this.mainChart.x_legend[i];
-					if (item.display) {
-						item.display = false;
-						item.startTimestamp = Date.now();
+					const val = this.mainChart.x_legend[i];
+					if (val.labelEl) {
+						val.labelEl.classList.add('hidden');
+						setTimeout(() => {
+							if (val.labelEl && val.labelEl.classList.contains('hidden')) {
+								this.mainChart.xLegendContainer.removeChild(val.labelEl);
+								val.labelEl = null;
+							}
+						}, duration);
 					}
 				}
 			}
