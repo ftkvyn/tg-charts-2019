@@ -340,7 +340,7 @@ a {
 }
 
 .btn.btn-off {
-	
+	height: 26px;
 }
 
 .btn .btn-overlay {
@@ -602,6 +602,14 @@ a {
 
 .info .item .name {
 	float: left;
+}
+
+.info .item .value.percent-value {
+	font-weight: bold;
+	margin-right: 7px;
+	min-width: 35px;
+	width: 35px;
+	text-align: right;
 }
 
 .info.pie-info {

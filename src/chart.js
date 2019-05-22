@@ -1790,32 +1790,52 @@
 
 				let total = 0;
 
+				if (this.type === 'bar' || this.type === 'area') {
+					this.graphs.forEach((gr) => {
+						if (gr.display) {
+							total += gr.y_vals[this.details_num];
+						}
+					});
+				}
+
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
 						let infoEl = this.infoBox.getElementsByClassName(gr.opacityKey)[0];
 						let valueText = '';
-						total += gr.y_vals[this.details_num];
+						let percentNode = '';
+						let percent = 0;
 						if (gr.y_scaled) {
 							valueText = formatNumber(gr.y_vals_orig[this.details_num], true);
 						} else {
 							valueText = formatNumber(gr.y_vals[this.details_num], true);
 						}
+						if (this.type === 'area') {
+							percent = r(100 * gr.y_vals[this.details_num] / total);
+							percentNode = '<div class="percent-value name value"></div>';
+						}
 						if (!infoEl) {
 							const infoHtml = `<div class="item ${gr.opacityKey}">
-								<div class="value" style="color:${getColor(gr.color, this.isLight, 'text')}"></div>
+								${percentNode}
+								<div class="value num-value" style="color:${getColor(gr.color, this.isLight, 'text')}"></div>
 								<div class="name">${gr.name}</div>
 							</div>`;
 							const template = document.createElement('template');
 							template.innerHTML = infoHtml;
 							infoEl = template.content.firstChild;
-							const valueEl = infoEl.getElementsByClassName('value')[0];
+							const valueEl = infoEl.getElementsByClassName('num-value')[0];
 							infoEl.valueEl = valueEl;
 							this.infoBox.appendChild(infoEl);
+							if (this.type === 'area') {
+								infoEl.percentEl = infoEl.getElementsByClassName('percent-value')[0];
+							}
 						} else {
 							infoEl.valueEl.style.color = getColor(gr.color, this.isLight, 'text');
 						}
 						infoEl.classList.remove('hidden');
 						changeLabels(infoEl.valueEl, valueText);
+						if (this.type === 'area') {
+							changeLabels(infoEl.percentEl, `${percent} %`);
+						}
 					}
 				});
 
