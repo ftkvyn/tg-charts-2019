@@ -664,3 +664,34 @@ a {
 .x-labels .x-label.hidden {
 	opacity: 0;
 }
+
+.y-labels {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100px;
+	height: 310px;
+	overflow: hidden;
+}
+.y-labels.y-labels-right {
+	right: 0;
+	left: initial;
+}
+.y-labels .y-label {
+	position: absolute;
+	bottom: 29px;
+	left: 15px;
+	color: white;
+	font-size: 12px;
+	white-space: nowrap;
+	opacity: 1;
+	transition: opacity .2s;
+}
+.y-labels.y-labels-right .y-label {
+	left: initial;
+	right: 9px;
+}
+
+.y-labels .y-label.hidden {
+	opacity: 0;
+}

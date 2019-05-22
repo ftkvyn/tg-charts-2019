@@ -202,7 +202,7 @@
 	function getColor(original, isLight, key) {
 		const colorObj = isLight ? colors[original] : colorsDark[original];
 		if (!colorObj) {
-			return '#000000'; //original;
+			return '#000000'; // original;
 		}
 		return (colorObj[key] || original).toLowerCase();
 	}
@@ -425,7 +425,7 @@
 		}
 
 		setStartEnd() {
-			let start_i = this.x_vals.findIndex((val) => { return val >= this[zx]; });
+			const start_i = this.x_vals.findIndex((val) => { return val >= this[zx]; });
 			if (start_i > 0) {
 				// start_i -= 1; // Starting from the first point beyond the chart to the left;
 			}
@@ -825,6 +825,8 @@
 			this.changes = {};
 
 			this.xLegendContainer = canv.parentElement.getElementsByClassName('x-labels')[0];
+			this.yLegendContainer = canv.parentElement.getElementsByClassName('y-labels')[0];
+			this.yLegendRightContainer = canv.parentElement.getElementsByClassName('y-labels-right')[0];
 
 			this.thickness = 2;
 			this.axisThickness = 1;
@@ -1125,6 +1127,50 @@
 			}
 		}
 
+		displayYLabel(item, y, isInitial, textColor, container, isForceHide, isScaled) {
+			let labelEl = isScaled ? item.scaledLabelEl : item.labelEl;
+			if (item.opacity && !this.isDisappearing && !isForceHide) {
+				if (!labelEl) {
+					const template = document.createElement('template');
+					template.innerHTML = `<div class="y-label ${isInitial ? '' : 'hidden'}" style="bottom:${-y}px;color:${textColor}">${formatNumber(isScaled ? item.scaled_y : item.y)}</div>`;
+					labelEl = template.content.firstChild;
+					container.appendChild(labelEl);
+					if (isScaled) {
+						item.scaledLabelEl = labelEl;
+					} else {
+						item.labelEl = labelEl;
+					}
+					setTimeout(() => {
+						if (labelEl) {
+							labelEl.classList.remove('hidden');
+						}
+					});
+				} else {
+					labelEl.classList.remove('hidden');
+					labelEl.style.bottom = `${-y}px`;
+					labelEl.style.color = textColor;
+				}
+			} else if (!isScaled) {
+				if (item.labelEl) {
+					item.labelEl.classList.add('hidden');
+					setTimeout(() => {
+						if (item.labelEl && item.labelEl.classList.contains('hidden')) {
+							container.removeChild(item.labelEl);
+							item.labelEl = null;
+						}
+					}, duration);
+				}
+			} else if (item.scaledLabelEl) {
+				item.scaledLabelEl.classList.add('hidden');
+				setTimeout(() => {
+					if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('hidden')) {
+						container.removeChild(item.scaledLabelEl);
+						item.scaledLabelEl = null;
+					}
+				}, duration);
+			}
+		}
+
 		drawAxis(isInitial) {
 			if (!this.isDrawAxis) {
 				return;
@@ -1137,10 +1183,24 @@
 				strokeColor = axis_color_dark;
 			}
 			this.ctx.font = '12px Arial';
-			const textColor = this.isLight ? text_color_light : text_color_dark;
+			let textColor = this.isLight ? text_color_light : text_color_dark;
 
 			// y-legend
-			this.y_legend = this.y_legend.filter((leg) => { return leg.display || leg.opacity; }); // removing old garbage.
+			this.y_legend
+				.filter((leg) => { return !(leg.display || leg.opacity); })
+				.forEach((item) => {
+					if (item.labelEl) {
+						item.labelEl.classList.add('hidden');
+						setTimeout(() => {
+							if (item.labelEl && item.labelEl.classList.contains('hidden')) {
+								this.yLegendContainer.removeChild(item.labelEl);
+								item.labelEl = null;
+								item.removed = true;
+							}
+						}, duration);
+					}
+				});
+			this.y_legend = this.y_legend.filter((leg) => { return !leg.removed; }); // removing old garbage.
 			for (let i = 0; i < this.y_legend.length; i += 1) {
 				this.ctx.lineWidth = this.axisThickness;
 				const item = this.y_legend[i];
@@ -1149,31 +1209,19 @@
 				this.ctx.moveTo(r(main_chart_padding), r(this.translateY(item.realY)));
 				this.ctx.lineTo(r(this.width - main_chart_padding), r(this.translateY(item.realY)));
 				this.ctx.stroke();
+
+				const y = this.translateY(item.realY) - y_legend_text_height;
+
 				if (this.y_scaled) {
-					if (!item.hideLeft) {
-						this.ctx.fillStyle = getColor(this.graphs[0].color, this.isLight, 'text') + getOpacity(item.opacity);
-						if (!this.graphs[0].display) {
-							this.ctx.fillStyle = getColor(this.graphs[0].color, this.isLight, 'text') + getOpacity(this[this.graphs[0].opacityKey]);
-						}
-						this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.realY) - y_legend_text_height);
+					this.displayYLabel(item, y, isInitial, getColor(this.graphs[0].color, this.isLight, 'text'), this.yLegendContainer, item.hideLeft);
+
+					this.displayYLabel(item, y, isInitial, getColor(this.graphs[1].color, this.isLight, 'text'), this.yLegendRightContainer, item.hideRight, true);
+				} else {
+					if (this.type === 'bar' || this.type === 'area') {
+						textColor = this.isLight ? text_color_bar_light : text_color_bar_dark_y;
 					}
 
-					if (!item.hideRight) {
-						this.ctx.fillStyle = getColor(this.graphs[1].color, this.isLight, 'text') + getOpacity(item.opacity);
-						if (!this.graphs[1].display) {
-							this.ctx.fillStyle = getColor(this.graphs[1].color, this.isLight, 'text') + getOpacity(this[this.graphs[1].opacityKey]);
-						}
-						this.ctx.fillText(`${formatNumber(item.scaled_y)}`, this.width - main_chart_padding - 30, this.translateY(item.realY) - y_legend_text_height);
-					}
-				} else {
-					let opacityMult = 1;
-					if (this.type === 'bar' || this.type === 'area') {
-						opacityMult = 0.5;
-					} else if (!this.isLight) {
-						opacityMult = 0.6;
-					}
-					this.ctx.fillStyle = textColor + getOpacity(item.opacity * opacityMult);
-					this.ctx.fillText(`${formatNumber(item.y)}`, main_chart_padding, this.translateY(item.realY) - y_legend_text_height);
+					this.displayYLabel(item, y, isInitial, textColor, this.yLegendContainer);
 				}
 			}
 
@@ -1502,7 +1550,7 @@
 								item.startTimestamp = Date.now();
 							} else {
 								// Speed up disappearing
-								item.startTimestamp -= duration / 2;
+								// item.startTimestamp -= duration / 2;
 							}
 						}
 						let val = newMin;
@@ -1536,7 +1584,18 @@
 							}
 							val += step;
 							if (!this.isDisappearing) {
-								this.y_legend.push(item);
+								const existing = this.y_legend.filter(leg => {return leg.y === item.y});
+								if (existing.length) {
+									existing[0].opacity = item.opacity;
+									existing[0].display = true;
+									existing[0].realY = item.realY;
+
+									existing[0].hideLeft = item.hideLeft;
+									existing[0].hideRight = item.hideRight;
+									existing[0].scaled_y = item.scaled_y;
+								} else {
+									this.y_legend.push(item);
+								}
 							}
 						}
 					}
