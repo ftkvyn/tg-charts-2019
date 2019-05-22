@@ -521,6 +521,7 @@ a {
 	height: 18px;
 	min-width: 100px;
 	float: left;
+	white-space: nowrap;
 }
 
 .info .date.day{ 
