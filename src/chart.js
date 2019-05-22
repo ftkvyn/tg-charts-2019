@@ -2594,6 +2594,10 @@
 			});
 
 			this.mainChart.changeChart = () => {
+				if (this.isInTransition) {
+					return;
+				}
+				this.isInTransition = true;
 				if (this.isPieChartDetails) {
 					this.mainChart.last_details_num += 1;
 					this.generatePieDetailsData();
@@ -2932,6 +2936,7 @@
 			this.isOverview = false;
 			this.isPieDetails = true;
 			this.run(this.pieDetailsData, { isAppear: true, pieChart: true });
+			this.isInTransition = false;
 		}
 
 		showDetails() {
@@ -2949,6 +2954,7 @@
 					this.isOverview = false;
 					this.mainChart.isDetails = true;
 					this.run(detailsData, { isAppear: true });
+					this.isInTransition = false;
 				})
 				.catch((err) => {
 					console.error(err);
@@ -2957,6 +2963,7 @@
 						document.getElementById('error-box').classList.remove('shown');
 					}, 4000);
 					this.showOverview();
+					this.isInTransition = false;
 				});
 		}
 
@@ -2966,6 +2973,7 @@
 					this.isOverview = true;
 					this.mainChart.isDetails = false;
 					this.run(jsonData, { isAppear: !isInitial });
+					this.isInTransition = false;
 				})
 				.catch((err) => {
 					console.error(err);
@@ -2973,6 +2981,7 @@
 					setTimeout(() => {
 						document.getElementById('error-box').classList.remove('shown');
 					}, 4000);
+					this.isInTransition = false;
 				});
 		}
 	}
