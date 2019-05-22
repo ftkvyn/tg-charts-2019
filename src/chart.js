@@ -451,9 +451,10 @@
 				const multiplier = this[gr.scaleKey] / 100;
 				gr.totalVal = 0;
 				for (let i = this.start_i; i < this.end_i; i += 1) {
-					sum += multiplier * gr.y_vals[i];
 					gr.totalVal += multiplier * gr.y_vals[i];
 				}
+				gr.totalVal = r(gr.totalVal / this.selectedDays);
+				sum += gr.totalVal;
 			}
 
 			this.startChangeKey(sum_all, sum);
