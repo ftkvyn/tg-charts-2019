@@ -1404,7 +1404,9 @@
 				x2 = this.translateX(orig_x2),
 				y1 = this.translateY(from_y),
 				y2 = this.translateY(to_y);
-			if (this.details_num === -1) {
+			if (this.isDisappearing) {
+				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
+			} else if (this.details_num === -1) {
 				this.ctx.fillStyle = `${color}ff`;
 			} else if (this.details_num === num) {
 				this.ctx.fillStyle = `${color}ff`;
@@ -1414,9 +1416,7 @@
 			if (isEdge) {
 				this.ctx.fillStyle = color;
 			}
-			if (this.isDisappearing) {
-				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
-			}
+
 			this.bar_width = x2 - x1;
 			this.ctx.fillRect(r(x1), r(y1), r(this.bar_width), r(y2 - y1));
 		}
@@ -1425,6 +1425,7 @@
 			this.setStartEnd();
 			this.bar_width = undefined;
 			const x_step = this.x_vals[this.end_i - 2] - this.x_vals[this.end_i - 3];
+			const barColors = [];
 			for (let i = this.start_i; i < this.end_i; i += 1) {
 				let currentHeight = 0;
 				let sum = 0;
@@ -1448,9 +1449,29 @@
 						if (this.percentBars) {
 							dy = 100 * dy / sum;
 						}
-						this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, getColor(gr.color, this.isLight, 'chart'));
+						const color = getColor(gr.color, this.isLight, 'chart');
+						if (!barColors[color]) {
+							barColors[color] = [];
+						}
+						barColors[color].push({
+							orig_x1: this.x_vals[i],
+							orig_x2: this.x_vals[i] - x_step,
+							from_y: currentHeight,
+							to_y: currentHeight + dy,
+							num: i,
+						});
+						// this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, color);
 						currentHeight += dy;
 					}
+				}
+			}
+			const keys = Object.keys(barColors);
+			for (let i = 0; i < keys.length; i += 1) {
+				const color = keys[i];
+				const colorItems = barColors[color];
+				for (let k = 0; k < colorItems.length; k += 1) {
+					const item = colorItems[k];
+					this.drawNextBarItem(item.orig_x1, item.orig_x2, item.from_y, item.to_y, item.num, color);
 				}
 			}
 			this.calculateMaxY();
@@ -1584,7 +1605,7 @@
 							}
 							val += step;
 							if (!this.isDisappearing) {
-								const existing = this.y_legend.filter(leg => {return leg.y === item.y});
+								const existing = this.y_legend.filter((leg) => { return leg.y === item.y; });
 								if (existing.length) {
 									existing[0].opacity = item.opacity;
 									existing[0].display = true;
