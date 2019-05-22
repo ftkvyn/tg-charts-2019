@@ -13,6 +13,7 @@
 	global.requestAnimationFrame = requestAnimationFrame;
 
 	const r = Math.round;
+	const isEdge = window.navigator.userAgent.indexOf('Edge') > -1;
 
 	const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		months = monthsFull.map((m) => { return m.substr(0, 3); }),
@@ -203,7 +204,7 @@
 		if (!colorObj) {
 			return '#000000'; //original;
 		}
-		return colorObj[key] || original;
+		return (colorObj[key] || original).toLowerCase();
 	}
 
 	const timestamp_0 = 1515000000000;
@@ -313,6 +314,9 @@
 	}
 
 	function getOpacity(val) {
+		if (isEdge) {
+			return '';
+		}
 		return padZeros(Math.round(val).toString(16));
 	}
 
@@ -521,6 +525,9 @@
 
 					this.ctx.font = `bold ${fontSize}px Arial`;
 					this.ctx.fillStyle = '#ffffffee';
+					if (isEdge) {
+						this.ctx.fillStyle = '#ffffff';
+					}
 					const txt = `${Math.round(fraction * 100)}%`;
 					const measures = this.ctx.measureText(txt);
 
@@ -1291,6 +1298,9 @@
 		endDrawArea(color) {
 			this.ctx.closePath();
 			this.ctx.fillStyle = `${color}ff`;
+			if (isEdge) {
+				this.ctx.fillStyle = color;
+			}
 			if (this.isDisappearing) {
 				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
 			}
@@ -1347,6 +1357,9 @@
 				this.ctx.fillStyle = `${color}ff`;
 			} else {
 				this.ctx.fillStyle = `${color}80`;
+			}
+			if (isEdge) {
+				this.ctx.fillStyle = color;
 			}
 			if (this.isDisappearing) {
 				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
