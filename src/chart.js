@@ -112,6 +112,9 @@
 				btn: '#5CBCDF',
 				text: '#5CBCDF',
 			},
+			total: {
+				text: '#000000',
+			},
 		},
 		colorsDark = {
 			'#FE3C30': {
@@ -188,6 +191,9 @@
 				btn: '#4697B3',
 				text: '#4697B3',
 				chart: '#4697B3',
+			},
+			total: {
+				text: '#ffffff',
 			},
 		};
 
@@ -1782,10 +1788,13 @@
 					grItems[i].classList.add('hidden');
 				}
 
+				let total = 0;
+
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
 						let infoEl = this.infoBox.getElementsByClassName(gr.opacityKey)[0];
 						let valueText = '';
+						total += gr.y_vals[this.details_num];
 						if (gr.y_scaled) {
 							valueText = formatNumber(gr.y_vals_orig[this.details_num], true);
 						} else {
@@ -1809,6 +1818,27 @@
 						changeLabels(infoEl.valueEl, valueText);
 					}
 				});
+
+				if (this.type === 'bar' && this.graphs.length > 1) {
+					let infoEl = this.infoBox.getElementsByClassName('total')[0];
+					const valueText = formatNumber(total, true);
+					if (!infoEl) {
+						const infoHtml = `<div class="item total">
+								<div class="value" style="color:${getColor('total', this.isLight, 'text')}"></div>
+								<div class="name">All</div>
+							</div>`;
+						const template = document.createElement('template');
+						template.innerHTML = infoHtml;
+						infoEl = template.content.firstChild;
+						const valueEl = infoEl.getElementsByClassName('value')[0];
+						infoEl.valueEl = valueEl;
+						this.infoBox.appendChild(infoEl);
+					} else {
+						infoEl.valueEl.style.color = getColor('total', this.isLight, 'text');
+					}
+					infoEl.classList.remove('hidden');
+					changeLabels(infoEl.valueEl, valueText);
+				}
 
 				this.prev_details_num = this.details_num;
 				let moreThanHalf = 0;
