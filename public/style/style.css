@@ -340,7 +340,7 @@ a {
 }
 
 .btn.btn-off {
-	height: 26px;
+	height: 22px;
 }
 
 .btn .btn-overlay {
@@ -364,10 +364,10 @@ a {
 
 .btn-filler {
 	  border-radius: 30px;
-    border-width: 20px;	
+    border-width: 18px;	
     border-style: solid;	
     box-sizing: border-box;	
-    transition: border-width .2s;	
+    transition: border-width .2s, background-color .1s .2s;	
 		transition-delay: .05s;
 		position: absolute;
     left: 0;
@@ -378,6 +378,8 @@ a {
 
 .btn.btn-off .btn-filler{
 	border-width: 2px;
+	background-color: transparent !important;
+
 }
 
 
@@ -404,7 +406,7 @@ a {
 .btn .btn-mark img{
 	position: absolute;
 	left: 10px;
-	top: 11px;
+	top: 9px;
 	width: 16px;
 	height: 16px;
 	transform: scale(1);
@@ -418,9 +420,9 @@ a {
 .btn .btn-text {
 	display: block;
 	float: right;
-	padding-top: 5px;
+	padding-top: 3px;
 	padding-left: 7px;
-	padding-right: 7px;
+	padding-right: 8px;
 	position: relative;
 	font-weight: bolder;
 	transition: color .30s;
