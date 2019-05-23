@@ -1399,23 +1399,11 @@
 			this.calculateMaxY();
 		}
 
-		drawNextBarItem(orig_x1, orig_x2, from_y, to_y, num, color) {
+		drawNextBarItem(orig_x1, orig_x2, from_y, to_y) {
 			const x1 = this.translateX(orig_x1),
 				x2 = this.translateX(orig_x2),
 				y1 = this.translateY(from_y),
 				y2 = this.translateY(to_y);
-			if (this.isDisappearing) {
-				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
-			} else if (this.details_num === -1) {
-				this.ctx.fillStyle = color;
-			} else if (this.details_num === num) {
-				this.ctx.fillStyle = color;
-			} else {
-				this.ctx.fillStyle = `${color}80`;
-			}
-			if (isEdge) {
-				this.ctx.fillStyle = color;
-			}
 
 			this.bar_width = x2 - x1;
 			this.ctx.fillRect(r(x1), r(y1), r(this.bar_width), r(y2 - y1));
@@ -1460,7 +1448,6 @@
 							to_y: currentHeight + dy,
 							num: i,
 						});
-						// this.drawNextBarItem(this.x_vals[i], this.x_vals[i] - x_step, currentHeight, currentHeight + dy, i, color);
 						currentHeight += dy;
 					}
 				}
@@ -1469,9 +1456,28 @@
 			for (let i = 0; i < keys.length; i += 1) {
 				const color = keys[i];
 				const colorItems = barColors[color];
+				if (this.isDisappearing) {
+					this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
+				} else if (this.details_num === -1) {
+					this.ctx.fillStyle = `${color}ff`;
+				} else {
+					this.ctx.fillStyle = `${color}80`;
+				}
+				if (isEdge) {
+					this.ctx.fillStyle = color;
+				}
+				let selectedItem = null;
 				for (let k = 0; k < colorItems.length; k += 1) {
 					const item = colorItems[k];
-					this.drawNextBarItem(item.orig_x1, item.orig_x2, item.from_y, item.to_y, item.num, color);
+					if (this.details_num === item.num) {
+						selectedItem = item;
+						continue;
+					}
+					this.drawNextBarItem(item.orig_x1, item.orig_x2, item.from_y, item.to_y);
+				}
+				if (selectedItem) {
+					this.ctx.fillStyle = `${color}ff`;
+					this.drawNextBarItem(selectedItem.orig_x1, selectedItem.orig_x2, selectedItem.from_y, selectedItem.to_y);
 				}
 			}
 			this.calculateMaxY();
@@ -1614,6 +1620,8 @@
 									existing[0].hideLeft = item.hideLeft;
 									existing[0].hideRight = item.hideRight;
 									existing[0].scaled_y = item.scaled_y;
+									existing[0].startTimestamp = item.startTimestamp;
+									existing[0].removed = false;
 								} else {
 									this.y_legend.push(item);
 								}
@@ -3077,6 +3085,12 @@
 					this.mainChart.isDetails = false;
 					this.run(jsonData, { isAppear: !isInitial });
 					this.isInTransition = false;
+					if (!isInitial) {
+						setTimeout(() => {
+							this.mainChart.prevVisibleItems = -1;
+							this.mainChart.calculateMaxY();
+						}, duration * 2);
+					}
 				})
 				.catch((err) => {
 					console.error(err);
