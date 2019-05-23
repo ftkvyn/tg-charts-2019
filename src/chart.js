@@ -1607,7 +1607,6 @@
 							if (!this.isDisappearing) {
 								const existing = this.y_legend.filter((leg) => { return leg.y === item.y; });
 								if (existing.length) {
-									console.log(existing[0]);
 									existing[0].opacity = item.opacity;
 									existing[0].display = true;
 									existing[0].realY = item.realY;
@@ -3080,6 +3079,12 @@
 					this.mainChart.isDetails = false;
 					this.run(jsonData, { isAppear: !isInitial });
 					this.isInTransition = false;
+					if (!isInitial) {
+						setTimeout(() => {
+							this.mainChart.prevVisibleItems = -1;
+							this.mainChart.calculateMaxY();
+						}, duration * 2);
+					}
 				})
 				.catch((err) => {
 					console.error(err);
