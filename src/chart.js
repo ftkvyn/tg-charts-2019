@@ -1609,7 +1609,7 @@
 							val += step;
 							if (!this.isDisappearing) {
 								const existing = this.y_legend.filter((leg) => { return leg.y === item.y; });
-								if (existing.length) {
+								if (existing.length && existing[0].labelEl) {
 									existing[0].opacity = item.opacity;
 									existing[0].display = true;
 									existing[0].realY = item.realY;
