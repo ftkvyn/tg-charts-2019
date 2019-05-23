@@ -204,7 +204,7 @@
 	function getColor(original, isLight, key) {
 		const colorObj = isLight ? colors[original] : colorsDark[original];
 		if (!colorObj) {
-			return '#000000'; // original;
+			return original;
 		}
 		return (colorObj[key] || original).toLowerCase();
 	}
@@ -1211,6 +1211,16 @@
 							if (item.labelEl && item.labelEl.classList.contains('hidden')) {
 								this.yLegendContainer.removeChild(item.labelEl);
 								item.labelEl = null;
+								item.removed = true;
+							}
+						}, duration);
+					}
+					if (item.scaledLabelEl) {
+						item.scaledLabelEl.classList.add('hidden');
+						this.timeout(() => {
+							if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('hidden')) {
+								this.yLegendRightContainer.removeChild(item.scaledLabelEl);
+								item.scaledLabelEl = null;
 								item.removed = true;
 							}
 						}, duration);
