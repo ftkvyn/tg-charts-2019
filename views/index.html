@@ -61,6 +61,26 @@
 				});
 		}
 
+		const dark_link = document.body.getElementsByClassName('set-theme-dark')[0];
+		const light_link = document.body.getElementsByClassName('set-theme-light')[0];
+		const htmlEl = window.document.getElementsByTagName('html')[0];
+
+		dark_link.onclick = () => {
+			dark_link.style.display = 'none';
+			light_link.style.display = 'initial';
+			htmlEl.classList.add('dark');
+			let event = new Event("darkmode");
+			htmlEl.dispatchEvent(event);
+		};
+
+		light_link.onclick = () => {
+			light_link.style.display = 'none';
+			dark_link.style.display = 'initial';
+			htmlEl.classList.remove('dark');
+			let event = new Event("darkmode");
+			htmlEl.dispatchEvent(event);
+		};
+
 		const names = ['Followers', 'Interactions', 'Eaten fruits', 'Views', 'Bought fruits'];
 		const chartsEls = document.body.getElementsByClassName('app-container');
 

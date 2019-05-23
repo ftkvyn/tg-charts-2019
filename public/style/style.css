@@ -9,7 +9,7 @@ body {
 	padding-bottom: 50px;
 }
 
-body.isDark {
+.dark {
 	background: rgb(36, 47, 62);
 	color: white;
 }
@@ -50,7 +50,7 @@ body.isDark {
 	color: #108be3;
 }
 
-.isDark .theme-link {
+.dark .theme-link {
 	color: #48aaf0;
 }
 
@@ -476,7 +476,7 @@ a {
 	margin-top: 0;
 }
 
-.isDark .error-box {
+.dark .error-box {
 	background: #E65850;
 }
 
@@ -663,7 +663,7 @@ a {
 	transition: opacity .2s;
 }
 
-.isDark .x-labels .x-label {
+.dark .x-labels .x-label {
 	opacity: 0.6;
 }
 

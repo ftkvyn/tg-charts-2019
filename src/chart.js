@@ -2351,7 +2351,7 @@
 					this.appContainerEl.classList.add('no-animation');
 				}
 				this.mapChart.toggleAnimation(isOn);
-			}
+			};
 			this.mapChart = new Chart(this.chart_map, this.map_height);
 			this.mapChart.isDrawAxis = false;
 			this.mapChart.thickness = 1.2;
@@ -3083,6 +3083,12 @@
 				this.moveChart(0);
 				this.setMapBox();
 			});
+
+			const htmlEl = window.document.getElementsByTagName('html')[0];
+			htmlEl.addEventListener('darkmode', () => {
+				this.isLight = !htmlEl.classList.contains('dark');
+				this.setColors();
+			});
 		}
 
 		setPieMapAllowedX() {
@@ -3115,6 +3121,7 @@
 				from -= 1; to -= 1;
 			}
 			console.log(`${from} - ${to}`);
+			// ToDo: finish it
 			// let from = this.mainChart.start_i;
 			// let to = this.mainChart.end_i + 2;
 			// this.pieDetailsData.extraRightSpace = to === this.mainChart.x_vals.length;
@@ -3186,33 +3193,6 @@
 			this.displayOverview(this.overviewData, isInitial);
 		}
 	}
-
-	const charts = [];
-	const names = ['Followers', 'Interactions', 'Eaten fruits', 'Views', 'Bought fruits'];
-	const chartsEls = document.body.getElementsByClassName('app-container');
-
-	const dark_link = document.body.getElementsByClassName('set-theme-dark')[0];
-	const light_link = document.body.getElementsByClassName('set-theme-light')[0];
-
-	dark_link.onclick = () => {
-		for (let i = 0; i < charts.length; i += 1) {
-			charts[i].isLight = false;
-			charts[i].setColors();
-		}
-		dark_link.style.display = 'none';
-		light_link.style.display = 'initial';
-		document.body.classList.add('isDark');
-	};
-
-	light_link.onclick = () => {
-		for (let i = 0; i < charts.length; i += 1) {
-			charts[i].isLight = true;
-			charts[i].setColors();
-		}
-		light_link.style.display = 'none';
-		dark_link.style.display = 'initial';
-		document.body.classList.remove('isDark');
-	};
 
 	window.Graph = {
 		render(container, chart) {

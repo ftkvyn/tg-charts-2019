@@ -6,3 +6,4 @@
 5. попап с информацией моргает
 
 12. fix pie chart
+13. handle absence of details loading
