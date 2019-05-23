@@ -30,7 +30,7 @@
 
 		text_color_dark = '#A3B1C2',
 		text_color_bar_dark_x = '#A3B1C2',
-		text_color_bar_dark_y = '#ECF2F8',
+		text_color_bar_dark_y = '#ECF2F880',
 		text_color_light = '#8E8E93',
 		text_color_bar_light = '#252529',
 
@@ -1231,6 +1231,9 @@
 			// x-legend
 			if (this.isDisappearing) {
 				return;
+			}
+			if (this.type === 'bar' || this.type === 'area') {
+				textColor = this.isLight ? text_color_light : text_color_bar_dark_x;
 			}
 			for (let i = 0; i < this.x_legend.length; i += 1) {
 				if (this.x_legend[i]) {
