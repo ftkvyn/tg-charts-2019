@@ -1607,6 +1607,7 @@
 							if (!this.isDisappearing) {
 								const existing = this.y_legend.filter((leg) => { return leg.y === item.y; });
 								if (existing.length) {
+									console.log(existing[0]);
 									existing[0].opacity = item.opacity;
 									existing[0].display = true;
 									existing[0].realY = item.realY;
@@ -1614,6 +1615,8 @@
 									existing[0].hideLeft = item.hideLeft;
 									existing[0].hideRight = item.hideRight;
 									existing[0].scaled_y = item.scaled_y;
+									existing[0].startTimestamp = item.startTimestamp;
+									existing[0].removed = false;
 								} else {
 									this.y_legend.push(item);
 								}
