@@ -35,8 +35,8 @@
 		text_color_bar_light = '#25252980',
 
 		duration = 180, // ms
-		slowFrameDelay = 120, //ms
-		slowFramesTheshold = 20,
+		slowFrameDelay = 120, // ms
+		slowFramesTheshold = 10,
 		padding_y = 0.03,
 		padding_x = 0.003,
 		pie_pad = 0.2,
@@ -1135,6 +1135,14 @@
 			}
 		}
 
+		timeout(fn, t) {
+			if (this.noAnimation) {
+				fn();
+			} else {
+				setTimeout(fn, t);
+			}
+		}
+
 		displayYLabel(item, y, isInitial, textColor, container, isForceHide, isScaled) {
 			let labelEl = isScaled ? item.scaledLabelEl : item.labelEl;
 			if (item.opacity && !this.isDisappearing && !isForceHide) {
@@ -1148,7 +1156,7 @@
 					} else {
 						item.labelEl = labelEl;
 					}
-					setTimeout(() => {
+					this.timeout(() => {
 						if (labelEl) {
 							labelEl.classList.remove('hidden');
 						}
@@ -1161,7 +1169,7 @@
 			} else if (!isScaled) {
 				if (item.labelEl) {
 					item.labelEl.classList.add('hidden');
-					setTimeout(() => {
+					this.timeout(() => {
 						if (item.labelEl && item.labelEl.classList.contains('hidden')) {
 							container.removeChild(item.labelEl);
 							item.labelEl = null;
@@ -1170,7 +1178,7 @@
 				}
 			} else if (item.scaledLabelEl) {
 				item.scaledLabelEl.classList.add('hidden');
-				setTimeout(() => {
+				this.timeout(() => {
 					if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('hidden')) {
 						container.removeChild(item.scaledLabelEl);
 						item.scaledLabelEl = null;
@@ -1199,7 +1207,7 @@
 				.forEach((item) => {
 					if (item.labelEl) {
 						item.labelEl.classList.add('hidden');
-						setTimeout(() => {
+						this.timeout(() => {
 							if (item.labelEl && item.labelEl.classList.contains('hidden')) {
 								this.yLegendContainer.removeChild(item.labelEl);
 								item.labelEl = null;
@@ -1251,7 +1259,7 @@
 							const labelEl = template.content.firstChild;
 							this.xLegendContainer.appendChild(labelEl);
 							val.labelEl = labelEl;
-							setTimeout(() => {
+							this.timeout(() => {
 								if (val.labelEl) {
 									val.labelEl.classList.remove('hidden');
 								}
@@ -1263,7 +1271,7 @@
 						}
 					} else if (val.labelEl) {
 						val.labelEl.classList.add('hidden');
-						setTimeout(() => {
+						this.timeout(() => {
 							if (val.labelEl && val.labelEl.classList.contains('hidden')) {
 								this.xLegendContainer.removeChild(val.labelEl);
 								val.labelEl = null;
@@ -1776,7 +1784,6 @@
 				if (this.slowFramesCount > slowFramesTheshold) {
 					this.toggleAnimation(false);
 				}
-				console.log(this.slowFramesCount);
 			}
 			this.prevFrameStart = this.frameStart;
 		}
