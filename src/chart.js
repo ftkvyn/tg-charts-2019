@@ -984,8 +984,10 @@
 			if (this.showMore) {
 				if (options.isDetails) {
 					this.showMore.style.display = 'none';
-				} else {
+				} else if (this.hasLoadDetails || type === 'area') {
 					this.showMore.style.display = 'block';
+				} else {
+					this.showMore.style.display = 'none';
 				}
 			}
 
@@ -2343,6 +2345,7 @@
 			this.map_height = 40;
 
 			this.mainChart = new Chart(this.main_chart, this.height);
+			this.mainChart.hasLoadDetails = !!this.loadDetails;
 			this.mainChart.zoomOutEl = this.zoomOutEl;
 			this.mainChart.onToggleAnimation = (isOn) => {
 				if (isOn) {
@@ -2797,6 +2800,9 @@
 			});
 
 			this.mainChart.changeChart = () => {
+				if (!this.isPieChartDetails && !this.loadDetails) {
+					return;
+				}
 				if (this.isInTransition) {
 					return;
 				}
