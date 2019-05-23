@@ -35,6 +35,8 @@
 		text_color_bar_light = '#25252980',
 
 		duration = 180, // ms
+		slowFrameDelay = 120, //ms
+		slowFramesTheshold = 20,
 		padding_y = 0.03,
 		padding_x = 0.003,
 		pie_pad = 0.2,
@@ -826,6 +828,9 @@
 			this.canv = canv;
 			this.ctx = canv.getContext('2d');
 			this.changes = {};
+
+			this.noAnimation = false;
+			this.slowFramesCount = 0;
 
 			this.xLegendContainer = canv.parentElement.getElementsByClassName('x-labels')[0];
 			this.yLegendContainer = canv.parentElement.getElementsByClassName('y-labels')[0];
@@ -1656,6 +1661,13 @@
 			}
 		}
 
+		toggleAnimation(isOn) {
+			this.noAnimation = !isOn;
+			if (this.onToggleAnimation) {
+				this.onToggleAnimation(isOn);
+			}
+		}
+
 		startChangeKey(key, targetVal, omitComparison) {
 			const val = this.changes[key];
 			if (!omitComparison && eq(val.targetVal, targetVal)) {
@@ -1673,12 +1685,9 @@
 		}
 
 		static changeLegendEntry(val) {
-			// if (!val.startTimestamp) {
-			// 	return 0;
-			// }
 			const delta = Date.now() - val.startTimestamp;
 			let deltaScale = delta / duration;
-			if (deltaScale > 1 || (!deltaScale && deltaScale !== 0)) {
+			if (deltaScale > 1 || (!deltaScale && deltaScale !== 0) || this.noAnimation) {
 				deltaScale = 1;
 			}
 			if (deltaScale === 1) {
@@ -1722,7 +1731,7 @@
 			}
 			const delta = Date.now() - val.startTimestamp;
 			let deltaScale = delta / duration;
-			if (deltaScale > 1) {
+			if (deltaScale > 1 || this.noAnimation) {
 				deltaScale = 1;
 			}
 			const additionalVal = val.deltaValue * deltaScale;
@@ -1738,6 +1747,7 @@
 		}
 
 		changeAllStep() {
+			this.frameStart = Date.now();
 			let somethingChanged = this.changingFields.reduce((keyChanged, key) => { return this.changeKeyStep(key) || keyChanged; }, false);
 
 			if (this.isDrawAxis) {
@@ -1750,7 +1760,25 @@
 				if (!this.animateFrameId) {
 					this.animateFrameId = requestAnimationFrame(this.changeAllStep.bind(this));
 				}
+			} else {
+				this.frameStart = undefined; // so that after next animation starts, the gap doesn't count as long frame.
 			}
+			if (this.prevFrameStart && this.frameStart && !this.noAnimation) {
+				const frameDuration = this.frameStart - this.prevFrameStart;
+				if (frameDuration > slowFrameDelay) {
+					this.slowFramesCount += 1;
+				} else {
+					this.slowFramesCount -= 1;
+				}
+				if (this.slowFramesCount < 0) {
+					this.slowFramesCount = 0;
+				}
+				if (this.slowFramesCount > slowFramesTheshold) {
+					this.toggleAnimation(false);
+				}
+				console.log(this.slowFramesCount);
+			}
+			this.prevFrameStart = this.frameStart;
 		}
 
 		toggleChart(key) {
@@ -2257,6 +2285,14 @@
 
 			this.mainChart = new Chart(this.main_chart, this.height);
 			this.mainChart.zoomOutEl = this.zoomOutEl;
+			this.mainChart.onToggleAnimation = (isOn) => {
+				if (isOn) {
+					this.appContainerEl.classList.remove('no-animation');
+				} else {
+					this.appContainerEl.classList.add('no-animation');
+				}
+				this.mapChart.toggleAnimation(isOn);
+			}
 			this.mapChart = new Chart(this.chart_map, this.map_height);
 			this.mapChart.isDrawAxis = false;
 			this.mapChart.thickness = 1.2;

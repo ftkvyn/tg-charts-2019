@@ -102,6 +102,10 @@ body.isDark {
 	opacity: 1;
 }
 
+.no-animation * {
+	transition: none !important;
+}
+
 .title-container .item.hidden {
 	transform-origin: 100% 0%;
 	transform: scale(0);
