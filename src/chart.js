@@ -32,7 +32,7 @@
 		text_color_bar_dark_x = '#A3B1C2',
 		text_color_bar_dark_y = '#ECF2F880',
 		text_color_light = '#8E8E93',
-		text_color_bar_light = '#252529',
+		text_color_bar_light = '#25252980',
 
 		duration = 180, // ms
 		padding_y = 0.03,
@@ -2274,7 +2274,7 @@
 			this.thumb_right = this.appEl.getElementsByClassName('thumb_right')[0];
 			this.overlay_left = this.appEl.getElementsByClassName('overlay_left')[0];
 			this.overlay_right = this.appEl.getElementsByClassName('overlay_right')[0];
-			this.isLight = false;
+			this.isLight = true;
 			this.windowWidth = this.appEl.clientWidth;
 
 			this.setupAllEvents();
