@@ -145,7 +145,7 @@ body {
 .legend .date .part {
 	white-space: nowrap;
 	-webkit-transform-origin: 00% 100%;
-	-webkit-transition: transform .2s, opacity .2s, width .2s;
+	-webkit-transition: -webkit-transform .2s, opacity .2s, width .2s;
 	-webkit-transform: scale(1);
 
 	transform-origin: 00% 100%;
