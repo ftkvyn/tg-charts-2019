@@ -40,7 +40,7 @@
 		pie_pad = 0.2,
 		main_chart_padding = 16,
 		map_left_padding = 0.002,
-		min_thumb_width = 10,
+		min_thumb_width = 30,
 		x_legend_padding = 20,
 		x_legend_val_width = 60,
 		y_legend_row_height = 50,
@@ -3029,13 +3029,23 @@
 				columns: [],
 			};
 
-			let from = this.mainChart.start_i;
-			let to = this.mainChart.end_i + 2;
-			this.pieDetailsData.extraRightSpace = this.mainChart.end_i === this.mainChart.x_vals.length;
-			if (from === 0) {
-				from += 1;
-				to += 1;
+			console.log(this.mainChart.last_details_num);
+			let from = this.mainChart.last_details_num - 2;
+			let to = this.mainChart.last_details_num + 4;
+			while (from < 1) {
+				from += 1; to += 1;
 			}
+			while (to > this.mainChart.x_vals.length - 1) {
+				from -= 1; to -= 1;
+			}
+			console.log(`${from} - ${to}`);
+			// let from = this.mainChart.start_i;
+			// let to = this.mainChart.end_i + 2;
+			// this.pieDetailsData.extraRightSpace = to === this.mainChart.x_vals.length;
+			// if (from === 0) {
+			// 	from += 1;
+			// 	to += 1;
+			// }
 			this.collection.columns.forEach((col) => {
 				const newCol = [col[0], ...col.slice(from, to)];
 				this.pieDetailsData.columns.push(newCol);
