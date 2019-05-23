@@ -2323,15 +2323,13 @@
 	}
 
 	class ChartContainer {
-		constructor(appContainerEl, name, num, singleBar, pieChartDetails) {
-			this.num = num;
+		constructor(appContainerEl, name, singleBar, pieChartDetails, loadDetails) {
 			this.isPieChartDetails = pieChartDetails;
 			this.isSaveBtnState = !singleBar;
 			this.isSingleBar = singleBar;
 			this.appContainerEl = appContainerEl;
-			const template = document.createElement('template');
-			template.innerHTML = chartMarkupTemplate;
-			this.appContainerEl.innerHTML = chartMarkupTemplate; //.appendChild(template.content.firstChild);
+			this.appContainerEl.innerHTML = chartMarkupTemplate;
+			this.loadDetails = loadDetails;
 
 			this.appEl = this.appContainerEl.firstElementChild;
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
@@ -3087,28 +3085,6 @@
 			});
 		}
 
-		loadDetails(folder, file) {
-			return fetch(`data_1/${this.num}/${folder}/${file}.json`)
-				.then((response) => {
-					const jsonData = response.json();
-					return jsonData;
-				});
-		}
-
-		loadMainData() {
-			if (!this.overviewData) {
-				return fetch(`data_1/${this.num}/overview.json`)
-					.then((response) => {
-						const jsonData = response.json();
-						this.overviewData = jsonData;
-						return jsonData;
-					});
-			}
-			return new Promise((resolve) => {
-				resolve(this.overviewData);
-			});
-		}
-
 		setPieMapAllowedX() {
 			const allowedPieX = [];
 			this.allowedStep = 0;
@@ -3159,6 +3135,13 @@
 			this.isInTransition = false;
 		}
 
+		displayDetails(detailsData) {
+			this.isOverview = false;
+			this.mainChart.isDetails = true;
+			this.run(detailsData, { isAppear: true });
+			this.isInTransition = false;
+		}
+
 		showDetails() {
 			const selectedX = this.mainChart.x_vals[this.mainChart.last_details_num];
 			this.detailsFrom = selectedX;
@@ -3166,15 +3149,12 @@
 				this.showPieDetails();
 				return;
 			}
-			const selectedDate = new Date(selectedX);
-			const folder = `${selectedDate.getFullYear()}-${padZeros(selectedDate.getMonth() + 1)}`;
-			const file = padZeros(selectedDate.getDate());
-			this.loadDetails(folder, file)
+			if (!this.loadDetails) {
+				return;
+			}
+			this.loadDetails(selectedX)
 				.then((detailsData) => {
-					this.isOverview = false;
-					this.mainChart.isDetails = true;
-					this.run(detailsData, { isAppear: true });
-					this.isInTransition = false;
+					this.displayDetails(detailsData);
 				})
 				.catch((err) => {
 					console.error(err);
@@ -3187,28 +3167,23 @@
 				});
 		}
 
+		displayOverview(jsonData, isInitial) {
+			this.isOverview = true;
+			this.mainChart.isDetails = false;
+			this.run(jsonData, { isAppear: !isInitial });
+			this.isInTransition = false;
+			if (!isInitial) {
+				setTimeout(() => {
+					this.mainChart.prevVisibleItems = -1;
+					this.mainChart.calculateMaxY();
+				}, duration * 2);
+			} else {
+				this.overviewData = jsonData;
+			}
+		}
+
 		showOverview(isInitial) {
-			this.loadMainData()
-				.then((jsonData) => {
-					this.isOverview = true;
-					this.mainChart.isDetails = false;
-					this.run(jsonData, { isAppear: !isInitial });
-					this.isInTransition = false;
-					if (!isInitial) {
-						setTimeout(() => {
-							this.mainChart.prevVisibleItems = -1;
-							this.mainChart.calculateMaxY();
-						}, duration * 2);
-					}
-				})
-				.catch((err) => {
-					console.error(err);
-					document.getElementById('error-box').classList.add('shown');
-					setTimeout(() => {
-						document.getElementById('error-box').classList.remove('shown');
-					}, 4000);
-					this.isInTransition = false;
-				});
+			this.displayOverview(this.overviewData, isInitial);
 		}
 	}
 
@@ -3239,12 +3214,13 @@
 		document.body.classList.remove('isDark');
 	};
 
-	for (let i = 0; i < 5; i += 1) {
-		const isSingleBar = i === 3;
-		const isPieDetails = i === 4;
-		const chart = new ChartContainer(chartsEls[i], names[i], i + 1, isSingleBar, isPieDetails);
-		charts.push(chart);
-		chart.initMapBox();
-		chart.showOverview(true);
-	}
+	window.Graph = {
+		render(container, chart) {
+			const typeKeys = Object.keys(chart.types);
+			const isSingleBar = typeKeys.length === 2 && chart.types[typeKeys[0]] === 'bar';
+			const chartItem = new ChartContainer(container, chart.title, isSingleBar, chart.percentage, chart.x_on_zoom);
+			chartItem.initMapBox();
+			chartItem.displayOverview(chart, true);
+		},
+	};
 }(window));

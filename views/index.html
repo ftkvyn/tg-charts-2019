@@ -30,6 +30,44 @@
 		</div>
 	</div>
 	<script src="js/chart.js"></script>
+	<script>
+		function padZeros(val) {
+				return (`00${val}`).substr(-2);
+			}
+
+		function generateLoadDetails(num) {
+			return function loadDetails(selectedX) {
+				const selectedDate = new Date(selectedX);
+				const folder = `${selectedDate.getFullYear()}-${padZeros(selectedDate.getMonth() + 1)}`;
+				const file = padZeros(selectedDate.getDate());
+				return fetch(`data_1/${num}/${folder}/${file}.json`)
+					.then((response) => {
+						const jsonData = response.json();
+						return jsonData;
+					});
+			}
+		}
+
+		function loadData(num) {
+			fetch(`data_1/${num + 1}/overview.json`)
+				.then((response) => {
+					const jsonData = response.json();
+					return jsonData;
+				})
+				.then((jsonData) => {
+					jsonData.title = names[num];
+					jsonData.x_on_zoom = generateLoadDetails(num + 1);
+					window.Graph.render(chartsEls[num], jsonData)
+				});
+		}
+
+		const names = ['Followers', 'Interactions', 'Eaten fruits', 'Views', 'Bought fruits'];
+		const chartsEls = document.body.getElementsByClassName('app-container');
+
+		for (let i = 0; i < 5; i += 1) {
+			loadData(i);
+		}
+	</script>
 </body>
 </html>
 
