@@ -15,6 +15,45 @@
 	const r = Math.round;
 	const isEdge = window.navigator.userAgent.indexOf('Edge') > -1;
 
+	const chartMarkupTemplate = `<div class="app">
+			<div class="appHeader">
+				<div class="title-container">
+					<div class="title item"></div>
+					<div class="zoom-out item hidden">Zoom out</div>
+				</div>
+				<div class="legend">
+					<div class="from day date"></div>
+					<div class="from month date"></div>
+					<div class="from year date"></div>
+					<div class="dash date"></div>
+					<div class="to day date"></div>
+					<div class="to month date"></div>
+					<div class="to year year-or-hour date"></div>
+				</div>
+			</div>
+			<div class="main-chart-container">
+				<canvas height="600" style="width:100%;height:300px;" class="main_chart"></canvas>
+				<canvas height="600" style="width:100%;height:300px;position: absolute;left: 0;top: 0;z-index: 1;"
+					class="details_chart"></canvas>
+				<div class="x-labels"></div>
+				<div class="y-labels"></div>
+				<div class="y-labels y-labels-right"></div>
+			</div>
+			<div class="map-chart-container">
+				<div class="map_container">
+					<div class="overlay overlay_left"></div>
+					<div class="selected" style="right:0;width:80px;">
+						<div class="thumb thumb_left">
+						</div>
+						<div class="thumb thumb_right">
+						</div>
+					</div>
+					<div class="overlay overlay_right"></div>
+					<canvas height="80" style="width:100%;height:40px;" class="chart_map"></canvas>
+				</div>
+			</div>
+		</div>`;
+
 	const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		months = monthsFull.map((m) => { return m.substr(0, 3); }),
 		daysFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -2284,12 +2323,16 @@
 	}
 
 	class ChartContainer {
-		constructor(appContainerEl, num, singleBar, pieChartDetails) {
+		constructor(appContainerEl, name, num, singleBar, pieChartDetails) {
 			this.num = num;
 			this.isPieChartDetails = pieChartDetails;
 			this.isSaveBtnState = !singleBar;
 			this.isSingleBar = singleBar;
 			this.appContainerEl = appContainerEl;
+			const template = document.createElement('template');
+			template.innerHTML = chartMarkupTemplate;
+			this.appContainerEl.innerHTML = chartMarkupTemplate; //.appendChild(template.content.firstChild);
+
 			this.appEl = this.appContainerEl.firstElementChild;
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
 			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
@@ -2297,6 +2340,7 @@
 			this.legend_els = this.appEl.getElementsByClassName('legend')[0].getElementsByClassName('date');
 			this.zoomOutEl = this.appEl.getElementsByClassName('zoom-out')[0];
 			this.titleEl = this.appEl.getElementsByClassName('title')[0];
+			this.titleEl.innerText = name;
 			this.height = 300;
 			this.map_height = 40;
 
@@ -3169,6 +3213,7 @@
 	}
 
 	const charts = [];
+	const names = ['Followers', 'Interactions', 'Eaten fruits', 'Views', 'Bought fruits'];
 	const chartsEls = document.body.getElementsByClassName('app-container');
 
 	const dark_link = document.body.getElementsByClassName('set-theme-dark')[0];
@@ -3197,7 +3242,7 @@
 	for (let i = 0; i < 5; i += 1) {
 		const isSingleBar = i === 3;
 		const isPieDetails = i === 4;
-		const chart = new ChartContainer(chartsEls[i], i + 1, isSingleBar, isPieDetails);
+		const chart = new ChartContainer(chartsEls[i], names[i], i + 1, isSingleBar, isPieDetails);
 		charts.push(chart);
 		chart.initMapBox();
 		chart.showOverview(true);
