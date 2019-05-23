@@ -144,13 +144,9 @@ body {
 
 .legend .date .part {
 	white-space: nowrap;
-	-webkit-transform-origin: 00% 100%;
-	-webkit-transition: -webkit-transform .2s, opacity .2s, width .2s;
-	-webkit-transform: scale(1);
+	-webkit-transition: opacity .2s, width .2s;
 
-	transform-origin: 00% 100%;
-	transition: transform .2s, opacity .2s, width .2s;
-	transform: scale(1);
+	transition: opacity .2s, width .2s;
 	opacity: 1;
 	position: absolute;
 	left: 0;
@@ -165,13 +161,9 @@ body {
 }
 
 .legend .date .part.old{
-	-webkit-transform-origin: 100% 0%;
-	-webkit-transform: scale(0);
-	-webkit-transition: transform .2s .1s, opacity .2s .1s, width .2s .1s;
+	-webkit-transition: opacity .2s .1s, width .2s .1s;
 
-	transform-origin: 100% 0%;
-	transform: scale(0);
-	transition: transform .2s .1s, opacity .2s .1s, width .2s .1s;
+	transition: opacity .2s .1s, width .2s .1s;
 	opacity: 0;
 }
 
