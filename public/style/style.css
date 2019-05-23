@@ -10,13 +10,15 @@ body {
 }
 
 .dark {
-	background: rgb(36, 47, 62);
+	background-color: rgb(36, 47, 62);
+	transition: background-color .2s;
 	color: white;
 }
 
 .app-container {
 	width: 100%;
 	clear: both;
+	transition: background-color .2s;
 }
 
 .app {
@@ -108,6 +110,7 @@ body {
 
 .title-container .item.hidden {
 	transform-origin: 100% 0%;
+	transition: transform .2s .1s, opacity .2s .1s, width .2s .1s;
 	transform: scale(0);
 	opacity: 0;
 }
@@ -154,6 +157,7 @@ body {
 	transform-origin: 100% 0%;
 	transform: scale(0);
 	opacity: 0;
+	transition: transform .2s .1s, opacity .2s .1s, width .2s .1s;
 }
 
 .legend .date .part.new{
@@ -551,6 +555,7 @@ a {
 
 .info .part.old{
 	transform-origin: 100% 0%;
+	transition: transform .2s .1s, opacity .2s .1s;
 	transform: scale(0);
 	opacity: 0;
 }
@@ -589,6 +594,7 @@ a {
 .info .item .value .part.old{
 	top: 20px;
 	transform: scale(1);
+	transition: top .2s .1s;
 	opacity: 1;
 }
 
@@ -639,6 +645,7 @@ a {
 
 .pie-info.info .part.old {
 	position: absolute;
+	transition: transform .2s .1s, opacity .2s .1s;
 	left: 15px;
 	top: 10px;
 }

@@ -2827,11 +2827,11 @@
 
 		setColors(isInitial) {
 			if (this.isLight) {
-				this.appContainerEl.style.background = white_color;
+				this.appContainerEl.style.backgroundColor = white_color;
 				this.appContainerEl.style.color = black_color;
 				this.appContainerEl.classList.remove('dark-theme');
 			} else {
-				this.appContainerEl.style.background = dark_color;
+				this.appContainerEl.style.backgroundColor = dark_color;
 				this.appContainerEl.style.color = white_color;
 				this.appContainerEl.classList.add('dark-theme');
 			}
