@@ -3054,6 +3054,7 @@
 					if (!this.btnState[num]) {
 						gr.display = false;
 						this.mapChart.graphs[num].display = false;
+						this.mapChart[this.mapChart.graphs[num].opacityKey] = 0;
 					}
 				});
 			}
@@ -3119,7 +3120,6 @@
 				columns: [],
 			};
 
-			console.log(this.mainChart.last_details_num);
 			let from = this.mainChart.last_details_num - 3;
 			let to = this.mainChart.last_details_num + 4;
 			while (from < 1) {
@@ -3128,12 +3128,10 @@
 			while (to > this.mainChart.x_vals.length + 1) {
 				from -= 1; to -= 1;
 			}
-			console.log(`${from} - ${to}`);
 			this.collection.columns.forEach((col) => {
 				const newCol = [col[0], ...col.slice(from, to)];
 				this.pieDetailsData.columns.push(newCol);
 			});
-			console.log(this.pieDetailsData.columns[0].map((c) => new Date(c).getDate()));
 		}
 
 		showPieDetails() {
