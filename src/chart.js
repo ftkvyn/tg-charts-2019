@@ -317,6 +317,9 @@
 		if (isEdge) {
 			return '';
 		}
+		if (val === 255) {
+			return '';
+		}
 		return padZeros(Math.round(val).toString(16));
 	}
 
@@ -1350,10 +1353,7 @@
 
 		endDrawArea(color) {
 			this.ctx.closePath();
-			this.ctx.fillStyle = `${color}ff`;
-			if (isEdge) {
-				this.ctx.fillStyle = color;
-			}
+			this.ctx.fillStyle = color;
 			if (this.isDisappearing) {
 				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
 			}
@@ -1407,9 +1407,9 @@
 			if (this.isDisappearing) {
 				this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
 			} else if (this.details_num === -1) {
-				this.ctx.fillStyle = `${color}ff`;
+				this.ctx.fillStyle = color;
 			} else if (this.details_num === num) {
-				this.ctx.fillStyle = `${color}ff`;
+				this.ctx.fillStyle = color;
 			} else {
 				this.ctx.fillStyle = `${color}80`;
 			}
