@@ -3040,6 +3040,18 @@
 				});
 			}
 
+			if (this.isSaveBtnState && this.btnState) {
+				main.graphs.forEach((gr, num) => {
+					if (!this.btnState[num]) {
+						gr.display = false;
+						this.mapChart.graphs[num].display = false;
+						if (optionsOrig.pieChart) {
+							this.mapChart[this.mapChart.graphs[num].opacityKey] = 0;
+						}
+					}
+				});
+			}
+
 			main.init();
 			this.mapChart.init();
 			this.mapChart.calculateMaxY(true, options.isAppear);
@@ -3049,15 +3061,7 @@
 					this.mainChart.calculateMaxY(true, options.isAppear);
 				}
 			}
-			if (this.isSaveBtnState && this.btnState) {
-				main.graphs.forEach((gr, num) => {
-					if (!this.btnState[num]) {
-						gr.display = false;
-						this.mapChart.graphs[num].display = false;
-						this.mapChart[this.mapChart.graphs[num].opacityKey] = 0;
-					}
-				});
-			}
+
 			if (options.isAppear) {
 				this.appear(optionsOrig);
 			} else {
