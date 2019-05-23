@@ -1005,7 +1005,7 @@
 			}
 
 			this[zx] = Math.min(...this.x_vals);
-			if (type === 'bar') {
+			if (type === 'bar' || this.percentBars) {
 				this[zx] -= this.x_vals[1] - this.x_vals[0];
 			}
 			this[mx] = Math.max(...this.x_vals);
@@ -2453,8 +2453,8 @@
 
 		tryStartMovingX() {
 			if (this.isPieChartDetails && !this.isOverview) {
-				this.pieChart[zx] = this.nextfrom;
-				this.pieChart[mx] = this.nextto;
+				this.pieChart[zx] = this.nextfrom + 86400000;
+				this.pieChart[mx] = this.nextto + 86400000;
 				this.pieChart.calculateSections();
 				this.updateLegend();
 				setTimeout(this.updateLegend.bind(this), duration * 1.2);
@@ -2508,7 +2508,7 @@
 				}
 				const addDays = Math.round(dx_int / this.allowedStep);
 				dx_int = addDays * this.allowedStep;
-				if (this.pieChart.start_i + this.pieChart.selectedDays + addDays >= this.pieChart.x_vals.length) {
+				if (this.pieChart.start_i + this.pieChart.selectedDays + addDays > this.pieChart.x_vals.length) {
 					return;
 				}
 				this.accumDx = 0;
@@ -2633,7 +2633,10 @@
 			}
 			this.detailsFrom -= 3600000;
 			let toX = this.detailsFrom + 86400000; // Adding 1day in ms
-			const lastX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1];
+			let lastX = this.mapChart.x_vals[this.mapChart.x_vals.length - 1];
+			if (this.isPieChartDetails) {
+				lastX += 86400000;
+			}
 			const totalX = lastX - this.mapChart.x_vals[0];
 			const scale = totalX / this.container_width;
 			const pad = this.mapChart.x_vals[0];
@@ -2653,10 +2656,10 @@
 				rightVal = this.container_width - ((toX - pad) / scale);
 				widthVal = this.container_width - rightVal - leftVal;
 			}
-			if (this.pieChart && this.pieDetailsData.extraRightSpace) {
-				rightVal += widthVal;
-				leftVal -= widthVal;
-			}
+			// if (this.pieChart && this.pieDetailsData.extraRightSpace) {
+			// 	rightVal += widthVal;
+			// 	leftVal -= widthVal;
+			// }
 
 			this.thumb_width = widthVal;
 			this.thumb.style.width = `${this.thumb_width}px`;
