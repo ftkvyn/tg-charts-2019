@@ -2502,7 +2502,7 @@
 			let dx_int = Math.round(dx);
 			if (!this.isOverview && this.isPieDetails) {
 				dx_int += this.accumDx || 0;
-				if (Math.abs(dx_int) < this.allowedStep && !isForce) {
+				if (Math.abs(dx_int) < (this.allowedStep * 0.7) && !isForce) {
 					this.accumDx = dx_int;
 					return;
 				}
@@ -2930,7 +2930,6 @@
 		// eslint-disable-next-line class-methods-use-this
 		appearChart(chart) {
 			if (chart.percentBars) {
-				// ToDo: remove
 				chart.drawAll();
 				return;
 			}
@@ -3118,27 +3117,20 @@
 			};
 
 			console.log(this.mainChart.last_details_num);
-			let from = this.mainChart.last_details_num - 2;
+			let from = this.mainChart.last_details_num - 3;
 			let to = this.mainChart.last_details_num + 4;
 			while (from < 1) {
 				from += 1; to += 1;
 			}
-			while (to > this.mainChart.x_vals.length - 1) {
+			while (to > this.mainChart.x_vals.length + 1) {
 				from -= 1; to -= 1;
 			}
 			console.log(`${from} - ${to}`);
-			// ToDo: finish it
-			// let from = this.mainChart.start_i;
-			// let to = this.mainChart.end_i + 2;
-			// this.pieDetailsData.extraRightSpace = to === this.mainChart.x_vals.length;
-			// if (from === 0) {
-			// 	from += 1;
-			// 	to += 1;
-			// }
 			this.collection.columns.forEach((col) => {
 				const newCol = [col[0], ...col.slice(from, to)];
 				this.pieDetailsData.columns.push(newCol);
 			});
+			console.log(this.pieDetailsData.columns[0].map((c) => new Date(c).getDate()));
 		}
 
 		showPieDetails() {
