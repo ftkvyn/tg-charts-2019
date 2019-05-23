@@ -2337,7 +2337,9 @@
 			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
 			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
 			this.chart_map = this.appEl.getElementsByClassName('chart_map')[0];
-			this.legend_els = this.appEl.getElementsByClassName('legend')[0].getElementsByClassName('date');
+			this.headerContainer = this.appEl.getElementsByClassName('appHeader')[0];
+			this.legendContainer = this.appEl.getElementsByClassName('legend')[0];
+			this.legend_els = this.legendContainer.getElementsByClassName('date');
 			this.zoomOutEl = this.appEl.getElementsByClassName('zoom-out')[0];
 			this.titleEl = this.appEl.getElementsByClassName('title')[0];
 			this.titleEl.innerText = name;
@@ -2449,6 +2451,19 @@
 					});
 				}
 			});
+			setTimeout(() => {
+				let titleWidth = 0;
+				if (this.isOverview) {
+					titleWidth = this.titleEl.clientWidth;
+				} else {
+					titleWidth = this.zoomOutEl.clientWidth;
+				}
+				if (this.legendContainer.clientWidth + titleWidth > this.headerContainer.clientWidth) {
+					this.headerContainer.classList.add('narrow-header');
+				} else {
+					this.headerContainer.classList.remove('narrow-header');
+				}
+			}, duration * 1.5);
 		}
 
 		tryStartMovingX() {
