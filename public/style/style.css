@@ -1,5 +1,6 @@
 html{ 
 	height: 100%; 
+	transition: background-color .2s;
 }
 
 body {
@@ -11,7 +12,6 @@ body {
 
 .dark {
 	background-color: rgb(36, 47, 62);
-	transition: background-color .2s;
 	color: white;
 }
 
