@@ -38,6 +38,7 @@
 				<div class="ft-chart--x-labels"></div>
 				<div class="ft-chart--y-labels"></div>
 				<div class="ft-chart--y-labels ft-chart--y-labels-right"></div>
+				<div class="ft-chart--h-lines"></div>
 			</div>
 			<div class="ft-chart--map-chart-container">
 				<div class="ft-chart--map_container">
@@ -872,6 +873,7 @@
 			this.slowFramesCount = 0;
 
 			this.xLegendContainer = canv.parentElement.getElementsByClassName('ft-chart--x-labels')[0];
+			this.hLinesContainer = canv.parentElement.getElementsByClassName('ft-chart--h-lines')[0];
 			this.yLegendContainer = canv.parentElement.getElementsByClassName('ft-chart--y-labels')[0];
 			this.yLegendRightContainer = canv.parentElement.getElementsByClassName('ft-chart--y-labels-right')[0];
 
@@ -1184,15 +1186,22 @@
 			}
 		}
 
-		displayYLabel(item, y, isInitial, textColor, container, isForceHide, isScaled) {
-			let labelEl = isScaled ? item.scaledLabelEl : item.labelEl;
+		displayYLabel(item, y, isInitial, textColor, container, isForceHide, isScaled, isLine) {
+			// eslint-disable-next-line no-nested-ternary
+			let labelEl = isLine ? item.lineEl : (isScaled ? item.scaledLabelEl : item.labelEl);
 			if (item.opacity && !this.isDisappearing && !isForceHide) {
 				if (!labelEl) {
 					const template = document.createElement('template');
-					template.innerHTML = `<div class="ft-chart--y-label ${isInitial ? '' : 'ft-chart--hidden'}" style="bottom:${-y}px;color:${textColor}">${formatNumber(isScaled ? item.scaled_y : item.y)}</div>`;
+					if (isLine) {
+						template.innerHTML = `<hr class="ft-chart--h-line ${isInitial ? '' : 'ft-chart--hidden'}" style="bottom:${-y}px;background-color:${textColor}" />`;
+					} else {
+						template.innerHTML = `<div class="ft-chart--y-label ${isInitial ? '' : 'ft-chart--hidden'}" style="bottom:${-y}px;color:${textColor}">${formatNumber(isScaled ? item.scaled_y : item.y)}</div>`;
+					}
 					labelEl = template.content.firstChild;
 					container.appendChild(labelEl);
-					if (isScaled) {
+					if (isLine) {
+						item.lineEl = labelEl;
+					} else if (isScaled) {
 						item.scaledLabelEl = labelEl;
 					} else {
 						item.labelEl = labelEl;
@@ -1205,7 +1214,21 @@
 				} else {
 					labelEl.classList.remove('ft-chart--hidden');
 					labelEl.style.bottom = `${-y}px`;
-					labelEl.style.color = textColor;
+					if (isLine) {
+						labelEl.style.backgroundColor = textColor;
+					} else {
+						labelEl.style.color = textColor;
+					}
+				}
+			} else if (!isLine) {
+				if (item.lineEl) {
+					item.lineEl.classList.add('ft-chart--hidden');
+					this.timeout(() => {
+						if (item.lineEl && item.lineEl.classList.contains('ft-chart--hidden')) {
+							container.removeChild(item.lineEl);
+							item.lineEl = null;
+						}
+					}, duration / 2);
 				}
 			} else if (!isScaled) {
 				if (item.labelEl) {
@@ -1215,7 +1238,7 @@
 							container.removeChild(item.labelEl);
 							item.labelEl = null;
 						}
-					}, duration);
+					}, duration / 2);
 				}
 			} else if (item.scaledLabelEl) {
 				item.scaledLabelEl.classList.add('ft-chart--hidden');
@@ -1224,7 +1247,7 @@
 						container.removeChild(item.scaledLabelEl);
 						item.scaledLabelEl = null;
 					}
-				}, duration);
+				}, duration / 2);
 			}
 		}
 
@@ -1253,7 +1276,17 @@
 								item.labelEl = null;
 								item.removed = true;
 							}
-						}, duration);
+						}, duration / 2);
+					}
+					if (item.lineEl) {
+						item.lineEl.classList.add('ft-chart--hidden');
+						this.timeout(() => {
+							if (item.lineEl && item.lineEl.classList.contains('ft-chart--hidden')) {
+								this.hLinesContainer.removeChild(item.lineEl);
+								item.lineEl = null;
+								item.removed = true;
+							}
+						}, duration / 2);
 					}
 					if (item.scaledLabelEl) {
 						item.scaledLabelEl.classList.add('ft-chart--hidden');
@@ -1263,20 +1296,14 @@
 								item.scaledLabelEl = null;
 								item.removed = true;
 							}
-						}, duration);
+						}, duration / 2);
 					}
 				});
 			this.y_legend = this.y_legend.filter((leg) => { return !leg.removed; }); // removing old garbage.
 			for (let i = 0; i < this.y_legend.length; i += 1) {
-				this.ctx.lineWidth = this.axisThickness;
 				const item = this.y_legend[i];
-				this.ctx.strokeStyle = strokeColor + getOpacity(item.opacity / 10);
-				this.ctx.beginPath();
-				this.ctx.moveTo(r(main_chart_padding), r(this.translateY(item.realY)));
-				this.ctx.lineTo(r(this.width - main_chart_padding), r(this.translateY(item.realY)));
-				this.ctx.stroke();
-
 				const y = this.translateY(item.realY) - y_legend_text_height;
+				this.displayYLabel(item, y + 7, isInitial, strokeColor, this.hLinesContainer, false, false, true);
 
 				if (this.y_scaled) {
 					this.displayYLabel(item, y, isInitial, getColor(this.graphs[0].color, this.isLight, 'text'), this.yLegendContainer, item.hideLeft);

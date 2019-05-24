@@ -69,8 +69,7 @@
 	left: 0;
 	top: 0;
 	transform-origin: 00% 100%;
-	transition: transform .2s, opacity .2s, width .2s;
-	transform: scale(1);
+	transition: opacity .2s, width .2s;
 	opacity: 1;
 }
 
@@ -80,8 +79,7 @@
 
 .ft-chart--title-container .ft-chart--item.ft-chart--hidden {
 	transform-origin: 100% 0%;
-	transition: transform .2s .1s, opacity .2s .1s, width .2s .1s;
-	transform: scale(0);
+	transition: opacity .2s .1s, width .2s .1s;
 	opacity: 0;
 }
 
@@ -107,9 +105,7 @@
 
 .ft-chart--legend .ft-chart--date .ft-chart--part {
 	white-space: nowrap;
-	transform-origin: 00% 100%;
-	transition: transform .2s, opacity .2s, width .2s;
-	transform: scale(1);
+	transition: opacity .2s, width .2s;
 	opacity: 1;
 	position: absolute;
 	left: 0;
@@ -124,14 +120,11 @@
 }
 
 .ft-chart--legend .ft-chart--date .ft-chart--part.ft-chart--old{
-	transform-origin: 100% 0%;
-	transform: scale(0);
 	opacity: 0;
-	transition: transform .2s .1s, opacity .2s .1s, width .2s .1s;
+	transition: opacity .2s .1s, width .2s .1s;
 }
 
 .ft-chart--legend .ft-chart--date .ft-chart--part.ft-chart--new{
-	transform: scale(0);
 	opacity: 0;
 }
 
@@ -460,8 +453,7 @@
 .ft-chart--info .ft-chart--part
 {
 	transform-origin: 00% 100%;
-	transition: transform .2s, opacity .2s;
-	transform: scale(1);
+	transition: opacity .2s;
 	opacity: 1;
 	position: absolute;
     left: 0;
@@ -470,13 +462,11 @@
 
 .ft-chart--info .ft-chart--part.ft-chart--old{
 	transform-origin: 100% 0%;
-	transition: transform .2s .1s, opacity .2s .1s;
-	transform: scale(0);
+	transition: opacity .2s .1s;
 	opacity: 0;
 }
 
 .ft-chart--info .ft-chart--part.ft-chart--new{
-	transform: scale(0);
 	opacity: 0;
 }
 
@@ -508,14 +498,12 @@
 
 .ft-chart--info .ft-chart--item .ft-chart--value .ft-chart--part.ft-chart--old{
 	top: 20px;
-	transform: scale(1);
 	transition: top .2s .1s;
 	opacity: 1;
 }
 
 .ft-chart--info .ft-chart--item .ft-chart--value .ft-chart--part.ft-chart--new{
 	top: -20px;
-	transform: scale(1);
 	opacity: 1;
 }
 
@@ -593,6 +581,15 @@
 	opacity: 0;
 }
 
+.ft-chart--h-lines {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 310px;
+	overflow: hidden;
+}
+
 .ft-chart--y-labels {
 	position: absolute;
 	bottom: 0;
@@ -601,6 +598,17 @@
 	height: 310px;
 	overflow: hidden;
 }
+.ft-chart--h-lines .ft-chart--h-line{
+	width: 100%;
+	height: 1px;
+	left: 15px;
+	position: absolute;
+	transition: opacity .1s;
+	margin: 0;
+	border: none;
+	opacity: 0.15;
+}
+
 .ft-chart--y-labels.ft-chart--y-labels-right {
 	right: 0;
 	left: initial;
@@ -613,13 +621,14 @@
 	font-size: 12px;
 	white-space: nowrap;
 	opacity: 1;
-	transition: opacity .2s;
+	transition: opacity .1s;
 }
 .ft-chart--y-labels.ft-chart--y-labels-right .ft-chart--y-label {
 	left: initial;
 	right: 9px;
 }
 
-.ft-chart--y-labels .ft-chart--y-label.ft-chart--hidden {
+.ft-chart--h-lines .ft-chart--y-label.ft-chart--hidden,
+.ft-chart--h-lines .ft-chart--h-line.ft-chart--hidden {
 	opacity: 0;
 }
