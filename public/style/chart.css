@@ -603,7 +603,6 @@
 	height: 1px;
 	left: 15px;
 	position: absolute;
-	transition: opacity .1s;
 	margin: 0;
 	border: none;
 	opacity: 0.15;
@@ -620,15 +619,8 @@
 	color: white;
 	font-size: 12px;
 	white-space: nowrap;
-	opacity: 1;
-	transition: opacity .1s;
 }
 .ft-chart--y-labels.ft-chart--y-labels-right .ft-chart--y-label {
 	left: initial;
 	right: 9px;
-}
-
-.ft-chart--h-lines .ft-chart--y-label.ft-chart--hidden,
-.ft-chart--h-lines .ft-chart--h-line.ft-chart--hidden {
-	opacity: 0;
 }

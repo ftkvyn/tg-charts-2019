@@ -1222,32 +1222,17 @@
 				}
 			} else if (isLine) {
 				if (item.lineEl) {
-					item.lineEl.classList.add('ft-chart--hidden');
-					this.timeout(() => {
-						if (item.lineEl && item.lineEl.classList.contains('ft-chart--hidden')) {
-							container.removeChild(item.lineEl);
-							item.lineEl = null;
-						}
-					}, duration / 2);
+					container.removeChild(item.lineEl);
+					item.lineEl = null;
 				}
 			} else if (!isScaled) {
 				if (item.labelEl) {
-					item.labelEl.classList.add('ft-chart--hidden');
-					this.timeout(() => {
-						if (item.labelEl && item.labelEl.classList.contains('ft-chart--hidden')) {
-							container.removeChild(item.labelEl);
-							item.labelEl = null;
-						}
-					}, duration / 2);
+					container.removeChild(item.labelEl);
+					item.labelEl = null;
 				}
 			} else if (item.scaledLabelEl) {
-				item.scaledLabelEl.classList.add('ft-chart--hidden');
-				this.timeout(() => {
-					if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('ft-chart--hidden')) {
-						container.removeChild(item.scaledLabelEl);
-						item.scaledLabelEl = null;
-					}
-				}, duration / 2);
+				container.removeChild(item.scaledLabelEl);
+				item.scaledLabelEl = null;
 			}
 		}
 
@@ -1269,34 +1254,19 @@
 				.filter((leg) => { return !(leg.display || leg.opacity); })
 				.forEach((item) => {
 					if (item.labelEl) {
-						item.labelEl.classList.add('ft-chart--hidden');
-						this.timeout(() => {
-							if (item.labelEl && item.labelEl.classList.contains('ft-chart--hidden')) {
-								this.yLegendContainer.removeChild(item.labelEl);
-								item.labelEl = null;
-								item.removed = true;
-							}
-						}, duration / 2);
+						this.yLegendContainer.removeChild(item.labelEl);
+						item.labelEl = null;
+						item.removed = true;
 					}
 					if (item.lineEl) {
-						item.lineEl.classList.add('ft-chart--hidden');
-						this.timeout(() => {
-							if (item.lineEl && item.lineEl.classList.contains('ft-chart--hidden')) {
-								this.hLinesContainer.removeChild(item.lineEl);
-								item.lineEl = null;
-								item.removed = true;
-							}
-						}, duration / 2);
+						this.hLinesContainer.removeChild(item.lineEl);
+						item.lineEl = null;
+						item.removed = true;
 					}
 					if (item.scaledLabelEl) {
-						item.scaledLabelEl.classList.add('ft-chart--hidden');
-						this.timeout(() => {
-							if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('ft-chart--hidden')) {
-								this.yLegendRightContainer.removeChild(item.scaledLabelEl);
-								item.scaledLabelEl = null;
-								item.removed = true;
-							}
-						}, duration / 2);
+						this.yLegendRightContainer.removeChild(item.scaledLabelEl);
+						item.scaledLabelEl = null;
+						item.removed = true;
 					}
 				});
 			this.y_legend = this.y_legend.filter((leg) => { return !leg.removed; }); // removing old garbage.
