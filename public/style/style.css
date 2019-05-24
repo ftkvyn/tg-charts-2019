@@ -17,14 +17,12 @@ body {
 
 .app-container {
 	width: 100%;
-	/* clear: both; */
 	transition: background-color .2s;
 }
 
 .app {
 	-moz-user-select: none;
 	-webkit-user-select: none;
-	max-width: 1000px;
 	min-height: 500px;
 	height: 100%;
 	position: relative;
