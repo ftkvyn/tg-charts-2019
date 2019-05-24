@@ -1215,12 +1215,12 @@
 					labelEl.classList.remove('ft-chart--hidden');
 					labelEl.style.bottom = `${-y}px`;
 					if (isLine) {
-						labelEl.style.backgroundColor = textColor;
+						labelEl.style.backgroundColor = textColor + getOpacity(item.opacity);
 					} else {
-						labelEl.style.color = textColor;
+						labelEl.style.color = textColor + getOpacity(item.opacity);
 					}
 				}
-			} else if (!isLine) {
+			} else if (isLine) {
 				if (item.lineEl) {
 					item.lineEl.classList.add('ft-chart--hidden');
 					this.timeout(() => {
