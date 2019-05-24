@@ -1198,7 +1198,7 @@
 						item.labelEl = labelEl;
 					}
 					this.timeout(() => {
-						if (labelEl) {
+						if (labelEl && item.opacity) {
 							labelEl.classList.remove('ft-chart--hidden');
 						}
 					});
