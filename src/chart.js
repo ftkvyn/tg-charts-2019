@@ -15,41 +15,41 @@
 	const r = Math.round;
 	const isEdge = window.navigator.userAgent.indexOf('Edge') > -1;
 
-	const chartMarkupTemplate = `<div class="app">
-			<div class="appHeader">
-				<div class="title-container">
-					<div class="title item"></div>
-					<div class="zoom-out item hidden">Zoom out</div>
+	const chartMarkupTemplate = `<div class="ft-chart--app">
+			<div class="ft-chart--appHeader">
+				<div class="ft-chart--title-container">
+					<div class="ft-chart--title ft-chart--item"></div>
+					<div class="ft-chart--zoom-out ft-chart--item ft-chart--hidden">Zoom out</div>
 				</div>
-				<div class="legend">
-					<div class="from day date"></div>
-					<div class="from month date"></div>
-					<div class="from year date"></div>
-					<div class="dash date"></div>
-					<div class="to day date"></div>
-					<div class="to month date"></div>
-					<div class="to year year-or-hour date"></div>
+				<div class="ft-chart--legend">
+					<div class="ft-chart--from ft-chart--day ft-chart--date"></div>
+					<div class="ft-chart--from ft-chart--month ft-chart--date"></div>
+					<div class="ft-chart--from ft-chart--year ft-chart--date"></div>
+					<div class="ft-chart--dash ft-chart--date"></div>
+					<div class="ft-chart--to ft-chart--day ft-chart--date"></div>
+					<div class="ft-chart--to ft-chart--month ft-chart--date"></div>
+					<div class="ft-chart--to ft-chart--year ft-chart--year-or-hour ft-chart--date"></div>
 				</div>
 			</div>
-			<div class="main-chart-container">
-				<canvas height="600" style="width:100%;height:300px;" class="main_chart"></canvas>
+			<div class="ft-chart--main-chart-container">
+				<canvas height="600" style="width:100%;height:300px;" class="ft-chart--main_chart"></canvas>
 				<canvas height="600" style="width:100%;height:300px;position: absolute;left: 0;top: 0;z-index: 1;"
-					class="details_chart"></canvas>
-				<div class="x-labels"></div>
-				<div class="y-labels"></div>
-				<div class="y-labels y-labels-right"></div>
+					class="ft-chart--details_chart"></canvas>
+				<div class="ft-chart--x-labels"></div>
+				<div class="ft-chart--y-labels"></div>
+				<div class="ft-chart--y-labels ft-chart--y-labels-right"></div>
 			</div>
-			<div class="map-chart-container">
-				<div class="map_container">
-					<div class="overlay overlay_left"></div>
-					<div class="selected" style="right:0;width:80px;">
-						<div class="thumb thumb_left">
+			<div class="ft-chart--map-chart-container">
+				<div class="ft-chart--map_container">
+					<div class="ft-chart--overlay ft-chart--overlay_left"></div>
+					<div class="ft-chart--selected" style="right:0;width:80px;">
+						<div class="ft-chart--thumb ft-chart--thumb_left">
 						</div>
-						<div class="thumb thumb_right">
+						<div class="ft-chart--thumb ft-chart--thumb_right">
 						</div>
 					</div>
-					<div class="overlay overlay_right"></div>
-					<canvas height="80" style="width:100%;height:40px;" class="chart_map"></canvas>
+					<div class="ft-chart--overlay ft-chart--overlay_right"></div>
+					<canvas height="80" style="width:100%;height:40px;" class="ft-chart--chart_map"></canvas>
 				</div>
 			</div>
 		</div>`;
@@ -289,10 +289,10 @@
 	}
 
 	function changeLabels(el, text, isCalculateWidth) {
-		const prevDetailEls = el.getElementsByClassName('detail');
+		const prevDetailEls = el.getElementsByClassName('ft-chart--detail');
 		let prevDetailEl = null;
 		for (let i = 0; i < prevDetailEls.length; i += 1) {
-			if (!prevDetailEls[i].classList.contains('old')) {
+			if (!prevDetailEls[i].classList.contains('ft-chart--old')) {
 				if (prevDetailEl && prevDetailEl.parentElement) {
 					prevDetailEl.parentElement.removeChild(prevDetailEl);
 				}
@@ -306,16 +306,16 @@
 		// eslint-disable-next-line eqeqeq
 		if (currentTxt != text) {
 			if (prevDetailEl) {
-				prevDetailEl.classList.add('old');
+				prevDetailEl.classList.add('ft-chart--old');
 			}
-			const detailPart = `<div class="part detail new">${text}</div>`;
+			const detailPart = `<div class="ft-chart--part ft-chart--detail ft-chart--new">${text}</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = detailPart;
 			const detailEl = template.content.firstChild;
 			if (prevDetailEl) {
 				el.appendChild(detailEl);
 				setTimeout(() => {
-					detailEl.classList.remove('new');
+					detailEl.classList.remove('ft-chart--new');
 				}, 0);
 				setTimeout(() => {
 					if (prevDetailEl && prevDetailEl.parentElement) {
@@ -323,14 +323,14 @@
 					}
 				}, duration);
 			} else {
-				detailEl.classList.remove('new');
+				detailEl.classList.remove('ft-chart--new');
 				el.appendChild(detailEl);
 			}
 		}
 		if (isCalculateWidth) {
-			el.style.width = `${el.getElementsByClassName('detail')[0].clientWidth}px`;
+			el.style.width = `${el.getElementsByClassName('ft-chart--detail')[0].clientWidth}px`;
 			setTimeout(() => {
-				el.style.width = `${el.getElementsByClassName('detail')[0].clientWidth}px`;
+				el.style.width = `${el.getElementsByClassName('ft-chart--detail')[0].clientWidth}px`;
 			}, duration);
 		}
 	}
@@ -654,10 +654,10 @@
 
 		setInfoBox(gr) {
 			this.infoBox.style.display = 'block';
-			const prevDetailEls = this.infoBox.getElementsByClassName('pie-info-value');
+			const prevDetailEls = this.infoBox.getElementsByClassName('ft-chart--pie-info-value');
 			let prevDetailEl = null;
 			for (let i = 0; i < prevDetailEls.length; i += 1) {
-				if (!prevDetailEls[i].classList.contains('old')) {
+				if (!prevDetailEls[i].classList.contains('ft-chart--old')) {
 					if (prevDetailEl && prevDetailEl.parentElement) {
 						prevDetailEl.parentElement.removeChild(prevDetailEl);
 					}
@@ -667,11 +667,11 @@
 
 			if (prevDetailEl) {
 				prevDetailEl.style.width = `${prevDetailEl.clientWidth}px`;
-				prevDetailEl.classList.add('old');
+				prevDetailEl.classList.add('ft-chart--old');
 			}
-			const itemHtml = `<div class="pie-info-value item part new">
-					<div class="pie-val name">${gr.name}</div>
-					<div class="pie-val value" style="color:${getColor(gr.color, this.isLight, 'text')};">${formatNumber(gr.totalVal)}</div>
+			const itemHtml = `<div class="ft-chart--pie-info-value ft-chart--item ft-chart--part ft-chart--new">
+					<div class="ft-chart--pie-val ft-chart--name">${gr.name}</div>
+					<div class="ft-chart--pie-val ft-chart--value" style="color:${getColor(gr.color, this.isLight, 'text')};">${formatNumber(gr.totalVal)}</div>
 				</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = itemHtml;
@@ -679,7 +679,7 @@
 			if (prevDetailEl) {
 				this.infoBox.appendChild(detailEl);
 				setTimeout(() => {
-					detailEl.classList.remove('new');
+					detailEl.classList.remove('ft-chart--new');
 				}, 0);
 				setTimeout(() => {
 					if (prevDetailEl && prevDetailEl.parentElement) {
@@ -687,7 +687,7 @@
 					}
 				}, duration);
 			} else {
-				detailEl.classList.remove('new');
+				detailEl.classList.remove('ft-chart--new');
 				this.infoBox.appendChild(detailEl);
 			}
 			const width = this.infoBox.clientWidth;
@@ -824,7 +824,7 @@
 				cancelId = setTimeout(this.hideDetails.bind(this), 800);
 			});
 
-			const infoBoxHtml = `<div class="pie-info info" style="display:none;">
+			const infoBoxHtml = `<div class="ft-chart--pie-info ft-chart--info" style="display:none;">
 			</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = infoBoxHtml;
@@ -871,9 +871,9 @@
 			this.noAnimation = false;
 			this.slowFramesCount = 0;
 
-			this.xLegendContainer = canv.parentElement.getElementsByClassName('x-labels')[0];
-			this.yLegendContainer = canv.parentElement.getElementsByClassName('y-labels')[0];
-			this.yLegendRightContainer = canv.parentElement.getElementsByClassName('y-labels-right')[0];
+			this.xLegendContainer = canv.parentElement.getElementsByClassName('ft-chart--x-labels')[0];
+			this.yLegendContainer = canv.parentElement.getElementsByClassName('ft-chart--y-labels')[0];
+			this.yLegendRightContainer = canv.parentElement.getElementsByClassName('ft-chart--y-labels-right')[0];
 
 			this.thickness = 2;
 			this.axisThickness = 1;
@@ -1189,7 +1189,7 @@
 			if (item.opacity && !this.isDisappearing && !isForceHide) {
 				if (!labelEl) {
 					const template = document.createElement('template');
-					template.innerHTML = `<div class="y-label ${isInitial ? '' : 'hidden'}" style="bottom:${-y}px;color:${textColor}">${formatNumber(isScaled ? item.scaled_y : item.y)}</div>`;
+					template.innerHTML = `<div class="ft-chart--y-label ${isInitial ? '' : 'ft-chart--hidden'}" style="bottom:${-y}px;color:${textColor}">${formatNumber(isScaled ? item.scaled_y : item.y)}</div>`;
 					labelEl = template.content.firstChild;
 					container.appendChild(labelEl);
 					if (isScaled) {
@@ -1199,28 +1199,28 @@
 					}
 					this.timeout(() => {
 						if (labelEl) {
-							labelEl.classList.remove('hidden');
+							labelEl.classList.remove('ft-chart--hidden');
 						}
 					});
 				} else {
-					labelEl.classList.remove('hidden');
+					labelEl.classList.remove('ft-chart--hidden');
 					labelEl.style.bottom = `${-y}px`;
 					labelEl.style.color = textColor;
 				}
 			} else if (!isScaled) {
 				if (item.labelEl) {
-					item.labelEl.classList.add('hidden');
+					item.labelEl.classList.add('ft-chart--hidden');
 					this.timeout(() => {
-						if (item.labelEl && item.labelEl.classList.contains('hidden')) {
+						if (item.labelEl && item.labelEl.classList.contains('ft-chart--hidden')) {
 							container.removeChild(item.labelEl);
 							item.labelEl = null;
 						}
 					}, duration);
 				}
 			} else if (item.scaledLabelEl) {
-				item.scaledLabelEl.classList.add('hidden');
+				item.scaledLabelEl.classList.add('ft-chart--hidden');
 				this.timeout(() => {
-					if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('hidden')) {
+					if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('ft-chart--hidden')) {
 						container.removeChild(item.scaledLabelEl);
 						item.scaledLabelEl = null;
 					}
@@ -1239,7 +1239,6 @@
 			} else {
 				strokeColor = axis_color_dark;
 			}
-			this.ctx.font = '12px Arial';
 			let textColor = this.isLight ? text_color_light : text_color_dark;
 
 			// y-legend
@@ -1247,9 +1246,9 @@
 				.filter((leg) => { return !(leg.display || leg.opacity); })
 				.forEach((item) => {
 					if (item.labelEl) {
-						item.labelEl.classList.add('hidden');
+						item.labelEl.classList.add('ft-chart--hidden');
 						this.timeout(() => {
-							if (item.labelEl && item.labelEl.classList.contains('hidden')) {
+							if (item.labelEl && item.labelEl.classList.contains('ft-chart--hidden')) {
 								this.yLegendContainer.removeChild(item.labelEl);
 								item.labelEl = null;
 								item.removed = true;
@@ -1257,9 +1256,9 @@
 						}, duration);
 					}
 					if (item.scaledLabelEl) {
-						item.scaledLabelEl.classList.add('hidden');
+						item.scaledLabelEl.classList.add('ft-chart--hidden');
 						this.timeout(() => {
-							if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('hidden')) {
+							if (item.scaledLabelEl && item.scaledLabelEl.classList.contains('ft-chart--hidden')) {
 								this.yLegendRightContainer.removeChild(item.scaledLabelEl);
 								item.scaledLabelEl = null;
 								item.removed = true;
@@ -1306,24 +1305,24 @@
 						const x = this.translateX(val.x);
 						if (!val.labelEl) {
 							const template = document.createElement('template');
-							template.innerHTML = `<div class="x-label ${isInitial ? '' : 'hidden'}" style="left:${x}px;color:${textColor}">${this.isDetails ? val.nameClear : val.dayMonth}</div>`;
+							template.innerHTML = `<div class="ft-chart--x-label ${isInitial ? '' : 'ft-chart--hidden'}" style="left:${x}px;color:${textColor}">${this.isDetails ? val.nameClear : val.dayMonth}</div>`;
 							const labelEl = template.content.firstChild;
 							this.xLegendContainer.appendChild(labelEl);
 							val.labelEl = labelEl;
 							this.timeout(() => {
 								if (val.labelEl) {
-									val.labelEl.classList.remove('hidden');
+									val.labelEl.classList.remove('ft-chart--hidden');
 								}
 							});
 						} else {
-							val.labelEl.classList.remove('hidden');
+							val.labelEl.classList.remove('ft-chart--hidden');
 							val.labelEl.style.left = `${x}px`;
 							val.labelEl.style.color = textColor;
 						}
 					} else if (val.labelEl) {
-						val.labelEl.classList.add('hidden');
+						val.labelEl.classList.add('ft-chart--hidden');
 						this.timeout(() => {
-							if (val.labelEl && val.labelEl.classList.contains('hidden')) {
+							if (val.labelEl && val.labelEl.classList.contains('ft-chart--hidden')) {
 								this.xLegendContainer.removeChild(val.labelEl);
 								val.labelEl = null;
 							}
@@ -1526,7 +1525,7 @@
 				if (this.isDisappearing) {
 					this.ctx.fillStyle = `${color}${getOpacity(this[this.graphs[0].opacityKey])}`;
 				} else if (this.details_num === -1) {
-					this.ctx.fillStyle = `${color}ff`;
+					this.ctx.fillStyle = color;
 				} else {
 					this.ctx.fillStyle = `${color}80`;
 				}
@@ -1543,7 +1542,7 @@
 					this.drawNextBarItem(item.orig_x1, item.orig_x2, item.from_y, item.to_y);
 				}
 				if (selectedItem) {
-					this.ctx.fillStyle = `${color}ff`;
+					this.ctx.fillStyle = color;
 					this.drawNextBarItem(selectedItem.orig_x1, selectedItem.orig_x2, selectedItem.from_y, selectedItem.to_y);
 				}
 			}
@@ -1972,13 +1971,13 @@
 
 				this.force_redraw_details = false;
 
-				const oldEls = this.infoBox.getElementsByClassName('old');
+				const oldEls = this.infoBox.getElementsByClassName('ft-chart--old');
 				while (oldEls && oldEls.length) {
 					oldEls[0].parentElement.removeChild(oldEls[0]);
 				}
-				const grItems = this.infoBox.getElementsByClassName('item');
+				const grItems = this.infoBox.getElementsByClassName('ft-chart--item');
 				for (let i = 0; i < grItems.length; i += 1) {
-					grItems[i].classList.add('hidden');
+					grItems[i].classList.add('ft-chart--hidden');
 				}
 
 				let total = 0;
@@ -1993,7 +1992,7 @@
 
 				this.graphs.forEach((gr) => {
 					if (gr.display) {
-						let infoEl = this.infoBox.getElementsByClassName(gr.opacityKey)[0];
+						let infoEl = this.infoBox.getElementsByClassName(`ft-chart--${gr.opacityKey}`)[0];
 						let valueText = '';
 						let percentNode = '';
 						let percent = 0;
@@ -2004,27 +2003,27 @@
 						}
 						if (this.type === 'area') {
 							percent = r(100 * gr.y_vals[this.details_num] / total);
-							percentNode = '<div class="percent-value name value"></div>';
+							percentNode = '<div class="ft-chart--percent-value ft-chart--name ft-chart--value"></div>';
 						}
 						if (!infoEl) {
-							const infoHtml = `<div class="item ${gr.opacityKey}">
+							const infoHtml = `<div class="ft-chart--item ft-chart--${gr.opacityKey}">
 								${percentNode}
-								<div class="value num-value" style="color:${getColor(gr.color, this.isLight, 'text')}"></div>
-								<div class="name">${gr.name}</div>
+								<div class="ft-chart--value ft-chart--num-value" style="color:${getColor(gr.color, this.isLight, 'text')}"></div>
+								<div class="ft-chart--name">${gr.name}</div>
 							</div>`;
 							const template = document.createElement('template');
 							template.innerHTML = infoHtml;
 							infoEl = template.content.firstChild;
-							const valueEl = infoEl.getElementsByClassName('num-value')[0];
+							const valueEl = infoEl.getElementsByClassName('ft-chart--num-value')[0];
 							infoEl.valueEl = valueEl;
 							this.infoBox.appendChild(infoEl);
 							if (this.type === 'area') {
-								infoEl.percentEl = infoEl.getElementsByClassName('percent-value')[0];
+								infoEl.percentEl = infoEl.getElementsByClassName('ft-chart--percent-value')[0];
 							}
 						} else {
 							infoEl.valueEl.style.color = getColor(gr.color, this.isLight, 'text');
 						}
-						infoEl.classList.remove('hidden');
+						infoEl.classList.remove('ft-chart--hidden');
 						changeLabels(infoEl.valueEl, valueText);
 						if (this.type === 'area') {
 							changeLabels(infoEl.percentEl, `${percent} %`);
@@ -2033,23 +2032,23 @@
 				});
 
 				if (this.type === 'bar' && this.graphs.length > 1) {
-					let infoEl = this.infoBox.getElementsByClassName('total')[0];
+					let infoEl = this.infoBox.getElementsByClassName('ft-chart--total')[0];
 					const valueText = formatNumber(total, true);
 					if (!infoEl) {
-						const infoHtml = `<div class="item total">
-								<div class="value" style="color:${getColor('total', this.isLight, 'text')}"></div>
-								<div class="name">All</div>
+						const infoHtml = `<div class="ft-chart--item ft-chart--total">
+								<div class="ft-chart--value" style="color:${getColor('total', this.isLight, 'text')}"></div>
+								<div class="ft-chart--name">All</div>
 							</div>`;
 						const template = document.createElement('template');
 						template.innerHTML = infoHtml;
 						infoEl = template.content.firstChild;
-						const valueEl = infoEl.getElementsByClassName('value')[0];
+						const valueEl = infoEl.getElementsByClassName('ft-chart--value')[0];
 						infoEl.valueEl = valueEl;
 						this.infoBox.appendChild(infoEl);
 					} else {
 						infoEl.valueEl.style.color = getColor('total', this.isLight, 'text');
 					}
-					infoEl.classList.remove('hidden');
+					infoEl.classList.remove('ft-chart--hidden');
 					changeLabels(infoEl.valueEl, valueText);
 				}
 
@@ -2160,21 +2159,21 @@
 				cancelId = setTimeout(this.hideDetails.bind(this), 1200);
 			});
 
-			const infoBoxHtml = `<div class="info" style="display:none;">
+			const infoBoxHtml = `<div class="ft-chart--info" style="display:none;">
 				<div style="display:block;clear:both;overflow:hidden;margin-bottom:2px;">
-					<div class="hour date"></div>
-					<div class="day date"></div>
-					<div class="month date"></div>
-					<div class="show-more"></div>
+					<div class="ft-chart--hour ft-chart--date"></div>
+					<div class="ft-chart--day ft-chart--date"></div>
+					<div class="ft-chart--month ft-chart--date"></div>
+					<div class="ft-chart--show-more"></div>
 				</div>
 			</div>`;
 			const template = document.createElement('template');
 			template.innerHTML = infoBoxHtml;
 			this.infoBox = template.content.firstChild;
-			this.infoHour = this.infoBox.getElementsByClassName('hour')[0];
-			this.infoDay = this.infoBox.getElementsByClassName('day')[0];
-			this.infoMonth = this.infoBox.getElementsByClassName('month')[0];
-			this.showMore = this.infoBox.getElementsByClassName('show-more')[0];
+			this.infoHour = this.infoBox.getElementsByClassName('ft-chart--hour')[0];
+			this.infoDay = this.infoBox.getElementsByClassName('ft-chart--day')[0];
+			this.infoMonth = this.infoBox.getElementsByClassName('ft-chart--month')[0];
+			this.showMore = this.infoBox.getElementsByClassName('ft-chart--show-more')[0];
 
 			this.detailsCanv.parentElement.appendChild(this.infoBox);
 
@@ -2227,13 +2226,13 @@
 				const template = document.createElement('template');
 				const colorL = getColor(gr.color, true, 'btn');
 				const colorD = getColor(gr.color, false, 'btn');
-				const html = `<div class="btn btn-on">
-				<div class="btn-filler show-light" style="border-color: ${colorL};background-color: ${colorL}"></div>
-				<div class="btn-filler show-dark" style="border-color: ${colorD};background-color: ${colorD}"></div>
-				<div class="btn-overlay"></div>
-				<div class="btn-mark"><img class="on-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wMMDTMnCMtF7AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAG5SURBVFjD7dhbSwJBFADgc6K3AvEvdPGx8t0hsSwruxhJF6QIwhCEHusv9BMK+iWGbY7mpashSEJBYVEoobaWuuL2GuZl13VXH3YeZ2eXj5kzh3MWDb5x6MbRA106VJgKU2EqTIXJNHoV3wnsgXODl/87Z/KbkeO5zu1YLRQAgNfg4Tt2lPVQHY0xBBSFUgSGgOAjZ3xX3UqhKJPfjIrChKAmAlP/bqSsMEqYpihzwIKlSkm5oxSKKlQK4mJMrxkDShieEoYf7htqO2r6YrYhCgAAq5sRSphPANBWrTsk1HjQDpQlOIf5cr6lW6mtMbdPCeOUipoJWgWhxMbYESXMZKsoa2gB2TIrWx7zUMIMiEXNh5Ywy+WkJditm21s8s7jqGZEMGoxbMMMlxGfnGt14rp+HZzoj3mpacMWXsF0Kd2+QjHBJsB550IpqOWIvWVUwxiLf8XBFXW3hLNHVjFVTMlXWsdyMXDf74nCrV1u4HvxQ/6aP5qNAgAMCvnY+pUDXwtvyjUjhBqfAMDcaI3jehOTP0nluyRCjaf1nu3cOvH5+6Vz7RuhxlrxtvvAJtpfZKp/FFWYzOMXdz2r/357T48AAAAASUVORK5CYII=" /></div>
-				<div class="btn-text show-light" style="color: ${getColor(gr.color, true, 'btn')}">${gr.name}</div>
-				<div class="btn-text show-dark" style="color: ${getColor(gr.color, false, 'btn')}">${gr.name}</div>
+				const html = `<div class="ft-chart--btn ft-chart--btn-on">
+				<div class="ft-chart--btn-filler ft-chart--show-light" style="border-color: ${colorL};background-color: ${colorL}"></div>
+				<div class="ft-chart--btn-filler ft-chart--show-dark" style="border-color: ${colorD};background-color: ${colorD}"></div>
+				<div class="ft-chart--btn-overlay"></div>
+				<div class="ft-chart--btn-mark"><img class="ft-chart--on-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wMMDTMnCMtF7AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAG5SURBVFjD7dhbSwJBFADgc6K3AvEvdPGx8t0hsSwruxhJF6QIwhCEHusv9BMK+iWGbY7mpashSEJBYVEoobaWuuL2GuZl13VXH3YeZ2eXj5kzh3MWDb5x6MbRA106VJgKU2EqTIXJNHoV3wnsgXODl/87Z/KbkeO5zu1YLRQAgNfg4Tt2lPVQHY0xBBSFUgSGgOAjZ3xX3UqhKJPfjIrChKAmAlP/bqSsMEqYpihzwIKlSkm5oxSKKlQK4mJMrxkDShieEoYf7htqO2r6YrYhCgAAq5sRSphPANBWrTsk1HjQDpQlOIf5cr6lW6mtMbdPCeOUipoJWgWhxMbYESXMZKsoa2gB2TIrWx7zUMIMiEXNh5Ywy+WkJditm21s8s7jqGZEMGoxbMMMlxGfnGt14rp+HZzoj3mpacMWXsF0Kd2+QjHBJsB550IpqOWIvWVUwxiLf8XBFXW3hLNHVjFVTMlXWsdyMXDf74nCrV1u4HvxQ/6aP5qNAgAMCvnY+pUDXwtvyjUjhBqfAMDcaI3jehOTP0nluyRCjaf1nu3cOvH5+6Vz7RuhxlrxtvvAJtpfZKp/FFWYzOMXdz2r/357T48AAAAASUVORK5CYII=" /></div>
+				<div class="ft-chart--btn-text ft-chart--show-light" style="color: ${getColor(gr.color, true, 'btn')}">${gr.name}</div>
+				<div class="ft-chart--btn-text ft-chart--show-dark" style="color: ${getColor(gr.color, false, 'btn')}">${gr.name}</div>
 			</div>`;
 				template.innerHTML = html;
 				const el = template.content.firstChild;
@@ -2243,7 +2242,7 @@
 						justTurnedOff = false;
 						return;
 					}
-					const isOff = el.classList.contains('btn-off');
+					const isOff = el.classList.contains('ft-chart--btn-off');
 					const targetOpacity = isOff ? 255 : 0;
 
 					this.toggleChart(gr.opacityKey);
@@ -2259,21 +2258,21 @@
 					}
 
 					if (isOff) {
-						el.classList.remove('btn-off');
-						el.classList.add('btn-on');
+						el.classList.remove('ft-chart--btn-off');
+						el.classList.add('ft-chart--btn-on');
 					} else {
-						el.classList.remove('btn-on');
-						el.classList.add('btn-off');
+						el.classList.remove('ft-chart--btn-on');
+						el.classList.add('ft-chart--btn-off');
 					}
 				};
 				let swichOtherOffId = null;
 				const turnOffFn = function turnOffFn() {
 					el.classList.remove('holding');
 					for (let i = 0; i < btns.length; i += 1) {
-						if (btns[i] !== el && btns[i].classList.contains('btn-on')) {
+						if (btns[i] !== el && btns[i].classList.contains('ft-chart--btn-on')) {
 							btns[i].click();
 						}
-						if (btns[i] === el && btns[i].classList.contains('btn-off')) {
+						if (btns[i] === el && btns[i].classList.contains('ft-chart--btn-off')) {
 							btns[i].click();
 						}
 					}
@@ -2284,28 +2283,28 @@
 					event.preventDefault();
 					clearTimeout(swichOtherOffId);
 					swichOtherOffId = setTimeout(turnOffFn, 750);
-					el.classList.add('holding');
+					el.classList.add('ft-chart--holding');
 				});
 
 				el.addEventListener('mouseup', () => {
 					clearTimeout(swichOtherOffId);
-					el.classList.remove('holding');
+					el.classList.remove('ft-chart--holding');
 				});
 				el.addEventListener('mouseleave', () => {
 					clearTimeout(swichOtherOffId);
-					el.classList.remove('holding');
+					el.classList.remove('ft-chart--holding');
 				});
 
 				el.addEventListener('touchstart', (event) => {
 					event.preventDefault();
 					clearTimeout(swichOtherOffId);
 					swichOtherOffId = setTimeout(turnOffFn, 750);
-					el.classList.add('holding');
+					el.classList.add('ft-chart--holding');
 				});
 
 				el.addEventListener('touchend', (e) => {
 					clearTimeout(swichOtherOffId);
-					el.classList.remove('holding');
+					el.classList.remove('ft-chart--holding');
 					let target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 					while (target && target !== el) {
 						target = target.parentElement;
@@ -2316,7 +2315,7 @@
 				});
 				el.addEventListener('touchcancel', () => {
 					clearTimeout(swichOtherOffId);
-					el.classList.remove('holding');
+					el.classList.remove('ft-chart--holding');
 				});
 				return el;
 			});
@@ -2330,18 +2329,19 @@
 			this.isSaveBtnState = !singleBar;
 			this.isSingleBar = singleBar;
 			this.appContainerEl = appContainerEl;
+			this.appContainerEl.classList.add('ft-chart--app-container');
 			this.appContainerEl.innerHTML = chartMarkupTemplate;
 			this.loadDetails = loadDetails;
 
 			this.appEl = this.appContainerEl.firstElementChild;
-			this.main_chart = this.appEl.getElementsByClassName('main_chart')[0];
-			this.details_chart = this.appEl.getElementsByClassName('details_chart')[0];
-			this.chart_map = this.appEl.getElementsByClassName('chart_map')[0];
-			this.headerContainer = this.appEl.getElementsByClassName('appHeader')[0];
-			this.legendContainer = this.appEl.getElementsByClassName('legend')[0];
-			this.legend_els = this.legendContainer.getElementsByClassName('date');
-			this.zoomOutEl = this.appEl.getElementsByClassName('zoom-out')[0];
-			this.titleEl = this.appEl.getElementsByClassName('title')[0];
+			this.main_chart = this.appEl.getElementsByClassName('ft-chart--main_chart')[0];
+			this.details_chart = this.appEl.getElementsByClassName('ft-chart--details_chart')[0];
+			this.chart_map = this.appEl.getElementsByClassName('ft-chart--chart_map')[0];
+			this.headerContainer = this.appEl.getElementsByClassName('ft-chart--appHeader')[0];
+			this.legendContainer = this.appEl.getElementsByClassName('ft-chart--legend')[0];
+			this.legend_els = this.legendContainer.getElementsByClassName('ft-chart--date');
+			this.zoomOutEl = this.appEl.getElementsByClassName('ft-chart--zoom-out')[0];
+			this.titleEl = this.appEl.getElementsByClassName('ft-chart--title')[0];
 			this.titleEl.innerText = name;
 			this.height = 300;
 			this.map_height = 40;
@@ -2351,9 +2351,9 @@
 			this.mainChart.zoomOutEl = this.zoomOutEl;
 			this.mainChart.onToggleAnimation = (isOn) => {
 				if (isOn) {
-					this.appContainerEl.classList.remove('no-animation');
+					this.appContainerEl.classList.remove('ft-chart--no-animation');
 				} else {
-					this.appContainerEl.classList.add('no-animation');
+					this.appContainerEl.classList.add('ft-chart--no-animation');
 				}
 				this.mapChart.toggleAnimation(isOn);
 			};
@@ -2368,12 +2368,12 @@
 				this.pieChart.setUpPieHover();
 			}
 
-			this.map_container = this.appEl.getElementsByClassName('map_container')[0];
-			this.thumb = this.appEl.getElementsByClassName('selected')[0];
-			this.thumb_left = this.appEl.getElementsByClassName('thumb_left')[0];
-			this.thumb_right = this.appEl.getElementsByClassName('thumb_right')[0];
-			this.overlay_left = this.appEl.getElementsByClassName('overlay_left')[0];
-			this.overlay_right = this.appEl.getElementsByClassName('overlay_right')[0];
+			this.map_container = this.appEl.getElementsByClassName('ft-chart--map_container')[0];
+			this.thumb = this.appEl.getElementsByClassName('ft-chart--selected')[0];
+			this.thumb_left = this.appEl.getElementsByClassName('ft-chart--thumb_left')[0];
+			this.thumb_right = this.appEl.getElementsByClassName('ft-chart--thumb_right')[0];
+			this.overlay_left = this.appEl.getElementsByClassName('ft-chart--overlay_left')[0];
+			this.overlay_right = this.appEl.getElementsByClassName('ft-chart--overlay_right')[0];
 			this.isLight = true;
 			this.windowWidth = this.appEl.clientWidth;
 
@@ -2421,12 +2421,12 @@
 			const le = this.legend_els;
 			if (isInitial) {
 				[0, 1, 2, 3, 4, 5, 6].forEach((num) => {
-					le[num].classList.add('no-animate');
+					le[num].classList.add('ft-chart--no-animate');
 				});
 			}
 			if (fromTxt.join() !== toTxt.join()) {
 				[0, 1, 2].forEach((num) => {
-					le[num].classList.remove('hidden');
+					le[num].classList.remove('ft-chart--hidden');
 				});
 				changeLabels(le[0], fromTxt[0], true);
 				changeLabels(le[1], fromTxt[1], true);
@@ -2437,7 +2437,7 @@
 				changeLabels(le[6], toTxt[2], true);
 			} else {
 				[0, 1, 2].forEach((num) => {
-					le[num].classList.add('hidden');
+					le[num].classList.add('ft-chart--hidden');
 				});
 				changeLabels(le[3], `${fromTxt[3]},`, true);
 				changeLabels(le[4], fromTxt[0], true);
@@ -2447,7 +2447,7 @@
 			setTimeout(() => {
 				if (isInitial) {
 					[0, 1, 2, 3, 4, 5, 6].forEach((num) => {
-						le[num].classList.remove('no-animate');
+						le[num].classList.remove('ft-chart--no-animate');
 					});
 				}
 			});
@@ -2459,9 +2459,9 @@
 					titleWidth = this.zoomOutEl.clientWidth;
 				}
 				if (this.legendContainer.clientWidth + titleWidth > this.headerContainer.clientWidth) {
-					this.headerContainer.classList.add('narrow-header');
+					this.headerContainer.classList.add('ft-chart--narrow-header');
 				} else {
-					this.headerContainer.classList.remove('narrow-header');
+					this.headerContainer.classList.remove('ft-chart--narrow-header');
 				}
 			}, duration * 1.5);
 		}
@@ -2614,8 +2614,8 @@
 		}
 
 		moveSelectBoxForOverview() {
-			this.map_container.classList.add('animating');
-			setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
+			this.map_container.classList.add('ft-chart--animating');
+			setTimeout(() => { this.map_container.classList.remove('ft-chart--animating'); }, duration * 1.2);
 			if (this.mapBoxParams) {
 				this.thumb_width = this.mapBoxParams.thumb_width * this.container_width;
 				this.thumb.style.width = `${this.thumb_width}px`;
@@ -2642,9 +2642,9 @@
 				this.mainChart[mx] = this.mainChart.x_vals[this.mainChart.x_vals.length - 1];
 				return;
 			}
-			this.map_container.classList.add('animating');
+			this.map_container.classList.add('ft-chart--animating');
 			if (!this.isPieChartDetails) {
-				setTimeout(() => { this.map_container.classList.remove('animating'); }, duration * 1.2);
+				setTimeout(() => { this.map_container.classList.remove('ft-chart--animating'); }, duration * 1.2);
 			}
 			this.detailsFrom -= 3600000;
 			let toX = this.detailsFrom + 86400000; // Adding 1day in ms
@@ -2844,11 +2844,11 @@
 			if (this.isLight) {
 				this.appContainerEl.style.backgroundColor = white_color;
 				this.appContainerEl.style.color = black_color;
-				this.appContainerEl.classList.remove('dark-theme');
+				this.appContainerEl.classList.remove('ft-chart--dark-theme');
 			} else {
 				this.appContainerEl.style.backgroundColor = dark_color;
 				this.appContainerEl.style.color = white_color;
-				this.appContainerEl.classList.add('dark-theme');
+				this.appContainerEl.classList.add('ft-chart--dark-theme');
 			}
 			this.mainChart.hideDetails();
 			this.mainChart.isLight = this.isLight;
@@ -2868,7 +2868,7 @@
 
 		disappear() {
 			if (this.isSaveBtnState) {
-				this.btnState = this.btns.map((btn) => { return btn.classList.contains('btn-on'); });
+				this.btnState = this.btns.map((btn) => { return btn.classList.contains('ft-chart--btn-on'); });
 			}
 			const deltaMain = this.mainChart[zx] - this.mainChart[mx];
 			if (this.isOverview) {
@@ -2881,14 +2881,14 @@
 				this.pieChart.graphs.forEach((gr) => {
 					this.pieChart.startChangeKey(gr.paddingKey, this.pieChart.radius * 2);
 				});
-				this.zoomOutEl.classList.add('hidden');
+				this.zoomOutEl.classList.add('ft-chart--hidden');
 			} else {
 				this.mainChart.isDisappearing = true;
 				this.mainChart.hideDetails();
 				if (this.isOverview) {
 					this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
 					this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
-					this.titleEl.classList.add('hidden');
+					this.titleEl.classList.add('ft-chart--hidden');
 				} else {
 					if (!this.isSingleBar) {
 						this.mainChart.startChangeKey(zx, this.mainChart[zx] + deltaMain / 2);
@@ -2897,7 +2897,7 @@
 						this.mainChart.startChangeKey(zx, this.mainChart[zx] - deltaMain / 2);
 						this.mainChart.startChangeKey(mx, this.mainChart[mx] + deltaMain / 2);
 					}
-					this.zoomOutEl.classList.add('hidden');
+					this.zoomOutEl.classList.add('ft-chart--hidden');
 				}
 
 				this.mainChart.graphs.forEach((gr) => {
@@ -2915,9 +2915,9 @@
 				for (let i = 0; i < this.mainChart.x_legend.length; i += 1) {
 					const val = this.mainChart.x_legend[i];
 					if (val.labelEl) {
-						val.labelEl.classList.add('hidden');
+						val.labelEl.classList.add('ft-chart--hidden');
 						setTimeout(() => {
-							if (val.labelEl && val.labelEl.classList.contains('hidden')) {
+							if (val.labelEl && val.labelEl.classList.contains('ft-chart--hidden')) {
 								this.mainChart.xLegendContainer.removeChild(val.labelEl);
 								val.labelEl = null;
 							}
@@ -2994,9 +2994,9 @@
 				this.pieChart.appear();
 			}
 			if (this.isOverview) {
-				this.titleEl.classList.remove('hidden');
+				this.titleEl.classList.remove('ft-chart--hidden');
 			} else {
-				this.zoomOutEl.classList.remove('hidden');
+				this.zoomOutEl.classList.remove('ft-chart--hidden');
 			}
 			this.updateLegend();
 		}
@@ -3045,8 +3045,8 @@
 			if (this.btns) {
 				this.btns.forEach((btn, num) => {
 					if (this.isSaveBtnState && this.btnState && !this.btnState[num]) {
-						btn.classList.remove('btn-on');
-						btn.classList.add('btn-off');
+						btn.classList.remove('ft-chart--btn-on');
+						btn.classList.add('ft-chart--btn-off');
 					} else if (!this.isSaveBtnState) {
 						btn.style.transform = 'scale(0)';
 					}
@@ -3183,10 +3183,6 @@
 				})
 				.catch((err) => {
 					console.error(err);
-					document.getElementById('error-box').classList.add('shown');
-					setTimeout(() => {
-						document.getElementById('error-box').classList.remove('shown');
-					}, 4000);
 					this.showOverview();
 					this.isInTransition = false;
 				});
